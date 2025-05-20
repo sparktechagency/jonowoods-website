@@ -12,63 +12,128 @@ import {
 } from "@/components/ui/dialog";
 import { Clock, Flame, Calendar, DollarSign } from "lucide-react";
 import Image from "next/image";
+import {
+  useMyProfileQuery,
+  useUpdateProfileMutation,
+} from "@/redux/featured/auth/authApi";
+import { getImageUrl } from "../share/imageUrl";
+import { toast } from "sonner";
 
 export default function ProfileDashboardComponents() {
-  // State for user data
-  const [user, setUser] = useState({
-    name: "Isabella Olivia",
-    email: "example@gmail.com",
-    contact: "+1234567890",
-    profilePicture: "https://i.ibb.co.com/qHGmP2p/Ellipse-1.png",
-  });
-
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null); // preview URL state
+  const { data: userData, isLoading } = useMyProfileQuery();
+  const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    contact: "",
-    profilePicture: "",
+    phone: "",
+    address: "",
   });
 
-  const [open, setOpen] = useState(false);
-
-  // Initialize form data when user data is available
   useEffect(() => {
-    setFormData(user);
-  }, [user]);
+    if (userData) {
+      setFormData({
+        name: userData.name || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+        address: userData.address || "",
+      });
+      setImagePreview(getImageUrl(userData.image)); // initial preview to current user image
+    }
+  }, [userData]);
 
-  // Handle input change
+  // Create preview URL when imageFile changes
+  useEffect(() => {
+    if (!imageFile) return;
+
+    const previewUrl = URL.createObjectURL(imageFile);
+    setImagePreview(previewUrl);
+
+    // Cleanup preview URL to avoid memory leaks
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [imageFile]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle profile picture selection
-  const handleProfileClick = () => {
-    document.getElementById("profileInput").click();
-  };
-
-  // Handle file change (for profile picture)
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({ ...formData, profilePicture: URL.createObjectURL(file) });
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated Data:", formData);
-    setUser(formData);
-    setOpen(false); // Close the modal after submission
+    try {
+      const userData = {
+        name: e.target.elements.name.value,
+        email: e.target.elements.email.value,
+        address: e.target.elements.address.value,
+        phone: e.target.elements.phone?.value || "",
+      };
+
+      const formDataToSend = new FormData();
+      formDataToSend.append("data", JSON.stringify(userData));
+
+      if (imageFile) {
+        formDataToSend.append("image", imageFile);
+      }
+      const response = await updateProfile({ data: formDataToSend }).unwrap();
+
+      if (response.success) {
+        toast.success("Profile updated successfully!");
+        if (response.token) {
+          localStorage.setItem("accessToken", response.token);
+        }
+        setOpen(false);
+      } else {
+        toast.error(response.toast || "Failed to update profile!");
+      }
+    } catch (error) {
+      toast.error(
+        error.data?.toast || "An error occurred while updating the profile"
+      );
+    }
   };
+
+  // Calculate days remaining in trial
+  const calculateDaysRemaining = () => {
+    if (!userData?.trialExpireAt) return 0;
+
+    const expireDate = new Date(userData.trialExpireAt);
+    const today = new Date();
+    const diffTime = expireDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  // Format expiration date nicely
+  const formatExpirationDate = () => {
+    if (!userData?.trialExpireAt) return "N/A";
+
+    const expireDate = new Date(userData.trialExpireAt);
+    return expireDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-60">Loading...</div>
+    );
 
   return (
     <div className="max-w-4xl mx-auto p-10 bg-white rounded-lg border mt-6">
       <div className="flex items-center justify-center mb-8 relative">
-        <div className="">
+        <div>
           <div className="flex items-center">
             <Image
-              src={user.profilePicture}
+              src={getImageUrl(userData?.image)}
               alt="Profile"
               height={100}
               width={100}
@@ -76,8 +141,8 @@ export default function ProfileDashboardComponents() {
             />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">{user.name}</h2>
-            <p className="text-gray-600">{user.email}</p>
+            <h2 className="text-xl font-semibold">{userData?.name}</h2>
+            <p className="text-gray-600">{userData?.email}</p>
           </div>
         </div>
 
@@ -86,7 +151,7 @@ export default function ProfileDashboardComponents() {
           <DialogTrigger asChild>
             <Button
               variant="destructive"
-              className="bg-red absolute top-0 right-5 "
+              className="bg-red absolute top-0 right-5"
             >
               Edit Profile
             </Button>
@@ -97,25 +162,32 @@ export default function ProfileDashboardComponents() {
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Profile Picture */}
-              <div className="flex justify-center">
-                <Image
-                  src={formData.profilePicture}
-                  alt="Profile"
-                  height={100}
-                  width={100}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 cursor-pointer"
-                  onClick={handleProfileClick}
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="flex justify-center mb-4">
+                  <img
+                    src={imagePreview}
+                    alt="Selected Preview"
+                    className="w-32 h-32 rounded-full object-cover border"
+                  />
+                </div>
+              )}
+
+              {/* Profile Image Input */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Profile Image
+                </label>
+                <Input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="py-2"
                 />
               </div>
-              <input
-                type="file"
-                id="profileInput"
-                className="hidden"
-                onChange={handleFileChange}
-              />
 
-              {/* Name Field */}
+              {/* Name Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">Name</label>
                 <Input
@@ -128,7 +200,7 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Email Field */}
+              {/* Email Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <Input
@@ -141,15 +213,28 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Contact Number Field */}
+              {/* Phone Input */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Phone</label>
+                <Input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  className="py-6"
+                />
+              </div>
+
+              {/* Address Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Contact Number
+                  Address
                 </label>
                 <Input
                   type="text"
-                  name="contact"
-                  value={formData.contact}
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   required
                   className="py-6"
@@ -160,8 +245,9 @@ export default function ProfileDashboardComponents() {
               <Button
                 type="submit"
                 className="w-full bg-red-500 hover:bg-red-600 py-6"
+                disabled={updating}
               >
-                Update Profile
+                {updating ? "Updating..." : "Update Profile"}
               </Button>
             </form>
           </DialogContent>
@@ -169,7 +255,7 @@ export default function ProfileDashboardComponents() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="">
+        <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="text-red-500">
@@ -177,7 +263,9 @@ export default function ProfileDashboardComponents() {
               </div>
               <h3 className="font-medium">Streak</h3>
             </div>
-            <p className="text-4xl font-bold mt-4">34 Days</p>
+            <p className="text-4xl font-bold mt-4">
+              {userData?.loginCount || 0} Days
+            </p>
           </CardContent>
         </Card>
 
@@ -189,7 +277,10 @@ export default function ProfileDashboardComponents() {
               </div>
               <h3 className="font-medium">Yoga Sessions</h3>
             </div>
-            <p className="text-4xl font-bold mt-4">0 Session</p>
+            <p className="text-4xl font-bold mt-4">
+              {userData?.completedSessions?.length || 0} Session
+              {userData?.completedSessions?.length !== 1 ? "s" : ""}
+            </p>
           </CardContent>
         </Card>
 
@@ -201,7 +292,9 @@ export default function ProfileDashboardComponents() {
               </div>
               <h3 className="font-medium">Total Mat Time</h3>
             </div>
-            <p className="text-4xl font-bold mt-4">0 Min</p>
+            <p className="text-4xl font-bold mt-4">
+              {userData?.matTime || 0} Min
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -212,16 +305,22 @@ export default function ProfileDashboardComponents() {
             <div className="text-red-500">
               <DollarSign size={24} />
             </div>
-            <h3 className="font-medium">6Month Plan Running</h3>
+            <h3 className="font-medium">
+              {userData?.isFreeTrial
+                ? "Free Trial Period"
+                : userData?.packageName || "No Active Plan"}
+            </h3>
           </div>
 
           <div className="flex flex-col items-center justify-center py-4">
-            <p className="text-6xl font-bold text-red-500 mb-4">50</p>
+            <p className="text-6xl font-bold text-red-500 mb-4">
+              {calculateDaysRemaining()}
+            </p>
             <p className="text-xl mb-4">Days Remaining</p>
 
             <div className="flex items-center gap-2">
               <Calendar className="text-gray-700" size={20} />
-              <p className="text-lg">Expires On Dec 31, 2025</p>
+              <p className="text-lg">Expires On {formatExpirationDate()}</p>
             </div>
           </div>
         </CardContent>

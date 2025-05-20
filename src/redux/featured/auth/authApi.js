@@ -88,10 +88,10 @@ const authSlice = api.injectEndpoints({
     }),
 
     updateProfile: builder.mutation({
-      query: (data) => {
+      query: ({data}) => {
         return {
           method: "PATCH",
-          url: "/user",
+          url: "/users/profile",
           body: data,
         };
       },
@@ -100,16 +100,16 @@ const authSlice = api.injectEndpoints({
       query: (data) => {
         return {
           method: "GET",
-          url: "/user/profile",
+          url: "/users/profile",
           body: data,
         };
       },
     }),
 
-    profile: builder.query({
+    myProfile: builder.query({
       query: () => ({
         method: "GET",
-        url: "/user/profile",
+        url: "/users/profile",
       }),
       transformResponse: ({ data }) => {
         return data;
@@ -129,5 +129,6 @@ export const {
   useUpdateProfileMutation,
   useProfileQuery,
   useGetUserQuery,
+  useMyProfileQuery,
   useLoginMutation,
 } = authSlice;

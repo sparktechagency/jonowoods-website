@@ -34,8 +34,8 @@ export default function ChangePassword() {
   };
 
   return (
-    <div className="flex justify-center items-center ">
-      <Card className="w-full max-w-lg bg-[#222] border border-[#2E2E2EF5] text-white shadow-lg p-6">
+    <div className="flex justify-center items-center mt-10">
+      <Card className="w-full max-w-xl bg-white border  text-black  p-6">
         <CardHeader className="text-center">
           <CardTitle>Change Password</CardTitle>
         </CardHeader>
@@ -92,7 +92,7 @@ export default function ChangePassword() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full bg-button mt-6 h-12">
+            <Button type="submit" className="w-full bg-red mt-6 h-12">
               Change Password
             </Button>
           </form>

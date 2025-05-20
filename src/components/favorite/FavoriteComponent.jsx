@@ -78,7 +78,7 @@ export default function FavoriteComponents() {
             className="bg-white rounded-lg overflow-hidden shadow flex flex-col md:flex-row"
           >
             {/* Left Side - Thumbnail */}
-            <div className="w-full md:w-1/3 h-48 md:h-auto relative">
+            <div className="w-full md:w-1/3 h-56 sm:h-64 md:h-auto relative">
               <img
                 src={video.thumbnail}
                 alt={video.title}
@@ -87,9 +87,10 @@ export default function FavoriteComponents() {
             </div>
 
             {/* Right Side - Content */}
-            <div className="w-full md:w-2/3 p-4 flex flex-col relative">
-              <div className="items-start">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">
+            <div className="w-full md:w-2/3 p-4 flex flex-col justify-between">
+              {/* Title and Duration */}
+              <div className="mb-3">
+                <h2 className="text-xl font-bold text-gray-900">
                   {video.title}
                 </h2>
                 <span className="text-sm font-medium text-gray-500">
@@ -97,69 +98,65 @@ export default function FavoriteComponents() {
                 </span>
               </div>
 
-              <div className="absolute border bottom-10 p-4 rounded-xl">
-                <h3 className="text-sm text-red font-medium mb-1">
+              {/* Description */}
+              <div className="border rounded-xl p-4 mb-4">
+                <h3 className="text-sm text-red-500 font-medium mb-1">
                   About this Class
                 </h3>
-                <p className="text-xs text-gray-700 line-clamp-3 mb-1">
+                <p className="text-xs text-gray-700 mb-2">
                   {video.description}
                 </p>
-                <p className="text-xs text-gray-700 line-clamp-3">
+                <p className="text-xs text-gray-700">
                   Through a variety of physical poses (asanas), yoga strengthens
                   and tones the body, enhances flexibility, and improves
                   posture. The focus on conscious breathing (pranayama) helps
                   calm the nervous system, reduce stress, and increase mental
-                  clarity. Additionally, yoga encourages mindfulness and
-                  self-awareness, cultivating a sense of inner peace and
-                  relaxation.
+                  clarity.
                 </p>
               </div>
-            </div>
 
-            {/* Action Buttons - Right Side (Desktop) */}
-            <div className="hidden md:flex flex-col h-full py-10 justify-between items-center">
-              <div className="flex space-x-12 items-center justify-center">
-                <button
-                  onClick={() => toggleLike(video.id)}
-                  className="flex items-center"
-                  aria-label="Like video"
-                >
-                  <Heart
-                    className={`h-5 w-5 ${
-                      likedVideos[video.id]
-                        ? "fill-rose-500 text-rose-500"
-                        : "text-rose-500"
-                    }`}
-                  />
-                </button>
-                <button
-                  className="flex items-center"
-                  aria-label="Download video"
-                >
-                  <Download className="h-5 w-5 text-gray-500" />
-                </button>
-              </div>
-
-              <div className="">
-                <div className="flex flex-col gap-5 w-40">
-                  <Link href={`/favorite/${video.id}`} className="mx-auto">
-                    <button className="px-4 py-3 w-[104px] bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
+              {/* Mobile Action Buttons */}
+              <div className="md:hidden flex justify-between items-center w-full mt-2">
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => toggleLike(video.id)}
+                    className="flex items-center"
+                    aria-label="Like video"
+                  >
+                    <Heart
+                      className={`h-5 w-5 ${
+                        likedVideos[video.id]
+                          ? "fill-rose-500 text-rose-500"
+                          : "text-rose-500"
+                      }`}
+                    />
+                  </button>
+                  <button
+                    className="flex items-center"
+                    aria-label="Download video"
+                  >
+                    <Download className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
+                <div className="flex space-x-2">
+                  <Link href={`/favorite/${video.id}`}>
+                    <button className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
                       Details
                     </button>
                   </Link>
                   <button
                     onClick={() => openVideoModal(video)}
-                    className="px-4 py-3 w-2/3 mx-auto bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
+                    className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
                   >
-                    Watch Now
+                    Watch
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons - Bottom (Mobile) */}
-            <div className="md:hidden flex justify-between items-center p-4 w-full">
-              <div className="flex space-x-4">
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex flex-col justify-between items-center p-4 my-0 md:mb-6">
+              <div className="flex space-x-6 items-center">
                 <button
                   onClick={() => toggleLike(video.id)}
                   className="flex items-center"
@@ -180,17 +177,18 @@ export default function FavoriteComponents() {
                   <Download className="h-5 w-5 text-gray-500" />
                 </button>
               </div>
-              <div className="flex space-x-2">
-                <Link href={`/favorite/${video.id}`}>
-                  <button className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
+
+              <div className="flex flex-col gap-4 w-28">
+                <Link href={`/favorite/${video.id}`} className="w-full">
+                  <button className="px-4 py-3 w-full bg-red text-white rounded text-xs font-medium hover:bg-red">
                     Details
                   </button>
                 </Link>
                 <button
                   onClick={() => openVideoModal(video)}
-                  className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
+                  className="px-4 py-3 w-full bg-red text-white rounded text-xs font-medium hover:bg-red"
                 >
-                  Watch
+                  Watch Now
                 </button>
               </div>
             </div>

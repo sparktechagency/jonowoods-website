@@ -35,7 +35,7 @@ export default function MyFeed({ id, initialContent, onDelete, onUpdate }) {
   };
 
   return (
-    <Card className="p-4 relative">
+    <Card className="p-3 mx- relative">
       <div className="flex justify-between items-start">
         <div>
           <h4 className="font-bold text-lg">Exciting Things Are Coming To</h4>

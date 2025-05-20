@@ -1,10 +1,11 @@
-"use client";
-import { useState } from "react";
-import Link from "next/link";
+"use client"
+import { useState, useEffect } from "react";
 import { Heart, ArrowLeft, Play } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+import CommentsSection from "./CommentSection";
 
-export default function DetailsComponents() {
+export default function EnhancedVideoDetails() {
   const params = useParams();
   const id = params?.id;
 
@@ -42,16 +43,26 @@ export default function DetailsComponents() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* <Link
-        href="/favorite"
-        className="flex items-center mb-6 text-gray-600 hover:text-gray-900"
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to all videos
-      </Link> */}
+    <div className="container mx-auto py-8 px-4 ">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <div className="bg-gray-100 p-2 rounded-lg mr-2">
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
+          </div>
+          <h1 className="text-lg font-bold">Today's Video</h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <button onClick={toggleLike} className="bg-gray-100 p-2 rounded-full">
+            <Heart
+              className={`h-5 w-5 ${
+                liked ? "fill-rose-500 text-rose-500" : "text-gray-400"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
 
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg">
+      <div className="bg-white rounded-lg overflow-hidden">
         <div className="relative aspect-video bg-black">
           {isPlaying ? (
             // Video player with controls and right-click disabled
@@ -85,20 +96,8 @@ export default function DetailsComponents() {
         </div>
 
         <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-2xl font-bold">{videoDetails.title}</h1>
-            <div className="flex space-x-3">
-              <button onClick={toggleLike}>
-                <Heart
-                  className={`h-6 w-6 ${
-                    liked ? "fill-rose-500 text-rose-500" : "text-rose-500"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-
-          <div className="mb-4">
+          <h1 className="text-2xl font-bold mb-2">{videoDetails.title}</h1>
+          <div className="mb-6">
             <span className="text-sm text-gray-500">
               {videoDetails.duration}
             </span>
@@ -123,14 +122,13 @@ export default function DetailsComponents() {
             </p>
           </div>
 
-          <div>
-            <h2 className="text-lg font-medium mb-2">
-              Proper Equipment Needed
-            </h2>
+          <div className="mb-6">
+            <h2 className="text-lg font-medium mb-2">Props/Equipment Needed</h2>
             <p className="text-gray-700">{videoDetails.equipmentNeeded}</p>
           </div>
 
-          {/* You can add custom buttons here if needed */}
+          {/* Comments Section */}
+          <CommentsSection />
         </div>
       </div>
     </div>

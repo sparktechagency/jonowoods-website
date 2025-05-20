@@ -1,5 +1,3 @@
-// ContactForm.jsx
-
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -7,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { useContactUsMutation } from "@/redux/featured/contact/contactUsApi";
 
 export default function ContactForm() {
   const [formData, setFormData] = useState({
@@ -17,7 +16,7 @@ export default function ContactForm() {
     subject: "",
     message: "",
   });
-  const [loading, setLoading] = useState(false);
+  const [contactUs, { isLoading }] = useContactUsMutation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,10 +25,16 @@ export default function ContactForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    const payload = {
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      email: formData.email,
+      subject: formData.subject,
+      message: formData.message,
+    };
+
+    try {
+      const result = await contactUs(payload).unwrap();
       toast.success("Message sent successfully!");
       setFormData({
         firstName: "",
@@ -39,8 +44,9 @@ export default function ContactForm() {
         subject: "",
         message: "",
       });
-      setLoading(false);
-    }, 1000);
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to send message.");
+    }
   };
 
   return (
@@ -65,7 +71,7 @@ export default function ContactForm() {
               value={formData.firstName}
               onChange={handleChange}
               required
-              className="rounded-md py-7 "
+              className="rounded-md py-7"
             />
             <Input
               name="lastName"
@@ -117,10 +123,10 @@ export default function ContactForm() {
 
           <Button
             type="submit"
-            disabled={loading}
-            className="w-full bg-red  text-white rounded-md py-7 mt-10"
+            disabled={isLoading}
+            className="w-full bg-red text-white rounded-md py-7 mt-10"
           >
-            {loading ? "Sending..." : "Send Message"}
+            {isLoading ? "Sending..." : "Send Message"}
           </Button>
         </form>
       </CardContent>

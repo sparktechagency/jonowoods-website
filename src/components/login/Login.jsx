@@ -21,23 +21,19 @@ export default function LoginUser() {
   const router = useRouter();
 
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
-  console.log(email, password);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const res = await login({ email, password }).unwrap();
-      console.log(res);
+   
+
       const { accessToken, refreshToken } = res.data;
 
-      // Save tokens to localStorage
       localStorage.setItem("token", accessToken);
-
-      // Dispatch only accessToken (no user)
       dispatch(loginSuccess(accessToken));
-
-      // Redirect
       router.push("/");
     } catch (error) {
       console.error("Login failed:", error);
