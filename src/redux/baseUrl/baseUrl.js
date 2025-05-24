@@ -3,9 +3,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://10.0.60.126:7000/api/v1", // Change this to your server URL
+    baseUrl: "http://10.0.60.126:7000/api/v1",
     prepareHeaders: (headers) => {
-      // Add the token to the headers
       const token = localStorage.getItem("token");
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
@@ -13,7 +12,6 @@ export const api = createApi({
       return headers;
     },
   }),
+  tagTypes: ["User", "Posts", "Comments"], 
   endpoints: () => ({}),
 });
-
-export const imageUrl = "http://10.0.60.126:7000"; // Change this to your server URL

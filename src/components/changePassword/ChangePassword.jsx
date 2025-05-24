@@ -3,8 +3,11 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useChangePasswordMutation } from "@/redux/featured/auth/authApi";
+import { toast } from "sonner";
 
 export default function ChangePassword() {
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -18,31 +21,40 @@ export default function ChangePassword() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Check if new password matches confirm password
     if (formData.newPassword !== formData.confirmPassword) {
       setError("New password and confirm password do not match!");
       return;
     }
 
-    console.log("Password Updated Successfully!", formData);
-    alert("Password changed successfully!");
-    setFormData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    try {
+      const response = await changePassword(formData).unwrap();
+      toast.success("Password changed successfully!");
+      setFormData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      const message =
+        err?.data?.message || "Failed to change password. Please try again.";
+      toast.error(message);
+    }
   };
 
   return (
     <div className="flex justify-center items-center mt-10">
-      <Card className="w-full max-w-xl bg-white border  text-black  p-6">
+      <Card className="w-full max-w-xl bg-white border text-black p-6">
         <CardHeader className="text-center">
           <CardTitle>Change Password</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Current Password */}
-            <div className="">
+            <div>
               <label className="block text-sm font-medium mb-2">
                 Current Password
               </label>
@@ -89,11 +101,16 @@ export default function ChangePassword() {
               />
             </div>
 
+            {/* Error Message */}
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             {/* Submit Button */}
-            <Button type="submit" className="w-full bg-red mt-6 h-12">
-              Change Password
+            <Button
+              type="submit"
+              className="w-full bg-red mt-6 h-12"
+              disabled={isLoading}
+            >
+              {isLoading ? "Updating..." : "Change Password"}
             </Button>
           </form>
         </CardContent>

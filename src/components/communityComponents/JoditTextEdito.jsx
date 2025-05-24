@@ -24,40 +24,40 @@ export const JoditEditor = ({ value, onChange }) => {
     setIsMounted(true);
   }, []);
 
-  //   const config = {
-  //     readonly: false,
-  //     height: 120,
-  //     placeholder: "Share your thoughts...",
-  //     buttons: [
-  //       "bold",
-  //       "italic",
-  //       "underline",
-  //       "|",
-  //       "ul",
-  //       "ol",
-  //       "|",
-  //       "link",
-  //       "image",
-  //       "video",
-  //       "|",
-  //       "undo",
-  //       "redo",
-  //     ],
-  //     removeButtons: [
-  //       "source",
-  //       "fullsize",
-  //       "about",
-  //       "outdent",
-  //       "indent",
-  //       "fontsize",
-  //       "brush",
-  //       "paragraph",
-  //     ],
-  //     toolbarAdaptive: false,
-  //     showCharsCounter: false,
-  //     showWordsCounter: false,
-  //     showXPathInStatusbar: false,
-  //   };
+  // const config = {
+  //   readonly: false,
+  //   height: 120,
+  //   placeholder: "Share your thoughts...",
+  //   buttons: [
+  //     "bold",
+  //     "italic",
+  //     "underline",
+  //     "|",
+  //     "ul",
+  //     "ol",
+  //     "|",
+  //     "link",
+  //     "image",
+  //     "video",
+  //     "|",
+  //     "undo",
+  //     "redo",
+  //   ],
+  //   removeButtons: [
+  //     "source",
+  //     "fullsize",
+  //     "about",
+  //     "outdent",
+  //     "indent",
+  //     "fontsize",
+  //     "brush",
+  //     "paragraph",
+  //   ],
+  //   toolbarAdaptive: false,
+  //   showCharsCounter: false,
+  //   showWordsCounter: false,
+  //   showXPathInStatusbar: false,
+  // };
 
   if (!isMounted) {
     return <div className="h-60 border rounded p-4 bg-gray-50"></div>;
@@ -67,7 +67,7 @@ export const JoditEditor = ({ value, onChange }) => {
     <JoditEditorComponent
       ref={editor}
       value={value}
-      //   config={config}
+      // config={config}
       onChange={onChange}
     />
   );

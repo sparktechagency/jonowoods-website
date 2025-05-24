@@ -1,52 +1,47 @@
-// src/components/PostCreate.jsx
 "use client";
 
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
+import { useCreatePostMutation } from "@/redux/featured/community/communityApi";
 import { JoditEditor } from "./JoditTextEdito";
 
-const PostCreate = ({ onPostCreate }) => {
+const PostCreate = () => {
   const [content, setContent] = useState("");
+  const [createPost, { isLoading }] = useCreatePostMutation();
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (content.trim()) {
-      const newPost = {
-        id: Date.now(), // Use timestamp for unique ID
-        user: {
-          name: "@yourusername",
-          avatar: "https://i.ibb.co.com/qHGmP2p/Ellipse-1.png",
-        },
-        timeAgo: "just now",
-        content: content,
-        likes: 0,
-        likedBy: [], // Track who liked this post
-        comments: [],
-      };
-      onPostCreate(newPost);
-      setContent("");
+      try {
+        await createPost({
+          content: content,
+          // Add any other fields required by your API
+        });
+        setContent(""); // Clear content after posting
+      } catch (error) {
+        console.error("Failed to create post:", error);
+      }
     }
   };
 
   return (
     <div className="w-full mb-6">
-      {/* Post creation area */}
       <Card className="p-4">
-        <div className="text-xl font-semibold text-red">
+        <div className="text-xl font-semibold text-red-500 mb-2">
           What's On Your Mind
         </div>
         <JoditEditor
           value={content}
           onChange={(newContent) => setContent(newContent)}
+          className="mb-4"
         />
-        <div className="flex justify-end mt-">
+        <div className="flex justify-end">
           <Button
-            size="sm"
             onClick={handlePost}
-            className=" text-white rounded-full w-20 h-8 flex items-center bg-red justify-center "
+            className="bg-red-500 text-white rounded-full px-6"
+            disabled={isLoading || !content.trim()}
           >
-            Post
+            {isLoading ? "Posting..." : "Post"}
           </Button>
         </div>
       </Card>
