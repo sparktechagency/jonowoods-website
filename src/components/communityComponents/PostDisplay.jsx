@@ -17,7 +17,6 @@ const PostDisplay = ({ posts, currentUserId = "yourusername" }) => {
   const handleLike = async (postId) => {
     try {
       await likePost(postId);
-      // The post data will be updated via RTK Query cache invalidation
     } catch (error) {
       console.error("Failed to like post:", error);
     }

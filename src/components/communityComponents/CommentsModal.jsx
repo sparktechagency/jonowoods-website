@@ -9,10 +9,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import { getImageUrl } from "../share/imageUrl";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageSquare, Edit, Trash } from "lucide-react";
+import {
+  Heart,
+  MessageSquare,
+  Edit,
+  Trash,
+  Loader2,
+  MoreVertical,
+} from "lucide-react";
 
 export const CommentsModal = ({
   postId,
@@ -27,6 +40,7 @@ export const CommentsModal = ({
   onEditComment,
   onLikeReply,
   isLoading = false,
+  isCommenting = false,
 }) => {
   const [newComment, setNewComment] = useState("");
   const [replyTexts, setReplyTexts] = useState({});
@@ -34,34 +48,93 @@ export const CommentsModal = ({
   const [replyingToReply, setReplyingToReply] = useState(null);
   const [editingComment, setEditingComment] = useState(null);
   const [editText, setEditText] = useState("");
+  const [loadingStates, setLoadingStates] = useState({
+    commenting: false,
+    replying: {},
+    liking: {},
+    editing: {},
+    deleting: {},
+  });
 
-  const handleAddComment = () => {
+  const setLoadingState = (type, id, value) => {
+    setLoadingStates((prev) => ({
+      ...prev,
+      [type]:
+        typeof prev[type] === "object" ? { ...prev[type], [id]: value } : value,
+    }));
+  };
+
+  const handleAddComment = async () => {
     if (newComment.trim()) {
-      onAddComment(postId, newComment);
-      setNewComment("");
+      setLoadingState("commenting", null, true);
+      try {
+        await onAddComment(postId, newComment);
+        setNewComment("");
+      } finally {
+        setLoadingState("commenting", null, false);
+      }
     }
   };
 
-  const handleAddReply = (commentId, parentReplyId = null) => {
-    const replyText = replyTexts[`${commentId}-${parentReplyId || ""}`];
+  const handleAddReply = async (commentId, parentReplyId = null) => {
+    const replyKey = `${commentId}-${parentReplyId || ""}`;
+    const replyText = replyTexts[replyKey];
+
     if (replyText && replyText.trim()) {
-      onAddReply(postId, commentId, replyText, parentReplyId);
+      setLoadingState("replying", replyKey, true);
+      try {
+        await onAddReply(postId, commentId, replyText, parentReplyId);
 
-      // Clear the reply text and reset UI state
-      setReplyTexts({
-        ...replyTexts,
-        [`${commentId}-${parentReplyId || ""}`]: "",
-      });
-      setReplyingTo(null);
-      setReplyingToReply(null);
+        // Clear the reply text and reset UI state
+        setReplyTexts({
+          ...replyTexts,
+          [replyKey]: "",
+        });
+        setReplyingTo(null);
+        setReplyingToReply(null);
+      } finally {
+        setLoadingState("replying", replyKey, false);
+      }
     }
   };
 
-  const handleEditComment = (commentId) => {
+  const handleEditComment = async (commentId) => {
     if (editText.trim()) {
-      onEditComment(commentId, editText);
-      setEditingComment(null);
-      setEditText("");
+      setLoadingState("editing", commentId, true);
+      try {
+        await onEditComment(commentId, editText);
+        setEditingComment(null);
+        setEditText("");
+      } finally {
+        setLoadingState("editing", commentId, false);
+      }
+    }
+  };
+
+  const handleLikeComment = async (commentId) => {
+    setLoadingState("liking", `comment-${commentId}`, true);
+    try {
+      await onLikeComment(commentId);
+    } finally {
+      setLoadingState("liking", `comment-${commentId}`, false);
+    }
+  };
+
+  const handleLikeReply = async (replyId) => {
+    setLoadingState("liking", `reply-${replyId}`, true);
+    try {
+      await onLikeReply(replyId);
+    } finally {
+      setLoadingState("liking", `reply-${replyId}`, false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    setLoadingState("deleting", commentId, true);
+    try {
+      await onDeleteComment(commentId);
+    } finally {
+      setLoadingState("deleting", commentId, false);
     }
   };
 
@@ -109,45 +182,98 @@ export const CommentsModal = ({
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Add a comment..."
             className="flex-1 text-sm p-2 border rounded"
-            disabled={isLoading}
+            disabled={loadingStates.commenting || isLoading}
           />
           <Button
             size="sm"
             onClick={handleAddComment}
-            className="bg-red-500 text-white"
-            disabled={isLoading}
+            className="bg-red-500 text-white min-w-[80px]"
+            disabled={loadingStates.commenting || isLoading}
           >
-            {isLoading ? "Posting..." : "Comment"}
+            {loadingStates.commenting ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Posting...</span>
+              </div>
+            ) : (
+              "Comment"
+            )}
           </Button>
         </div>
 
         <div className="space-y-4">
-          {comments && comments.length > 0 ? (
+          {isLoading ? (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="ml-2">Loading comments...</span>
+            </div>
+          ) : comments && comments.length > 0 ? (
             comments.map((comment) => (
               <div key={comment._id} className="border-t pt-3">
                 <div className="flex items-start gap-2 mb-2">
                   <Avatar className="h-8 w-8">
-                    {comment?.userId?.image ? (
+                    {comment?.commentCreatorId?.image ? (
                       <Image
-                        src={getImageUrl(comment.userId.image)}
+                        src={getImageUrl(comment.commentCreatorId.image)}
                         height={32}
                         width={32}
-                        alt={comment?.userId?.name || "User"}
+                        alt={comment?.commentCreatorId?.name || "User"}
                       />
                     ) : (
-                      <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                        {(comment?.userId?.name || "U").charAt(0)}
+                      <div className="h-full w-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
+                        {(comment?.commentCreatorId?.name || "U")
+                          .charAt(0)
+                          .toUpperCase()}
                       </div>
                     )}
                   </Avatar>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
-                        {comment?.userId?.name || "Unknown User"}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {formatTimeAgo(comment?.createdAt)}
-                      </span>
+                    <div className="flex items-center gap-2 justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {comment?.commentCreatorId?.name || "Unknown User"}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatTimeAgo(comment?.createdAt)}
+                        </span>
+                      </div>
+
+                      {/* 3-dot menu for edit/delete - only show for comment owner */}
+                      {comment?.commentCreatorId?._id === currentUserId && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 hover:bg-gray-100"
+                            >
+                              <MoreVertical className="h-4 w-4 text-gray-500" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-32">
+                            <DropdownMenuItem
+                              onClick={() => startEditing(comment)}
+                              disabled={loadingStates.editing[comment._id]}
+                              className="flex items-center gap-2 cursor-pointer"
+                            >
+                              <Edit className="h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteComment(comment._id)}
+                              disabled={loadingStates.deleting[comment._id]}
+                              className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700"
+                            >
+                              {loadingStates.deleting[comment._id] ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash className="h-4 w-4" />
+                              )}
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
 
                     {editingComment === comment._id ? (
@@ -157,17 +283,24 @@ export const CommentsModal = ({
                           value={editText}
                           onChange={(e) => setEditText(e.target.value)}
                           className="flex-1 text-sm p-2 border rounded"
+                          disabled={loadingStates.editing[comment._id]}
                         />
                         <Button
                           size="sm"
                           onClick={() => handleEditComment(comment._id)}
+                          disabled={loadingStates.editing[comment._id]}
                         >
-                          Save
+                          {loadingStates.editing[comment._id] ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "Save"
+                          )}
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => setEditingComment(null)}
+                          disabled={loadingStates.editing[comment._id]}
                         >
                           Cancel
                         </Button>
@@ -179,7 +312,8 @@ export const CommentsModal = ({
                     <div className="flex items-center gap-3 mt-1">
                       <button
                         onClick={() => toggleReply(comment._id)}
-                        className="text-sm text-blue-500 flex items-center gap-1"
+                        className="text-sm text-blue-500 flex items-center gap-1 hover:text-blue-600"
+                        disabled={loadingStates.replying[`${comment._id}-`]}
                       >
                         <MessageSquare className="h-4 w-4" />
                         {replyingTo === comment._id && !replyingToReply
@@ -188,41 +322,29 @@ export const CommentsModal = ({
                       </button>
 
                       <button
-                        onClick={() => onLikeComment(comment._id)}
-                        className={`text-sm flex items-center gap-1 ${
+                        onClick={() => handleLikeComment(comment._id)}
+                        disabled={
+                          loadingStates.liking[`comment-${comment._id}`]
+                        }
+                        className={`text-sm flex items-center gap-1 hover:scale-105 transition-transform ${
                           (comment.likedBy || []).includes(currentUserId)
                             ? "text-red-500"
                             : "text-blue-500"
                         }`}
                       >
-                        <Heart
-                          className={`h-4 w-4 ${
-                            (comment.likedBy || []).includes(currentUserId)
-                              ? "fill-red-500"
-                              : ""
-                          }`}
-                        />
+                        {loadingStates.liking[`comment-${comment._id}`] ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Heart
+                            className={`h-4 w-4 ${
+                              (comment.likedBy || []).includes(currentUserId)
+                                ? "fill-red-500"
+                                : ""
+                            }`}
+                          />
+                        )}
                         Like ({comment.likes || 0})
                       </button>
-
-                      {comment?.userId?._id === currentUserId && (
-                        <>
-                          <button
-                            onClick={() => startEditing(comment)}
-                            className="text-sm text-blue-500 flex items-center gap-1"
-                          >
-                            <Edit className="h-4 w-4" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => onDeleteComment(comment._id)}
-                            className="text-sm text-red-500 flex items-center gap-1"
-                          >
-                            <Trash className="h-4 w-4" />
-                            Delete
-                          </button>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -240,13 +362,19 @@ export const CommentsModal = ({
                       }
                       placeholder="Write a reply..."
                       className="flex-1 text-sm p-2 border rounded"
+                      disabled={loadingStates.replying[`${comment._id}-`]}
                     />
                     <Button
                       size="sm"
                       onClick={() => handleAddReply(comment._id)}
-                      className="bg-red-500 text-white"
+                      className="bg-red-500 text-white min-w-[70px]"
+                      disabled={loadingStates.replying[`${comment._id}-`]}
                     >
-                      Reply
+                      {loadingStates.replying[`${comment._id}-`] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Reply"
+                      )}
                     </Button>
                   </div>
                 )}
@@ -265,9 +393,10 @@ export const CommentsModal = ({
                         setReplyTexts={setReplyTexts}
                         toggleReply={toggleReply}
                         handleAddReply={handleAddReply}
-                        onLikeReply={onLikeReply}
+                        onLikeReply={handleLikeReply}
                         depth={1}
                         formatTimeAgo={formatTimeAgo}
+                        loadingStates={loadingStates}
                       />
                     ))}
                   </div>
@@ -276,7 +405,8 @@ export const CommentsModal = ({
             ))
           ) : (
             <div className="text-center py-6 text-gray-500">
-              No comments yet. Be the first to comment!
+              <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>No comments yet. Be the first to comment!</p>
             </div>
           )}
         </div>
@@ -298,9 +428,11 @@ function ReplyItem({
   onLikeReply,
   depth = 1,
   formatTimeAgo,
+  loadingStates,
 }) {
   const maxDepth = 5;
   const canReply = depth < maxDepth;
+  const replyKey = `${commentId}-${reply._id}`;
 
   return (
     <div
@@ -309,27 +441,54 @@ function ReplyItem({
       }`}
     >
       <Avatar className="h-6 w-6">
-        {reply?.userId?.image ? (
+        {reply?.commentCreatorId?.image ? (
           <Image
-            src={getImageUrl(reply.userId.image)}
+            src={getImageUrl(reply.commentCreatorId.image)}
             height={24}
             width={24}
-            alt={reply?.userId?.name || "User"}
+            alt={reply?.commentCreatorId?.name || "User"}
           />
         ) : (
-          <div className="h-full w-full bg-gray-200 flex items-center justify-center text-xs">
-            {(reply?.userId?.name || "U").charAt(0)}
+          <div className="h-full w-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">
+            {(reply?.commentCreatorId?.name || "U").charAt(0).toUpperCase()}
           </div>
         )}
       </Avatar>
       <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">
-            {reply?.userId?.name || "Unknown User"}
-          </span>
-          <span className="text-xs text-gray-500">
-            {formatTimeAgo(reply?.createdAt)}
-          </span>
+        <div className="flex items-center gap-2 justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {reply?.commentCreatorId?.name || "Unknown User"}
+            </span>
+            <span className="text-xs text-gray-500">
+              {formatTimeAgo(reply?.createdAt)}
+            </span>
+          </div>
+
+          {/* 3-dot menu for replies - only show for reply owner */}
+          {reply?.commentCreatorId?._id === currentUserId && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-5 w-5 p-0 hover:bg-gray-100"
+                >
+                  <MoreVertical className="h-3 w-3 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-32">
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                  <Edit className="h-3 w-3" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700">
+                  <Trash className="h-3 w-3" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         <p className="text-sm mt-1">{reply.content}</p>
 
@@ -337,7 +496,8 @@ function ReplyItem({
           {canReply && (
             <button
               onClick={() => toggleReply(commentId, reply._id)}
-              className="text-sm text-blue-500 flex items-center gap-1"
+              className="text-sm text-blue-500 flex items-center gap-1 hover:text-blue-600"
+              disabled={loadingStates.replying[replyKey]}
             >
               <MessageSquare className="h-3 w-3" />
               {replyingToReply === reply._id ? "Cancel" : "Reply"}
@@ -346,19 +506,24 @@ function ReplyItem({
 
           <button
             onClick={() => onLikeReply(reply._id)}
-            className={`text-sm flex items-center gap-1 ${
+            disabled={loadingStates.liking[`reply-${reply._id}`]}
+            className={`text-sm flex items-center gap-1 hover:scale-105 transition-transform ${
               (reply.likedBy || []).includes(currentUserId)
                 ? "text-red-500"
                 : "text-blue-500"
             }`}
           >
-            <Heart
-              className={`h-3 w-3 ${
-                (reply.likedBy || []).includes(currentUserId)
-                  ? "fill-red-500"
-                  : ""
-              }`}
-            />
+            {loadingStates.liking[`reply-${reply._id}`] ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Heart
+                className={`h-3 w-3 ${
+                  (reply.likedBy || []).includes(currentUserId)
+                    ? "fill-red-500"
+                    : ""
+                }`}
+              />
+            )}
             Like ({reply.likes || 0})
           </button>
         </div>
@@ -367,22 +532,28 @@ function ReplyItem({
           <div className="mt-2 flex items-center gap-2">
             <input
               type="text"
-              value={replyTexts[`${commentId}-${reply._id}`] || ""}
+              value={replyTexts[replyKey] || ""}
               onChange={(e) =>
                 setReplyTexts({
                   ...replyTexts,
-                  [`${commentId}-${reply._id}`]: e.target.value,
+                  [replyKey]: e.target.value,
                 })
               }
               placeholder="Write a reply..."
               className="flex-1 text-sm p-2 border rounded"
+              disabled={loadingStates.replying[replyKey]}
             />
             <Button
               size="sm"
               onClick={() => handleAddReply(commentId, reply._id)}
-              className="bg-red-500 text-white"
+              className="bg-red-500 text-white min-w-[70px]"
+              disabled={loadingStates.replying[replyKey]}
             >
-              Reply
+              {loadingStates.replying[replyKey] ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Reply"
+              )}
             </Button>
           </div>
         )}
@@ -404,6 +575,7 @@ function ReplyItem({
                 onLikeReply={onLikeReply}
                 depth={depth + 1}
                 formatTimeAgo={formatTimeAgo}
+                loadingStates={loadingStates}
               />
             ))}
           </div>

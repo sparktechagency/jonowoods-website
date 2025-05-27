@@ -30,6 +30,7 @@ export default function CommunityComponents() {
     isLoading,
     isError,
   } = useGetAllPostQuery([{ name: "page", value: currentPage }]);
+  console.log(apiResponse)
 
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
   console.log(currentPage)
@@ -52,11 +53,9 @@ export default function CommunityComponents() {
     try {
       const response = await createPost(postData).unwrap();
       if (response?.success) {
-        // If we're not on page 1, go back to page 1 to see the new post
         if (currentPage !== 1) {
           setCurrentPage(1);
         } else {
-          // Otherwise refresh the current posts
           setPosts([response.data, ...posts]);
         }
       }
@@ -70,7 +69,6 @@ export default function CommunityComponents() {
   };
 
   const handlePageChange = (newPage) => {
-    // Update page number which will trigger a new API call via the query hook
     setCurrentPage(newPage);
   };
 

@@ -30,6 +30,7 @@ export const CommentsContainer = ({
   } = useGetCommentsByPostIdQuery(postId, {
     skip: !isCommentsOpen, // Only fetch when modal is open
   });
+  console.log("Comments data:", commentsData);
 
   const [addComment, { isLoading: isAddingComment }] = useAddCommentMutation();
   const [addReply, { isLoading: isAddingReply }] = useAddReplyMutation();
