@@ -322,6 +322,10 @@ export default function ProfileDashboardComponents() {
               <Calendar className="text-gray-700" size={20} />
               <p className="text-lg">Expires On {formatExpirationDate()}</p>
             </div>
+
+            <Button
+              className="mt-4 bg-red-500 hover:bg-red-600"
+              onClick={() => window.location.href = "/subscription-package"} >Extendtion </Button>
           </div>
         </CardContent>
       </Card>

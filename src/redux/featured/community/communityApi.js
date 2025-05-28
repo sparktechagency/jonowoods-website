@@ -20,7 +20,28 @@ export const communityApi = api.injectEndpoints({
 
         return {
           method: "GET",
-          url: `/community${queryString}`, // e.g. "/community?page=2"
+          url: `/community${queryString}`, 
+        };
+      },
+      providesTags: ["Posts"],
+    }),
+    getMyPost: builder.query({
+      query: (args) => {
+        // args is array of { name, value }, e.g. [{ name: "page", value: 2 }]
+        const queryString =
+          args && args.length
+            ? "?" +
+              args
+                .map(
+                  ({ name, value }) =>
+                    `${encodeURIComponent(name)}=${encodeURIComponent(value)}`
+                )
+                .join("&")
+            : "";
+
+        return {
+          method: "GET",
+          url: `/community/my-post${queryString}`,
         };
       },
       providesTags: ["Posts"],
@@ -63,9 +84,9 @@ export const communityApi = api.injectEndpoints({
       invalidatesTags: ["Posts"],
     }),
 
-    likePost: builder.mutation({
+    likePost: builder.query({
       query: (postId) => ({
-        method: "POST",
+        method: "GET",
         url: `/community/like/${postId}`,
       }),
       invalidatesTags: (result, error, postId) => [
@@ -90,6 +111,7 @@ export const {
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
-  useLikePostMutation,
+  useLazyLikePostQuery,
   useUnlikePostMutation,
+  useGetMyPostQuery
 } = communityApi;
