@@ -1,13 +1,15 @@
 "use client";
 
+
+import { jwtDecode } from 'jwt-decode';
 import { Heart, MoreHorizontal, Send } from 'lucide-react';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
+import Spinner from '../../../(commonLayout)/Spinner';
 import commectIcon from '../../../../../public/assests/comment.png';
 import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation } from '../../../../redux/featured/commentApi/commentApi';
 import { useVideoFavouriteMutation } from '../../../../redux/featured/favouritApi/favouritApi';
 import { useSingleVidoeQuery } from '../../../../redux/featured/homeApi.jsx/homeApi';
-import Spinner from '../../../(commonLayout)/Spinner';
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -15,7 +17,9 @@ export default function FitnessVideoPage({ params }) {
   const [likeCount, setLikeCount] = useState(0);
   const [comment, setComment] = useState('');
   const [replyText, setReplyText] = useState('');
-  console.log(isLiked);
+  const token = localStorage.getItem('token');
+  const decoded = jwtDecode(token);
+  const currentUserId = decoded.id;
 
   // API hooks
   const { data, isLoading, refetch } = useSingleVidoeQuery(id, { skip: !id });
@@ -51,17 +55,12 @@ export default function FitnessVideoPage({ params }) {
   }, [data]);
 
   const handleLike = async (id) => {
-
     try {
-
       const response = await favrite(id).unwrap();
       refetch();
     } catch (error) {
       console.error('Error liking video:', error)
     }
-
-
-    // You can add API call here to like/unlike the video
   };
 
   const handleCommentSubmit = async (e) => {
@@ -164,7 +163,11 @@ export default function FitnessVideoPage({ params }) {
   };
 
   const renderComment = (comment, depth = 0) => {
-    const isCurrentUser = comment.isCurrentUser || false; // You'll need to implement user auth
+    // TODO: Replace this with actual user authentication logic
+    // For now, showing edit/delete buttons for all comments for testing
+    // In production, you should check if the comment belongs to the current user
+    //const isCurrentUser = true; // Change this to proper user check: comment.userId === currentUser?.id
+    const isCurrentUser = comment.userId === currentUserId;
 
     return (
       <div key={comment._id} className="mb-4">
@@ -194,12 +197,14 @@ export default function FitnessVideoPage({ params }) {
             <div className="flex items-center space-x-4 text-xs">
               <button
                 onClick={() => handleLikeComment(comment._id)}
-                className="flex  cursor-pointer items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
+                className="flex cursor-pointer items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
                 disabled={likeLoading}
               >
-                {/* <Heart className={`w-3 h-3 ${comment.isLiked ? 'fill-red-500 text-red-500' : ''}`} /> */}
+                <Heart className={`w-3 h-3 ${comment.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
                 <span>{comment.likes || 0}</span>
-                <span className={`${comment.isLiked ? 'text-red-500' : ''}`}>{comment.isLiked ? 'Liked' : 'Like'}</span>
+                <span className={`${comment.isLiked ? 'text-red-500' : ''}`}>
+                  {comment.isLiked ? 'Liked' : 'Like'}
+                </span>
               </button>
 
               <button
@@ -209,20 +214,22 @@ export default function FitnessVideoPage({ params }) {
                 Reply
               </button>
 
+              {/* Edit and Delete buttons - now visible */}
               {isCurrentUser && (
                 <>
                   <button
                     onClick={() => handleEdit(comment)}
-                    className="text-gray-500 cursor-pointer hover:text-gray-700 transition-colors"
+                    className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors"
+                    disabled={editLoading}
                   >
-                    Edit
+                    {editLoading ? 'Editing...' : 'Edit'}
                   </button>
                   <button
                     onClick={() => handleDeleteComment(comment._id)}
                     className="text-gray-500 cursor-pointer hover:text-red-500 transition-colors"
                     disabled={deleteLoading}
                   >
-                    Delete
+                    {deleteLoading ? 'Deleting...' : 'Delete'}
                   </button>
                 </>
               )}
@@ -342,18 +349,18 @@ export default function FitnessVideoPage({ params }) {
             className="flex items-center space-x-2"
             aria-label={videoData.isFavorite ? 'Unlike video' : 'Like video'}
           >
-            {
-              favLoading ? (
-                <h3>Loading</h3>
-              ) : <Heart
+            {favLoading ? (
+              <h3>Loading</h3>
+            ) : (
+              <Heart
                 className={`w-6 h-6 cursor-pointer transition-colors ${videoData.isFavorite ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
                   }`}
               />
-            }
+            )}
           </button>
 
           <div className="flex items-center space-x-2">
-            <div className="w-5 h-5 rounded-full  flex items-center justify-center">
+            <div className="w-5 h-5 rounded-full flex items-center justify-center">
               <Image src={commectIcon} alt="comment icons" width={20} height={20} />
             </div>
             <span className="text-sm font-medium text-gray-900">{comments.length}</span>
