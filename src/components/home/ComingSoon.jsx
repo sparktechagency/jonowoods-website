@@ -8,8 +8,9 @@ export const ComingSoon = () => {
       <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
       <VideoCard
         title="Coming Soon"
-        imageUrl="/assests/Rectangle7.png"
+        imageUrl="/assests/comingSoon.png"
         overlayText="Coming Soon"
+        route = {"/comingSoon"}
       />
     </div>
   );

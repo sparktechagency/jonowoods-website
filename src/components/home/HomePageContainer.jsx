@@ -4,15 +4,17 @@ import { ComingSoon } from "./ComingSoon";
 import { DailyInspiration } from "./DailyInspiration";
 import NewClasses from "../exploreComponents/NewClasses";
 import BrowseByCategory from "../exploreComponents/BrowseByCategory";
+import YogaQuotePage from "../exploreComponents/Qoute";
 
 const HomePageContainer = () => {
   return (
     <div>
+      <YogaQuotePage />
       <TodaysVideo />
       <ComingSoon />
       <DailyInspiration />
-      <NewClasses />
       <BrowseByCategory />
+      <NewClasses />
     </div>
   );
 };

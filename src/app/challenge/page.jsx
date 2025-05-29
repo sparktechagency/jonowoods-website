@@ -1,20 +1,18 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getVideoAndThumbnail } from "../../components/share/imageUrl";
 import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
-import { getVideoAndThumbnail } from "../share/imageUrl";
 
-
-export default function NewClasses() {
+export default function page() {
   const router = useRouter();
   const { data, isLoading } = useChallengeVideoQuery();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div className="h-[400px] flex justify-center items-center text-2xl font-bold">Loading...</div>;
 
   return (
-    <section className="my-10 mx-3">
+    <section className="container my-10 mx-auto">
       <div className="flex mb-4">
         <h2 className="text-xl font-semibold">Join a Challenge</h2>
       </div>
@@ -51,11 +49,7 @@ export default function NewClasses() {
           </div>
         ))}
       </div>
-      <div className="flex justify-end">
-        <Button onClick={() => router.push("/challenge")} variant="link" className="text-rose-500 cursor-pointer hover:text-rose-600">
-          See More
-        </Button>
-      </div>
+
     </section>
   );
 }

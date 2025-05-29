@@ -71,7 +71,7 @@ export default function Navbar() {
         {/* Profile Dropdown */}
         <div className="relative profile-menu">
           <button
-            className="relative flex items-center space-x-2"
+            className="relative flex cursor-pointer items-center space-x-2 group"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
           >
             {data?.image ? (
@@ -80,87 +80,99 @@ export default function Navbar() {
                 height={100}
                 width={100}
                 alt="Profile"
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover border-2 border-gray-300"
               />
             ) : (
               <FaUserCircle size={40} className="text-black" />
             )}
-
-            {/* Name that only shows on hover */}
-            <span className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 whitespace-nowrap bg-white text-black px-2 py-1 rounded shadow-md opacity-0 pointer-events-none transition-opacity duration-300 hover:opacity-100 group-hover:opacity-100">
+            
+            {/* Tooltip-style name that shows on hover */}
+            <span className="hidden md:inline absolute left-full ml-2 top-1/2 transform -translate-y-1/2 whitespace-nowrap bg-gray-800 text-white text-sm px-2 py-1 rounded shadow-md opacity-0 pointer-events-none transition-opacity duration-300 group-hover:opacity-100">
               {data?.name || "User"}
             </span>
           </button>
 
           {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-60 border-2 border-[#2E2E2EF5] bg-[#fff] text-black shadow-md rounded-md">
-              <ul className="py-2">
-                <li>
-                  <Link href="/profile-dashboard" className="block px-4 py-2">
-                    Profile Dashboard
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/my-feed" className="block px-4 py-2">
-                    My Feed
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/my-download" className="block px-4 py-2 ">
-                    Download Video
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    className="block w-full text-left px-4 py-2 "
-                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                  >
-                    <div className="flex justify-between items-center">
-                      Settings
-                      <MdKeyboardArrowDown />
-                    </div>
-                  </button>
-                  {isSettingsOpen && (
-                    <ul className="pl-4">
-                      <li>
-                        <Link href="/contact" className="block px-4 py-2 ">
-                          Contact us
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/terms" className="block px-4 py-2 ">
-                          Terms & Conditions
-                        </Link>
-                      </li>
-                      <li>
-                        <Link
-                          href="/change-password"
-                          className="block px-4 py-2 "
-                        >
-                          Change Password
-                        </Link>
-                      </li>
-                      <li>
-                        <Link href="/policy" className="block px-4 py-2 ">
-                          Privacy Policy
-                        </Link>
-                      </li>
-                    </ul>
-                  )}
-                </li>
-                <li>
-                  <Link
-                    href="/login"
-                    onClick={() => {
-                      localStorage.removeItem("user");
-                      localStorage.removeItem("token");
-                    }}
-                    className="block px-4 py-2 mt-10"
-                  >
-                    Logout
-                  </Link>
-                </li>
-              </ul>
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+              <div className="px-4 py-2 border-b border-gray-100">
+                <p className="text-sm font-medium text-gray-900">{data?.name || "User"}</p>
+                <p className="text-xs text-gray-500 truncate">{data?.email || "user@example.com"}</p>
+              </div>
+              
+              <Link 
+                href="/profile-dashboard" 
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Profile Dashboard
+              </Link>
+              
+              <Link 
+                href="/my-feed" 
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                My Feed
+              </Link>
+              
+              <Link 
+                href="/my-download" 
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Download Video
+              </Link>
+              
+              <div className="border-t border-gray-100"></div>
+              
+              <div className="relative">
+                <button
+                  onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                  className="flex justify-between items-center cursor-pointer w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  <span>Settings</span>
+                  <MdKeyboardArrowDown className={`transition-transform ${isSettingsOpen ? 'transform rotate-180' : ''}`} />
+                </button>
+                
+                {isSettingsOpen && (
+                  <div className="pl-4 bg-gray-50">
+                    <Link 
+                      href="/contact" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Contact us
+                    </Link>
+                    <Link 
+                      href="/terms" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Terms & Conditions
+                    </Link>
+                    <Link 
+                      href="/change-password" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Change Password
+                    </Link>
+                    <Link 
+                      href="/policy" 
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </div>
+                )}
+              </div>
+              
+              <div className="border-t border-gray-100"></div>
+              
+              <Link
+                href="/login"
+                onClick={() => {
+                  localStorage.removeItem("user");
+                  localStorage.removeItem("token");
+                }}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Logout
+              </Link>
             </div>
           )}
         </div>

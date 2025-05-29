@@ -11,6 +11,9 @@ export const getImageUrl = (path) => {
   }
 };
 
-export const getVideoAndThumbnail = (Url) => {
-  return `https://${Url}`;
-};
+export function getVideoAndThumbnail(url) {
+  if (!url.startsWith('http')) {
+    return `https://${url}`;
+  }
+  return url;
+}

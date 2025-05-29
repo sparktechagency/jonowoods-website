@@ -8,8 +8,9 @@ export const TodaysVideo = () => {
       <h2 className="text-xl font-bold mb-2">Today's Video</h2>
       <VideoCard
         title="Today's Video"
-        imageUrl="/assests/payerImage.png"
+        imageUrl="/assests/todayVideo.png"
         overlayText="Cooling Yoga Flow"
+        route = {"/today-video"}
       />
     </div>
   );
