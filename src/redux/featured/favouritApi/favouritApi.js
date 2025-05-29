@@ -40,5 +40,4 @@ export const {
   useGetFavouriteQuery,
   useWatchFavouriteMutation,
   useVideoFavouriteMutation
-
 } = favouriteSlice;

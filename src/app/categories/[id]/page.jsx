@@ -4,6 +4,7 @@ import React from 'react';
 import ClassSilder from '../../../components/Category/ClassSilder';
 import CourseSlider from '../../../components/Category/CourseSlider';
 import { useCategoryVideoQuery, useCategoryWithSubcategoryQuery } from '../../../redux/featured/homeApi.jsx/homeApi';
+import Spinner from '../../(commonLayout)/Spinner';
 
 const page = ({ params }) => {
   const { id } = React.use(params);
@@ -14,7 +15,7 @@ const page = ({ params }) => {
 
   // console.log(category?.data?.result[0].categoryId._id);
 
-  if (categoryLoading || classVideoLoading) return <div className='h-[400px] flex justify-center items-center text-2xl font-bold'>Loading...</div>
+  if (categoryLoading || classVideoLoading) return <Spinner />
 
   return (
     <div>

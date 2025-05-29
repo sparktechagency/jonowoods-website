@@ -1,27 +1,27 @@
 "use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { FaUserCircle, FaBell } from "react-icons/fa";
-import { MdKeyboardArrowDown, MdClose } from "react-icons/md";
-import { useMyProfileQuery } from "@/redux/featured/auth/authApi";
-import {
-  useGetNotificationQuery,
-  useReadOneNotificationMutation,
-  useReadAllNotificationMutation,
-} from "@/redux/featured/notification/NotificationApi";
-import { getImageUrl } from "../share/imageUrl";
-import Image from "next/image";
-import io from "socket.io-client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMyProfileQuery } from "@/redux/featured/auth/authApi";
+import {
+  useGetNotificationQuery,
+  useReadAllNotificationMutation,
+  useReadOneNotificationMutation,
+} from "@/redux/featured/notification/NotificationApi";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { FaBell, FaUserCircle } from "react-icons/fa";
+import { MdClose, MdKeyboardArrowDown } from "react-icons/md";
+import io from "socket.io-client";
+import { getImageUrl } from "../share/imageUrl";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -44,7 +44,7 @@ export default function Navbar() {
     page: 1,
     limit: 15,
   });
-  console.log(notificationData)
+
 
   const [readOneNotification] = useReadOneNotificationMutation();
   const [readAllNotification] = useReadAllNotificationMutation();
@@ -206,11 +206,10 @@ export default function Navbar() {
               <li key={item.name}>
                 <Link
                   href={item.path}
-                  className={`relative pb-1 text-black transition-all duration-300 ease-in-out ${
-                    pathname === item.path
+                  className={`relative pb-1 text-black transition-all duration-300 ease-in-out ${pathname === item.path
                       ? "border-b-2 border-red-500 text-black"
                       : "hover:border-b-2 hover:border-red-500 text-black"
-                  }`}
+                    }`}
                 >
                   {item.name}
                 </Link>
@@ -399,11 +398,10 @@ export default function Navbar() {
                 notifications.map((notification) => (
                   <div
                     key={notification._id}
-                    className={`p-4 rounded-lg border transition-colors ${
-                      notification.read
+                    className={`p-4 rounded-lg border transition-colors ${notification.read
                         ? "bg-gray-50 border-gray-200"
                         : "bg-blue-50 border-blue-200"
-                    }`}
+                      }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">

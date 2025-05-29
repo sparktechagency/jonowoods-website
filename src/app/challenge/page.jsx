@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getVideoAndThumbnail } from "../../components/share/imageUrl";
 import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
+import Spinner from "../(commonLayout)/Spinner";
 
 export default function page() {
   const router = useRouter();
   const { data, isLoading } = useChallengeVideoQuery();
 
-  if (isLoading) return <div className="h-[400px] flex justify-center items-center text-2xl font-bold">Loading...</div>;
+  if (isLoading) return <Spinner />
 
   return (
     <section className="container my-10 mx-auto">

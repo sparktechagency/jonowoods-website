@@ -1,5 +1,6 @@
 "use client";
 
+import Spinner from "../(commonLayout)/Spinner";
 import VideoPlayer from "../../components/VideoPlayer";
 import { useComingSoonLetestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 
@@ -9,7 +10,7 @@ const page = () => {
   return (
     <div>
       {
-        isLoading ? <div className='h-[400px] flex justify-center items-center text-2xl font-bold'>Loading...</div> : <VideoPlayer data={data?.data} />
+        isLoading ? <Spinner /> : <VideoPlayer data={data?.data} />
       }
     </div>
   );

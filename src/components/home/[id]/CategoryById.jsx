@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Spinner from "../../../app/(commonLayout)/Spinner";
 
 export default function CategoryDetailPage() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function CategoryDetailPage() {
   };
 
   if (!id) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (

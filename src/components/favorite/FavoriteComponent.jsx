@@ -1,26 +1,33 @@
 // pages/index.js
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import { Heart, Download, X } from "lucide-react";
 import { useFavouriteVideoListQuery } from "@/redux/featured/favouriteVideo/favouriteVideoApi";
-import { getImageUrl, getVideoAndThumbnail } from "../share/imageUrl";
+import { Download, Heart, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import Spinner from "../../app/(commonLayout)/Spinner";
+import { useVideoFavouriteMutation } from "../../redux/featured/favouritApi/favouritApi";
+import { getVideoAndThumbnail } from "../share/imageUrl";
 
 export default function FavoriteComponents() {
-  const { data } = useFavouriteVideoListQuery();
+  const [favorite, { isLoading: isFavouriteLoading }] = useVideoFavouriteMutation();
+
+  const { data, isLoading } = useFavouriteVideoListQuery();
   const favouriteVideos = data?.data?.favouritList || [];
+  console.log(favouriteVideos);
   const pagination = data?.data?.meta || {};
 
   const [likedVideos, setLikedVideos] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(null);
 
-  const toggleLike = (id) => {
-    setLikedVideos((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const toggleLike = async (id) => {
+    // try {
+    //   await favorite(id).unwrap();
+    // } catch (error) {
+    //   console.log(error);
+    // }
+    console.log(id);
   };
 
   const openVideoModal = (video) => {
@@ -37,6 +44,10 @@ export default function FavoriteComponents() {
   const isValidVideo = (favoriteItem) => {
     return favoriteItem && favoriteItem.videoId !== null;
   };
+
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6">
@@ -97,16 +108,15 @@ export default function FavoriteComponents() {
                   <div className="md:hidden flex justify-between items-center w-full mt-2">
                     <div className="flex space-x-4">
                       <button
-                        onClick={() => toggleLike(favorite._id)}
+                        onClick={() => toggleLike(favorite?.videoId?._id)}
                         className="flex items-center"
                         aria-label="Like video"
                       >
                         <Heart
-                          className={`h-5 w-5 ${
-                            favorite.liked || likedVideos[favorite._id]
-                              ? "fill-rose-500 text-rose-500"
-                              : "text-rose-500"
-                          }`}
+                          className={`h-5 w-5 ${favorite.liked || likedVideos[favorite._id]
+                            ? "fill-rose-500 text-rose-500"
+                            : "text-rose-500"
+                            }`}
                         />
                       </button>
                       <button
@@ -147,11 +157,10 @@ export default function FavoriteComponents() {
                       aria-label="Like video"
                     >
                       <Heart
-                        className={`h-5 w-5 ${
-                          favorite.liked || likedVideos[favorite._id]
-                            ? "fill-rose-500 text-rose-500"
-                            : "text-rose-500"
-                        }`}
+                        className={`h-5 w-5 ${favorite.liked || likedVideos[favorite._id]
+                          ? "fill-rose-500 text-rose-500"
+                          : "text-rose-500"
+                          }`}
                       />
                     </button>
                     <button
@@ -236,11 +245,10 @@ export default function FavoriteComponents() {
             {Array.from({ length: pagination.totalPage }, (_, i) => (
               <button
                 key={i}
-                className={`px-3 py-1 rounded ${
-                  pagination.page === i + 1
-                    ? "bg-red-500 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
+                className={`px-3 py-1 rounded ${pagination.page === i + 1
+                  ? "bg-red-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
               >
                 {i + 1}
               </button>

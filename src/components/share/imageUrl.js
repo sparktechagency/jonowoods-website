@@ -12,8 +12,13 @@ export const getImageUrl = (path) => {
 };
 
 export function getVideoAndThumbnail(url) {
-  if (!url.startsWith('http')) {
-    return `https://${url}`;
+  if (!url) return ''; // handle undefined/null cases
+  
+  // If already has http/https, return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
   }
-  return url;
+  
+  // Otherwise, add https://
+  return `https://${url}`;
 }

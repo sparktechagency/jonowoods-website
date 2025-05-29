@@ -7,6 +7,7 @@ import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { useCategoryWithSubcategoryQuery } from "../../../redux/featured/homeApi.jsx/homeApi";
 import CommentsSection from "./CommentSection";
+import Spinner from "../../../app/(commonLayout)/Spinner";
 
 export default function EnhancedVideoDetails() {
   const { id } = useParams();
@@ -89,7 +90,7 @@ export default function EnhancedVideoDetails() {
   };
 
   if (!id) {
-    return <div className="container mx-auto py-8 px-4">Loading...</div>;
+    return <Spinner />;
   }
 
   return (

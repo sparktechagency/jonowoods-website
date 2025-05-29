@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useComingSoonLetestSingleVideoQuery } from "../../../redux/featured/homeApi.jsx/homeApi";
+import Spinner from "../../(commonLayout)/Spinner";
 
 
 
@@ -13,9 +14,7 @@ const SingleVideoPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-          Loading...
-        </div>
+        <Spinner />
       </div>
     );
   }
