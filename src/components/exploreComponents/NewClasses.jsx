@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 import { getVideoAndThumbnail } from "../share/imageUrl";
+import Spinner from "../../app/(commonLayout)/Spinner";
 
 
 export default function NewClasses() {
   const router = useRouter();
   const { data, isLoading } = useChallengeVideoQuery();
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Spinner />;
 
   return (
     <section className="my-10 mx-3">

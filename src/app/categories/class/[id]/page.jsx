@@ -7,6 +7,7 @@ import commectIcon from '../../../../../public/assests/comment.png';
 import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation } from '../../../../redux/featured/commentApi/commentApi';
 import { useVideoFavouriteMutation } from '../../../../redux/featured/favouritApi/favouritApi';
 import { useSingleVidoeQuery } from '../../../../redux/featured/homeApi.jsx/homeApi';
+import Spinner from '../../../(commonLayout)/Spinner';
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -285,7 +286,7 @@ export default function FitnessVideoPage({ params }) {
   };
 
   if (isLoading) {
-    return <div className="container mx-auto bg-white p-4">Loading...</div>;
+    return <Spinner />
   }
 
   if (!data?.data) {

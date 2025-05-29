@@ -2,6 +2,16 @@ import { api } from "@/redux/baseUrl/baseUrl";
 
 const commignSoonSlice = api.injectEndpoints({
   endpoints: (builder) => ({
+
+      quotation : builder.query({
+      query: () => {
+        return {
+          method: "GET",
+          url: "/quotation",
+        };
+      },
+    }),
+
     comingSoonLetestVideo: builder.query({
       query: () => {
         return {
@@ -54,6 +64,7 @@ const commignSoonSlice = api.injectEndpoints({
 });
 
 export const {
+  useQuotationQuery,
   useComingSoonLetestVideoQuery,
   useInspirationLetestVideoQuery,
   useTodayLetestVideoQuery,

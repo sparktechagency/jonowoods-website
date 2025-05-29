@@ -26,6 +26,7 @@ import {
 import { getImageUrl } from "../share/imageUrl";
 import { toast } from "sonner";
 import { useRunningPackageQuery } from "@/redux/featured/Package/packageApi";
+import Spinner from "../../app/(commonLayout)/Spinner";
 
 // Subscription Card Component
 const SubscriptionCard = ({ packageData, userData }) => {
@@ -283,7 +284,7 @@ export default function ProfileDashboardComponents() {
 
   if (isLoading)
     return (
-      <div className="flex justify-center items-center h-60">Loading...</div>
+        <Spinner />
     );
 
   return (

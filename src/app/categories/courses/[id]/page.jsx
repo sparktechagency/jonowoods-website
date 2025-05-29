@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSubCategoryVideoQuery } from '../../../../redux/featured/homeApi.jsx/homeApi';
+import Spinner from '../../../(commonLayout)/Spinner';
 
 export default function CoursePage({ params }) {
   const { id } = React.use(params);
@@ -62,7 +63,7 @@ export default function CoursePage({ params }) {
   };
 
   if (courseLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <Spinner />;
   }
 
   if (!videos.length) {

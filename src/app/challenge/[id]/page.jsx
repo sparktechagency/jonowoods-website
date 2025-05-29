@@ -3,6 +3,7 @@
 import React from 'react';
 import VideoPlayer from '../../../components/VideoPlayer';
 import { useSingleChallengeVideoQuery } from '../../../redux/featured/CommingSoon/commingSoonApi';
+import Spinner from '../../(commonLayout)/Spinner';
 
 const page = ({ params }) => {
   const { id } = React.use(params);
@@ -11,7 +12,7 @@ const page = ({ params }) => {
 
   return (
     <div>
-      {isLoading ? <div className='h-[400px] flex justify-center items-center text-2xl font-bold'>Loading...</div> : <VideoPlayer data={data?.data} />}
+      {isLoading ? <Spinner /> : <VideoPlayer data={data?.data} />}
     </div>
   );
 };

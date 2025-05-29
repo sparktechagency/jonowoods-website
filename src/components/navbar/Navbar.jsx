@@ -19,8 +19,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotificationPagination from "./PaginationInNotification";
 import Spinner from "@/app/(commonLayout)/Spinner";
@@ -209,11 +207,10 @@ export default function Navbar() {
               <li key={item.name}>
                 <Link
                   href={item.path}
-                  className={`relative pb-1 text-black transition-all duration-300 ease-in-out ${
-                    pathname === item.path
+                  className={`relative pb-1 text-black transition-all duration-300 ease-in-out ${pathname === item.path
                       ? "border-b-2 border-red-500 text-black"
                       : "hover:border-b-2 hover:border-red-500 text-black"
-                  }`}
+                    }`}
                 >
                   {item.name}
                 </Link>
