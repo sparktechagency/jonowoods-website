@@ -32,26 +32,27 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [allNotifications, setAllNotifications] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalNotifications, setTotalNotifications] = useState(0);
   const [socket, setSocket] = useState(null);
   const { data } = useMyProfileQuery();
 
   // Redux queries and mutations
+  const NOTIFICATIONS_PER_PAGE = 10; // Changed from 15 to 10
+
   const {
     data: notificationData,
     isLoading,
     refetch,
   } = useGetNotificationQuery({
-    page: 1,
-    limit: 15,
+    page: currentPage,
+    limit: NOTIFICATIONS_PER_PAGE,
   });
-  console.log(notificationData)
 
   const [readOneNotification] = useReadOneNotificationMutation();
   const [readAllNotification] = useReadAllNotificationMutation();
 
-  const NOTIFICATIONS_PER_PAGE = 15;
-
-  // Calculate unread count from notifications
+  // Calculate unread count from all notifications
   const unreadCount = allNotifications.filter((n) => !n.read).length;
 
   useEffect(() => {
@@ -76,13 +77,34 @@ export default function Navbar() {
 
   // Update local notifications when Redux data changes
   useEffect(() => {
-    if (notificationData?.data?.result?.result) {
+    if (notificationData?.data?.result) {
+      const result = notificationData.data.result;
+
+      // Set current page notifications
+      setNotifications(result.result || []);
+
+      // Set pagination info
+      setTotalPages(result.totalPages || 1);
+      setTotalNotifications(result.totalCount || 0);
+
+      // Update all notifications for unread count (fetch all if needed)
       if (currentPage === 1) {
-        setAllNotifications(notificationData?.data?.result?.result);
-        setNotifications(notificationData?.data?.result?.result?.slice(0, 15));
+        setAllNotifications(result.result || []);
       }
     }
   }, [notificationData, currentPage]);
+
+  // Fetch all notifications for unread count
+  const { data: allNotificationData } = useGetNotificationQuery({
+    page: 1,
+    limit: 1000, // Large number to get all notifications for unread count
+  });
+
+  useEffect(() => {
+    if (allNotificationData?.data?.result?.result) {
+      setAllNotifications(allNotificationData.data.result.result);
+    }
+  }, [allNotificationData]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -97,21 +119,9 @@ export default function Navbar() {
     };
   }, []);
 
-  const fetchMoreNotifications = async () => {
-    try {
-      const nextPage = currentPage + 1;
-      const { data: moreData } = await useGetNotificationQuery({
-        page: nextPage,
-        limit: NOTIFICATIONS_PER_PAGE,
-      }).unwrap();
-
-      if (moreData?.data?.result) {
-        setAllNotifications((prev) => [...prev, ...moreData.data.result]);
-        setNotifications((prev) => [...prev, ...moreData.data.result]);
-        setCurrentPage(nextPage);
-      }
-    } catch (error) {
-      console.error("Error fetching more notifications:", error);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
@@ -178,9 +188,43 @@ export default function Navbar() {
 
   const handleNotificationClick = () => {
     setIsNotificationModalOpen(true);
-    // Reset to show initial notifications
-    setNotifications(allNotifications.slice(0, 5));
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   };
 
   return (
@@ -355,15 +399,15 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* Notification Modal */}
+      {/* Notification Modal - Positioned below notification button */}
       <Dialog
         open={isNotificationModalOpen}
         onOpenChange={setIsNotificationModalOpen}
       >
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogContent className="max-w-md w-[400px] fixed top-20 right-4 left-auto transform-none max-h-[80vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center justify-between">
-              <span>Notifications</span>
+              <span>Notifications ({totalNotifications})</span>
               <div className="flex items-center space-x-2">
                 {unreadCount > 0 && (
                   <Button
@@ -391,7 +435,7 @@ export default function Navbar() {
                 <div className="text-center py-8 text-gray-500">
                   No notifications yet
                 </div>
-              ) : isLoading && notifications.length === 0 ? (
+              ) : isLoading ? (
                 <div className="text-center py-8 text-gray-500">
                   Loading notifications...
                 </div>
@@ -419,7 +463,7 @@ export default function Navbar() {
                           size="sm"
                           variant="outline"
                           onClick={() => markAsRead(notification._id)}
-                          className="ml-2"
+                          className="ml-2 text-xs"
                         >
                           Mark as Read
                         </Button>
@@ -428,21 +472,59 @@ export default function Navbar() {
                   </div>
                 ))
               )}
-
-              {notifications.length < allNotifications.length && (
-                <div className="text-center py-4">
-                  <Button
-                    onClick={fetchMoreNotifications}
-                    disabled={isLoading}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    {isLoading ? "Loading..." : "See More"}
-                  </Button>
-                </div>
-              )}
             </div>
           </ScrollArea>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2 mt-4 pt-4 border-t">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-2"
+              >
+                Previous
+              </Button>
+
+              <div className="flex space-x-1">
+                {getPageNumbers().map((page, index) => (
+                  <span key={index}>
+                    {page === "..." ? (
+                      <span className="px-2 py-1 text-gray-500">...</span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant={currentPage === page ? "default" : "outline"}
+                        onClick={() => handlePageChange(page)}
+                        className="px-2 py-1 min-w-[32px]"
+                      >
+                        {page}
+                      </Button>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-2"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+
+          {/* Page info */}
+          {totalPages > 1 && (
+            <div className="text-center text-xs text-gray-500 mt-2">
+              Page {currentPage} of {totalPages}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
