@@ -10,6 +10,14 @@ const packagesApi = api.injectEndpoints({
                 };
             },
         }),
+        runningPackage: builder.query({
+            query: () => {
+                return {
+                  method: "GET",
+                  url: `/subscription/details`,
+                };
+            },
+        }),
         checkoutForSubscription: builder.mutation({
             query: (id) => {
                 return {
@@ -21,4 +29,4 @@ const packagesApi = api.injectEndpoints({
     }),
 });
 
-export const { useGetWebPackagesQuery, useCheckoutForSubscriptionMutation } = packagesApi;
+export const { useGetWebPackagesQuery, useCheckoutForSubscriptionMutation,useRunningPackageQuery } = packagesApi;

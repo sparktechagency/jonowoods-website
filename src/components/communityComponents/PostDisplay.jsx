@@ -11,6 +11,7 @@ import {
   useDeletePostMutation,
 } from "@/redux/featured/community/communityApi";
 import { CommentsContainer } from "./CommentsContainer";
+import { toast } from "sonner";
 
 const PostDisplay = ({
   posts,
@@ -69,15 +70,24 @@ const PostDisplay = ({
 
   const handleDelete = async (postId) => {
     try {
-      await deletePost(postId);
-      if (onPostDelete) {
-        onPostDelete(postId);
+      const response = await deletePost(postId).unwrap(); // unwrap() করলে সরাসরি ডাটা পাওয়া যায়
+      console.log(response);
+
+      if (response?.success) {
+        toast.success("Post deleted successfully!");
+        if (onPostDelete) {
+          onPostDelete(postId);
+        }
+        setDeleteConfirmOpen(null);
+      } else {
+        toast.error(response?.message || "Failed to delete post.");
       }
-      setDeleteConfirmOpen(null);
     } catch (error) {
       console.error("Failed to delete post:", error);
+      toast.error("An error occurred while deleting the post.");
     }
   };
+  
 
   const toggleDropdown = (postId) => {
     setDropdownOpen(dropdownOpen === postId ? null : postId);
