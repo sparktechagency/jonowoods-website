@@ -1,33 +1,37 @@
 // pages/index.js
 "use client";
 import { useFavouriteVideoListQuery } from "@/redux/featured/favouriteVideo/favouriteVideoApi";
-import { Download, Heart, X } from "lucide-react";
+import { Heart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Spinner from "../../app/(commonLayout)/Spinner";
 import { useVideoFavouriteMutation } from "../../redux/featured/favouritApi/favouritApi";
 import { getVideoAndThumbnail } from "../share/imageUrl";
 
 export default function FavoriteComponents() {
+  const router = useRouter();
   const [favorite, { isLoading: isFavouriteLoading }] = useVideoFavouriteMutation();
-
-  const { data, isLoading } = useFavouriteVideoListQuery();
-  const favouriteVideos = data?.data?.favouritList || [];
-  console.log(favouriteVideos);
-  const pagination = data?.data?.meta || {};
+  const { data, isLoading, isError, refetch } = useFavouriteVideoListQuery();
 
   const [likedVideos, setLikedVideos] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const favouriteVideos = data?.data?.favouritList || [];
+  const pagination = data?.data?.meta || {};
 
   const toggleLike = async (id) => {
-    // try {
-    //   await favorite(id).unwrap();
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    console.log(id);
+    try {
+      setErrorMessage('');
+      await favorite(id).unwrap();
+      refetch();
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setErrorMessage('Failed to update favorite. Please try again.');
+    }
   };
 
   const openVideoModal = (video) => {
@@ -46,170 +50,214 @@ export default function FavoriteComponents() {
   };
 
   if (isLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-12">
+        <h3 className="text-xl font-medium text-gray-700">
+          Error loading favorite videos
+        </h3>
+        <p className="text-gray-500 mt-2">
+          Please try refreshing the page or check your connection
+        </p>
+        <button
+          onClick={() => refetch()}
+          className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6">
+      {errorMessage && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+          {errorMessage}
+        </div>
+      )}
+
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">My Favorite Videos</h1>
+
       <div className="grid grid-cols-1 gap-6">
-        {favouriteVideos.map(
-          (favorite) =>
-            isValidVideo(favorite) && (
-              <div
-                key={favorite._id}
-                className="bg-white rounded-lg overflow-hidden shadow flex flex-col md:flex-row"
-              >
-                {/* Left Side - Thumbnail */}
-                <div className="w-full md:w-1/3 h-56 sm:h-64 md:h-80 relative">
-                  <Image
-                    src={getVideoAndThumbnail(favorite.videoId.thumbnailUrl)}
-                    alt={favorite.videoId.title}
-                    height={200}
-                    width={300}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Right Side - Content */}
-                <div className="w-full md:w-2/3 p-4 flex flex-col justify-between">
-                  {/* Title and Duration */}
-                  <div className="mb-3">
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {favorite.videoId.title}
-                    </h2>
-                    <span className="text-sm font-medium text-gray-500">
-                      {favorite.videoId.duration}
-                    </span>
-                    <span className="ml-2 px-2 py-1 text-xs font-semibold rounded bg-gray-100">
-                      {favorite.videoId.type}
-                    </span>
+        {favouriteVideos.length > 0 ? (
+          favouriteVideos.map(
+            (favorite) =>
+              isValidVideo(favorite) && (
+                <div
+                  key={favorite._id}
+                  className="bg-white rounded-lg overflow-hidden shadow flex flex-col md:flex-row"
+                >
+                  {/* Left Side - Thumbnail */}
+                  <div className="w-full md:w-1/3 h-56 sm:h-64 md:h-80 relative">
+                    {favorite.videoId.thumbnailUrl ? (
+                      <Image
+                        src={getVideoAndThumbnail(favorite.videoId.thumbnailUrl)}
+                        alt={favorite.videoId.title || 'Favorite video thumbnail'}
+                        height={200}
+                        width={300}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = '/placeholder-thumbnail.jpg'; // Fallback image
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500">No Favorite Video available</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Description */}
-                  <div className="border rounded-xl p-4 mb-4">
-                    <h3 className="text-sm text-red-500 font-medium mb-1">
-                      About this Class
-                    </h3>
-                    <p className="text-xs text-gray-700 mb-2">
-                      Yoga is a holistic practice that blends physical postures,
-                      breath control, meditation, and ethical principles to
-                      promote overall well-being.
-                    </p>
-                    <p className="text-xs text-gray-700">
-                      Through a variety of physical poses (asanas), yoga
-                      strengthens and tones the body, enhances flexibility, and
-                      improves posture. The focus on conscious breathing
-                      (pranayama) helps calm the nervous system, reduce stress,
-                      and increase mental clarity.
-                    </p>
+                  {/* Right Side - Content */}
+                  <div className="w-full md:w-2/3 p-4 flex flex-col justify-between">
+                    {/* Title and Duration */}
+                    <div className="mb-3">
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {favorite.videoId.title || 'Untitled Video'}
+                      </h2>
+                      {favorite.videoId.duration && (
+                        <span className="text-sm font-medium text-gray-500">
+                          {favorite.videoId.duration}
+                        </span>
+                      )}
+                      {favorite.videoId.type && (
+                        <span className="ml-2 px-2 py-1 text-xs font-semibold rounded bg-gray-100">
+                          {favorite.videoId.type}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <div className="border rounded-xl p-4 mb-4">
+                      <h3 className="text-sm text-red-500 font-medium mb-1">
+                        About this Class
+                      </h3>
+                      {favorite.videoId.description ? (
+                        <p className="text-xs text-gray-700">
+                          {favorite.videoId.description}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-gray-500 italic">
+                          No description available
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Mobile Action Buttons */}
+                    <div className="md:hidden flex justify-between items-center w-full mt-2">
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => toggleLike(favorite?.videoId?._id)}
+                          className="flex items-center"
+                          aria-label="Like video"
+                          disabled={isFavouriteLoading}
+                        >
+                          <Heart
+                            className={`h-5 w-5 ${favorite.liked || likedVideos[favorite._id]
+                              ? "fill-rose-500 text-rose-500"
+                              : "text-rose-500"
+                              }`}
+                          />
+                        </button>
+                        {/* <button
+                          className="flex items-center"
+                          aria-label="Download video"
+                        >
+                          <Download className="h-5 w-5 text-gray-500" />
+                        </button> */}
+                      </div>
+                      <div className="flex space-x-2">
+                        {favorite.videoId._id && (
+                          <Link href={`/categories/class/${favorite.videoId._id}`}>
+                            <button className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
+                              Details
+                            </button>
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => router.push(`/categories/class/${favorite.videoId._id}`)}
+                          className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
+                        >
+                          Watch
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Mobile Action Buttons */}
-                  <div className="md:hidden flex justify-between items-center w-full mt-2">
-                    <div className="flex space-x-4">
+                  {/* Desktop Action Buttons */}
+                  <div className="hidden md:flex flex-col justify-between items-center p-4 my-0 md:mb-6">
+                    <div className="flex space-x-6 items-center">
                       <button
                         onClick={() => toggleLike(favorite?.videoId?._id)}
                         className="flex items-center"
                         aria-label="Like video"
+                        disabled={isFavouriteLoading}
                       >
+
                         <Heart
-                          className={`h-5 w-5 ${favorite.liked || likedVideos[favorite._id]
+                          className={`h-5 cursor-pointer w-5 ${favorite.liked || likedVideos[favorite._id]
                             ? "fill-rose-500 text-rose-500"
                             : "text-rose-500"
                             }`}
                         />
+
                       </button>
-                      <button
+                      {/* <button
                         className="flex items-center"
                         aria-label="Download video"
                       >
                         <Download className="h-5 w-5 text-gray-500" />
-                      </button>
+                      </button> */}
                     </div>
-                    <div className="flex space-x-2">
-                      <Link href={`/favorite/${favorite.videoId._id}`}>
-                        <button className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
-                          Details
-                        </button>
-                      </Link>
+
+                    <div className="flex flex-col gap-4 w-28">
+                      {favorite.videoId._id && (
+                        <Link
+                          href={`/categories/class/${favorite.videoId._id}`}
+                          className="w-full"
+                        >
+                          <button className="px-4 py-3 cursor-pointer w-full bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
+                            Details
+                          </button>
+                        </Link>
+                      )}
                       <button
-                        onClick={() =>
-                          openVideoModal({
-                            ...favorite.videoId,
-                            videoUrl:
-                              "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/video/rTl3vg0veiylgd0ih/67b9b23cbe35d27f504d4bb7-p3-m41wef7__95cf3e9af7013f8c30516ea56660faae__P360.mp4", // Placeholder URL
-                          })
-                        }
-                        className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
+                        onClick={() => router.push(`/categories/class/${favorite.videoId._id}`)}
+                        className="px-4 py-3 w-full cursor-pointer bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
                       >
-                        Watch
+                        Watch Now
                       </button>
                     </div>
                   </div>
                 </div>
-
-                {/* Desktop Action Buttons */}
-                <div className="hidden md:flex flex-col justify-between items-center p-4 my-0 md:mb-6">
-                  <div className="flex space-x-6 items-center">
-                    <button
-                      onClick={() => toggleLike(favorite._id)}
-                      className="flex items-center"
-                      aria-label="Like video"
-                    >
-                      <Heart
-                        className={`h-5 w-5 ${favorite.liked || likedVideos[favorite._id]
-                          ? "fill-rose-500 text-rose-500"
-                          : "text-rose-500"
-                          }`}
-                      />
-                    </button>
-                    <button
-                      className="flex items-center"
-                      aria-label="Download video"
-                    >
-                      <Download className="h-5 w-5 text-gray-500" />
-                    </button>
-                  </div>
-
-                  <div className="flex flex-col gap-4 w-28">
-                    <Link
-                      href={`/favorite/${favorite.videoId._id}`}
-                      className="w-full"
-                    >
-                      <button className="px-4 py-3 w-full bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
-                        Details
-                      </button>
-                    </Link>
-                    <button
-                      onClick={() =>
-                        openVideoModal({
-                          ...favorite.videoId,
-                          videoUrl:
-                            "https://dm0qx8t0i9gc9.cloudfront.net/watermarks/video/rTl3vg0veiylgd0ih/67b9b23cbe35d27f504d4bb7-p3-m41wef7__95cf3e9af7013f8c30516ea56660faae__P360.mp4", // Placeholder URL
-                        })
-                      }
-                      className="px-4 py-3 w-full bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
-                    >
-                      Watch Now
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )
+              )
+          )
+        ) : (
+          <div className="text-center py-12">
+            <div className="mx-auto w-24 h-24 text-gray-400 mb-4">
+              <Heart className="w-full h-full" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-700">
+              No favorite videos yet
+            </h3>
+            <p className="text-gray-500 mt-2">
+              You haven't added any videos to your favorites. Start exploring and add some!
+            </p>
+            <Link href="/videos">
+              <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                Browse Videos
+              </button>
+            </Link>
+          </div>
         )}
       </div>
-
-      {/* Empty state when no favorites are available */}
-      {favouriteVideos.length === 0 && (
-        <div className="text-center py-12">
-          <h3 className="text-xl font-medium text-gray-700">
-            No favorite videos found
-          </h3>
-          <p className="text-gray-500 mt-2">
-            Add videos to your favorites to see them here
-          </p>
-        </div>
-      )}
 
       {/* Video Modal */}
       {showModal && currentVideo && (
@@ -223,16 +271,24 @@ export default function FavoriteComponents() {
               <X className="h-6 w-6 text-white" />
             </button>
             <div className="aspect-video bg-black">
-              <video className="w-full h-full" controls autoPlay>
-                <source src={currentVideo.videoUrl} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              {currentVideo.videoUrl ? (
+                <video className="w-full h-full" controls autoPlay>
+                  <source src={currentVideo.videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white">
+                  Video not available
+                </div>
+              )}
             </div>
             <div className="p-4">
-              <h2 className="text-xl font-semibold">{currentVideo.title}</h2>
-              <span className="text-sm text-gray-500">
-                {currentVideo.duration}
-              </span>
+              <h2 className="text-xl font-semibold">{currentVideo.title || 'Untitled Video'}</h2>
+              {currentVideo.duration && (
+                <span className="text-sm text-gray-500">
+                  {currentVideo.duration}
+                </span>
+              )}
             </div>
           </div>
         </div>
