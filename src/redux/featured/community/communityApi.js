@@ -20,7 +20,7 @@ export const communityApi = api.injectEndpoints({
 
         return {
           method: "GET",
-          url: `/community${queryString}`, 
+          url: `/community${queryString}`,
         };
       },
       providesTags: ["Posts"],
@@ -102,6 +102,14 @@ export const communityApi = api.injectEndpoints({
       }),
       invalidatesTags: (result, error, id) => [{ type: "Posts", id }, "Posts"],
     }),
+
+    getFeaturedPost: builder.query({
+      query: () => ({
+        method: "GET",
+        url: `/post/letest`,
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "Posts", id }, "Posts"],
+    }),
   }),
 });
 
@@ -113,5 +121,6 @@ export const {
   useDeletePostMutation,
   useLazyLikePostQuery,
   useUnlikePostMutation,
-  useGetMyPostQuery
+  useGetMyPostQuery,
+  useGetFeaturedPostQuery
 } = communityApi;
