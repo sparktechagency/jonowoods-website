@@ -1,39 +1,57 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { baseUrlApi } from "../../redux/baseUrl/baseUrlApi";
 import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
 
-export default function BrowseByCategory({ onSeeMore, onClassClick }) {
+export default function CategoriesPage() {
   const router = useRouter();
-  const { data, isLoading } = useGetCategoryQuery();
+  const { data, isLoading, isError } = useGetCategoryQuery();
 
+  if (isLoading) {
+    return (
+      <section className="container mx-auto mt-10">
+        <h2 className="text-xl font-semibold mb-4">All Categories</h2>
+        <p className="text-center text-gray-500">Loading categories...</p>
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section className="container mx-auto mt-10">
+        <h2 className="text-xl font-semibold mb-4">All Categories</h2>
+        <p className="text-center text-red-500">
+          Failed to load categories. Please try again later.
+        </p>
+      </section>
+    );
+  }
 
   return (
-    <section className="mb-10 mx-3">
+    <section className="container mx-auto mt-10">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Browse By Categories</h2>
+        <h2 className="text-xl font-semibold">All Categories</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-10">
-        {data?.data.map((yogaClass) => (
+        {data?.data.map((category) => (
           <div
-            key={yogaClass._id}
+            key={category._id}
             className="relative h-80 rounded-lg overflow-hidden cursor-pointer group"
-            onClick={() => router.push(`/categories/${yogaClass._id}`)}
+            onClick={() => router.push(`/categories/${category._id}`)}
           >
-            <Link href={`/categories/${yogaClass._id}`}>
+            <Link href={`/categories/${category._id}`}>
               <div className="relative w-full h-full">
-                {/* Image displayed on top */}
+                {/* Category Image */}
                 <Image
-                  src={`${baseUrlApi}${yogaClass.thumbnail}`}
-                  alt={yogaClass.name}
+                  src={`${baseUrlApi}${category.thumbnail}`}
+                  alt={category.name}
                   layout="fill"
                   objectFit="cover"
                   className="absolute inset-0 w-full h-full"
                 />
-                {/* Gradient Overlay on top of the image */}
+                {/* Gradient Overlay */}
                 <div
                   className="absolute inset-0 bg-gradient-to-t"
                   style={{
@@ -41,25 +59,16 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
                       "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
                   }}
                 />
+                {/* Category Name */}
                 <div className="absolute inset-0 flex items-end p-4">
                   <h3 className="text-white font-medium text-lg">
-                    {yogaClass.name}
+                    {category.name}
                   </h3>
                 </div>
               </div>
             </Link>
           </div>
         ))}
-      </div>
-
-      <div className="flex justify-end">
-        <Button
-          variant="link"
-          className="text-rose-500 hover:text-rose-600 cursor-pointer"
-          onClick={() => router.push("/categories")}
-        >
-          See More
-        </Button>
       </div>
     </section>
   );

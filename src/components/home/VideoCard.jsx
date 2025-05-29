@@ -1,25 +1,55 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import Image from "next/image";
+"use client";
+import { useRouter } from "next/navigation";
 
-export const VideoCard = ({ title, imageUrl, overlayText }) => {
-  // Display the image inside the video card
+export const VideoCard = ({ 
+  title = "Cooling Yoga Flow", 
+  imageUrl, 
+  route
+}) => {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(route);
+  };
+
   return (
-    <Card className="w-full overflow-hidden rounded-lg shadow-md mb-8">
-      <CardContent className="p-0 relative">
-        <div className=" w-full h-48 md:h-64 lg:h-[570px]">
-          <Image
-            src={imageUrl}
-            alt={title}
-            layout="fill"
-            className="object-cover" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-red-500/70 to-blue-500/30 mix-blend-overlay" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h3 className="text-white text-xl font-medium">{overlayText}</h3>
+    <section className="w-full overflow-hidden rounded-lg mb-8">
+      <div className="relative h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden">
+        {/* Background Image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: imageUrl 
+              ? `url(${imageUrl})` 
+              : `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwMCIgaGVpZ2h0PSI2NzUiIHZpZXdB...')` // truncated for brevity
+          }}
+        />
+
+        {/* Silhouette overlay */}
+        <div className="absolute inset-0 flex items-end justify-center pb-8 pointer-events-none">
+          <div className="w-20 h-32 md:w-32 md:h-48 opacity-30">
+            <div 
+              className="w-full h-full bg-black rounded-t-full" 
+              style={{
+                clipPath: 'polygon(30% 0%, 70% 0%, 85% 40%, 90% 70%, 85% 100%, 15% 100%, 10% 70%, 15% 40%)'
+              }}
+            />
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
+
+        {/* Centered Text - Clickable Area */}
+        <div 
+          onClick={handleClick} 
+          className="absolute inset-0 flex items-center mt-72 justify-center cursor-pointer text-center text-white"
+        >
+          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide drop-shadow-lg hover:underline">
+            {title}
+          </h3>
+        </div>
+      </div>
+    </section>
   );
 };

@@ -1,5 +1,4 @@
 // DailyInspiration.jsx
-import React from "react";
 import { VideoCard } from "./VideoCard";
 
 export const DailyInspiration = () => {
@@ -8,8 +7,9 @@ export const DailyInspiration = () => {
       <h2 className="text-xl font-bold mb-4">Daily Inspiration</h2>
       <VideoCard
         title="Daily Inspiration"
-        imageUrl="/assests/payerImage.png"
+        imageUrl="/assests/comingSoon.png"
         overlayText="Cooling Yoga Flow"
+        route={"/inspiration"}
       />
     </section>
   );
