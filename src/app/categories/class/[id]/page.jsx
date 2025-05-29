@@ -166,8 +166,8 @@ export default function FitnessVideoPage({ params }) {
     // TODO: Replace this with actual user authentication logic
     // For now, showing edit/delete buttons for all comments for testing
     // In production, you should check if the comment belongs to the current user
-    //const isCurrentUser = true; // Change this to proper user check: comment.userId === currentUser?.id
-    const isCurrentUser = comment.userId === currentUserId;
+    const isCurrentUser = true; // Change this to proper user check: comment.userId === currentUser?.id
+    // const isCurrentUser = comment.userId === currentUserId;
 
     return (
       <div key={comment._id} className="mb-4">
