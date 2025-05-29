@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import PostCreate from "./PostCreate";
 import PostDisplay from "./PostDisplay";
@@ -10,29 +9,28 @@ import {
 } from "@/redux/featured/community/communityApi";
 import { useMyProfileQuery } from "@/redux/featured/auth/authApi";
 import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communityLeaderBoard";
-
-// Mock leaderboard data - keeping this as it doesn't appear to be from the API yet
-
+import Spinner from "@/app/(commonLayout)/Spinner";
+import Pagination from "./PaginationComponent";
 
 export default function CommunityComponents() {
   const [currentPage, setCurrentPage] = useState(1);
   const [posts, setPosts] = useState([]);
-  const { data } = useMyProfileQuery()
-  const currentUserId = data?._id; 
-  const { data: leaderboard } = useCommunityLeaderBoardQuery()
+  const [editingPost, setEditingPost] = useState(null);
 
-  console.log(leaderboard)
-  
-  const leaderboardData = leaderboard?.data 
-  console.log(leaderboardData)
+  const { data } = useMyProfileQuery();
+  const currentUserId = data?._id;
+
+  const { data: leaderboard } = useCommunityLeaderBoardQuery();
+  const leaderboardData = leaderboard?.data;
+
   const {
     data: apiResponse,
     isLoading,
     isError,
+    refetch,
   } = useGetAllPostQuery([{ name: "page", value: currentPage }]);
 
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
-  console.log(currentPage)
 
   // Extract posts and pagination from API response
   useEffect(() => {
@@ -52,11 +50,9 @@ export default function CommunityComponents() {
     try {
       const response = await createPost(postData).unwrap();
       if (response?.success) {
-        // If we're not on page 1, go back to page 1 to see the new post
         if (currentPage !== 1) {
           setCurrentPage(1);
         } else {
-          // Otherwise refresh the current posts
           setPosts([response.data, ...posts]);
         }
       }
@@ -65,25 +61,40 @@ export default function CommunityComponents() {
     }
   };
 
+  const handlePostEdit = (post) => {
+    setEditingPost(post);
+    // Scroll to top to show the edit form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleEditCancel = () => {
+    setEditingPost(null);
+  };
+
+  const handlePostSuccess = () => {
+    setEditingPost(null);
+    // Refetch posts to get updated data
+    refetch();
+  };
+
+  const handlePostDelete = (deletedPostId) => {
+    // Remove the deleted post from the current posts array
+    setPosts((prevPosts) =>
+      prevPosts.filter((post) => post._id !== deletedPostId)
+    );
+  };
+
   const handlePostsUpdate = (updatedPosts) => {
     setPosts(updatedPosts);
   };
 
   const handlePageChange = (newPage) => {
-    // Update page number which will trigger a new API call via the query hook
     setCurrentPage(newPage);
+    setEditingPost(null); // Cancel any editing when changing pages
   };
 
-  // Loading state
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen justify-center items-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4">Loading posts...</p>
-        </div>
-      </div>
-    );
+    return <Spinner />;
   }
 
   // Error state
@@ -102,39 +113,25 @@ export default function CommunityComponents() {
   return (
     <main className="flex min-h-screen flex-col items-center mt-6 mx-3">
       <div className="w-full">
-        <PostCreate onPostCreate={handleNewPost} isCreating={isCreating} />
+        <PostCreate
+          editPost={editingPost}
+          onEditCancel={handleEditCancel}
+          onPostSuccess={handlePostSuccess}
+        />
 
         <PostDisplay
           posts={posts}
           currentUserId={currentUserId}
           onPostsUpdate={handlePostsUpdate}
+          onPostEdit={handlePostEdit}
+          onPostDelete={handlePostDelete}
         />
 
-        {pagination.totalPage > 1 && (
-          <div className="flex justify-center my-6">
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
-                className="px-4 py-2 border rounded-md disabled:opacity-50"
-              >
-                Previous
-              </button>
-
-              <div className="flex items-center px-4">
-                Page {currentPage} of {pagination.totalPage}
-              </div>
-
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= pagination.totalPage}
-                className="px-4 py-2 border rounded-md disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={pagination.totalPage}
+          onPageChange={handlePageChange}
+        />
 
         <Leaderboard leaderboardData={leaderboardData} />
       </div>

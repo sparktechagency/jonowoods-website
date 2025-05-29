@@ -12,13 +12,11 @@ import {
   useLikeReplyMutation,
   useDeleteCommentMutation,
   useUpdateCommentMutation,
+  useDeleteReplyMutation,
+  useUpdateReplyMutation,
 } from "@/redux/featured/community/commentsApi";
 
-export const CommentsContainer = ({
-  postId,
-  currentUserId,
-  commentsCount = 0,
-}) => {
+export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) => {
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [localComments, setLocalComments] = useState([]);
 
@@ -38,6 +36,8 @@ export const CommentsContainer = ({
   const [likeReply] = useLikeReplyMutation();
   const [deleteComment] = useDeleteCommentMutation();
   const [updateComment] = useUpdateCommentMutation();
+  const [deleteReply] = useDeleteReplyMutation();
+  const [updateReply] = useUpdateReplyMutation();
 
   // Update local comments when API data changes
   useEffect(() => {
@@ -59,7 +59,7 @@ export const CommentsContainer = ({
       await addComment({
         data: { content: commentText, postId },
       });
-      refetch(); // Refresh comment data
+      refetch();
     } catch (error) {
       console.error("Failed to add comment:", error);
     }
@@ -73,47 +73,104 @@ export const CommentsContainer = ({
   ) => {
     try {
       if (parentReplyId) {
-        // Reply to a reply
         await replyToReply({
           replyId: parentReplyId,
           data: { content: replyText },
         });
       } else {
-        // Reply directly to a comment
         await addReply({
           commentId,
           data: { content: replyText },
         });
       }
-      refetch(); // Refresh comment data
+      refetch();
     } catch (error) {
       console.error("Failed to add reply:", error);
     }
   };
 
-    const handleLikeComment = async (commentId) => {
-      console.log("Comment ID to like:", commentId);
+  const handleLikeComment = async (commentId) => {
+    const updatedComments = localComments.map((comment) => {
+      if (comment._id === commentId) {
+        const isCurrentlyLiked =
+          comment.isLiked || (comment.likedBy || []).includes(currentUserId);
+        const newLikes = isCurrentlyLiked
+          ? Math.max(0, comment.likes - 1)
+          : (comment.likes || 0) + 1;
+        const newLikedBy = isCurrentlyLiked
+          ? (comment.likedBy || []).filter((id) => id !== currentUserId)
+          : [...(comment.likedBy || []), currentUserId];
+
+        return {
+          ...comment,
+          isLiked: !isCurrentlyLiked,
+          likes: newLikes,
+          likedBy: newLikedBy,
+        };
+      }
+      return comment;
+    });
+
+    setLocalComments(updatedComments);
+
     try {
       await likeComment(commentId);
-      refetch(); // Refresh comment data
+      refetch();
     } catch (error) {
       console.error("Failed to like comment:", error);
+      setLocalComments(localComments);
     }
   };
 
+
+
   const handleLikeReply = async (replyId) => {
+    // Find and update reply optimistically inside comments
+    const updatedComments = localComments.map((comment) => {
+      if (!comment.replies) return comment;
+
+      const updatedReplies = comment.replies.map((reply) => {
+        if (reply._id === replyId) {
+          const isCurrentlyLiked =
+            reply.isLiked || (reply.likedBy || []).includes(currentUserId);
+          const newLikes = isCurrentlyLiked
+            ? Math.max(0, reply.likes - 1)
+            : (reply.likes || 0) + 1;
+          const newLikedBy = isCurrentlyLiked
+            ? (reply.likedBy || []).filter((id) => id !== currentUserId)
+            : [...(reply.likedBy || []), currentUserId];
+
+          return {
+            ...reply,
+            isLiked: !isCurrentlyLiked,
+            likes: newLikes,
+            likedBy: newLikedBy,
+          };
+        }
+        return reply;
+      });
+
+      return {
+        ...comment,
+        replies: updatedReplies,
+      };
+    });
+
+    setLocalComments(updatedComments);
+
     try {
       await likeReply(replyId);
-      refetch(); // Refresh comment data
+      refetch(); 
     } catch (error) {
       console.error("Failed to like reply:", error);
+      setLocalComments(localComments); // revert on error
     }
   };
 
   const handleDeleteComment = async (commentId) => {
     try {
-      await deleteComment(commentId);
-      refetch(); // Refresh comment data
+      await deleteComment( commentId );
+      refetch();
     } catch (error) {
       console.error("Failed to delete comment:", error);
     }
@@ -125,9 +182,30 @@ export const CommentsContainer = ({
         commentId,
         data: { content: newContent },
       });
-      refetch(); // Refresh comment data
+      refetch();
     } catch (error) {
-      console.error("Failed to update comment:", error);
+      console.error("Failed to edit comment:", error);
+    }
+  };
+
+  const handleEditReply = async (replyId, newContent) => {
+    try {
+      await updateReply({
+        replyId,
+        data: { content: newContent },
+      });
+      refetch();
+    } catch (error) {
+      console.error("Failed to edit reply:", error);
+    }
+  };
+
+  const handleDeleteReply = async (replyId) => {
+    try {
+      await deleteReply(replyId );
+      refetch();
+    } catch (error) {
+      console.error("Failed to delete reply:", error);
     }
   };
 
@@ -135,10 +213,12 @@ export const CommentsContainer = ({
     <>
       <button
         onClick={handleOpenComments}
-        className="flex items-center text-xl"
+        className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
       >
-        <MessageSquare className="h-6 w-6 mr-1" />
-        {commentsCount}
+        <MessageSquare className="h-5 w-5" />
+        <span className="text-sm">
+          {commentsCount > 0 ? `${commentsCount} Comments` : "Comment"}
+        </span>
       </button>
 
       <CommentsModal
@@ -153,10 +233,11 @@ export const CommentsContainer = ({
         onLikeReply={handleLikeReply}
         onDeleteComment={handleDeleteComment}
         onEditComment={handleEditComment}
-        isLoading={isLoading || isAddingComment || isAddingReply}
+        onEditReply={handleEditReply}
+        onDeleteReply={handleDeleteReply}
+        isLoading={isLoading}
+        isCommenting={isAddingComment || isAddingReply}
       />
     </>
   );
 };
-
-export default CommentsContainer;

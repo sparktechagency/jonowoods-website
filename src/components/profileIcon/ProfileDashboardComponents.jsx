@@ -10,7 +10,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Clock, Flame, Calendar, DollarSign } from "lucide-react";
+import {
+  Clock,
+  Flame,
+  Calendar,
+  DollarSign,
+  Crown,
+  CheckCircle,
+} from "lucide-react";
 import Image from "next/image";
 import {
   useMyProfileQuery,
@@ -18,10 +25,184 @@ import {
 } from "@/redux/featured/auth/authApi";
 import { getImageUrl } from "../share/imageUrl";
 import { toast } from "sonner";
+import { useRunningPackageQuery } from "@/redux/featured/Package/packageApi";
+
+// Subscription Card Component
+const SubscriptionCard = ({ packageData, userData }) => {
+  // Calculate days remaining from package data
+  const calculateDaysRemaining = () => {
+    if (!packageData?.currentPeriodEnd) return 0;
+
+    const expireDate = new Date(packageData.currentPeriodEnd);
+    const today = new Date();
+    const diffTime = expireDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  // Format expiration date from package data
+  const formatExpirationDate = () => {
+    if (!packageData?.currentPeriodEnd) return "N/A";
+
+    const expireDate = new Date(packageData.currentPeriodEnd);
+    return expireDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Format start date
+  const formatStartDate = () => {
+    if (!packageData?.currentPeriodStart) return "N/A";
+
+    const startDate = new Date(packageData.currentPeriodStart);
+    return startDate.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const isActive = packageData?.status === "active";
+  const packageTitle = packageData?.package?.title || "No Package";
+  const packageDuration = packageData?.package?.duration || "";
+  const packagePrice = packageData?.price || 0;
+
+  return (
+    <Card className="mb-6 overflow-hidden">
+      <CardContent className="pt-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div
+              className={`${isActive ? "text-yellow-500" : "text-gray-400"}`}
+            >
+              {packageTitle === "Gold" ? (
+                <Crown size={28} />
+              ) : (
+                <DollarSign size={28} />
+              )}
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg">
+                {userData?.isFreeTrial ? "Free Trial Period" : packageTitle}
+              </h3>
+              {packageDuration && (
+                <p className="text-sm text-gray-600">{packageDuration} plan</p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <CheckCircle
+              size={20}
+              className={`${isActive ? "text-green-500" : "text-gray-400"}`}
+            />
+            <span
+              className={`text-sm font-medium ${
+                isActive ? "text-green-600" : "text-gray-500"
+              }`}
+            >
+              {isActive ? "Active" : "Inactive"}
+            </span>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Days Remaining Section */}
+          <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
+            <p className="text-5xl font-bold text-red-500 mb-2">
+              {calculateDaysRemaining()}
+            </p>
+            <p className="text-lg font-medium text-gray-700 mb-4">
+              Days Remaining
+            </p>
+
+            <div className="flex items-center gap-2 text-gray-600">
+              <Calendar size={18} />
+              <p className="text-sm">Expires: {formatExpirationDate()}</p>
+            </div>
+          </div>
+
+          {/* Package Details Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-600">
+                Package Price
+              </span>
+              <span className="text-lg font-bold text-gray-800">
+                ${packagePrice}
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-600">
+                Started On
+              </span>
+              <span className="text-sm text-gray-700">{formatStartDate()}</span>
+            </div>
+
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <span className="text-sm font-medium text-gray-600">
+                Customer ID
+              </span>
+              <span className="text-sm text-gray-700 font-mono">
+                {packageData?.customerId?.slice(-8) || "N/A"}
+              </span>
+            </div>
+
+            <Button
+              className="w-full mt-4 py-5 text-white font-medium "
+              onClick={() => (window.location.href = "/subscription-package")}
+            >
+              Extend Subscription
+            </Button>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        {/* {packageData?.currentPeriodStart && packageData?.currentPeriodEnd && (
+          <div className="mt-6">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>Subscription Progress</span>
+              <span>
+                {Math.round(
+                  ((new Date() - new Date(packageData.currentPeriodStart)) /
+                    (new Date(packageData.currentPeriodEnd) -
+                      new Date(packageData.currentPeriodStart))) *
+                    100
+                )}
+                %
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-gradient-to-r from-red-500 to-red-600 h-2 rounded-full transition-all duration-500"
+                style={{
+                  width: `${Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      ((new Date() - new Date(packageData.currentPeriodStart)) /
+                        (new Date(packageData.currentPeriodEnd) -
+                          new Date(packageData.currentPeriodStart))) *
+                        100
+                    )
+                  )}%`,
+                }}
+              />
+            </div>
+          </div>
+        )} */}
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function ProfileDashboardComponents() {
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null); // preview URL state
+  const [imagePreview, setImagePreview] = useState(null);
   const { data: userData, isLoading } = useMyProfileQuery();
   const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
   const [open, setOpen] = useState(false);
@@ -32,6 +213,9 @@ export default function ProfileDashboardComponents() {
     address: "",
   });
 
+  const { data: packageResponse } = useRunningPackageQuery();
+  const packageData = packageResponse?.data;
+
   useEffect(() => {
     if (userData) {
       setFormData({
@@ -40,18 +224,16 @@ export default function ProfileDashboardComponents() {
         phone: userData.phone || "",
         address: userData.address || "",
       });
-      setImagePreview(getImageUrl(userData.image)); // initial preview to current user image
+      setImagePreview(getImageUrl(userData.image));
     }
   }, [userData]);
 
-  // Create preview URL when imageFile changes
   useEffect(() => {
     if (!imageFile) return;
 
     const previewUrl = URL.createObjectURL(imageFile);
     setImagePreview(previewUrl);
 
-    // Cleanup preview URL to avoid memory leaks
     return () => URL.revokeObjectURL(previewUrl);
   }, [imageFile]);
 
@@ -99,29 +281,6 @@ export default function ProfileDashboardComponents() {
     }
   };
 
-  // Calculate days remaining in trial
-  const calculateDaysRemaining = () => {
-    if (!userData?.trialExpireAt) return 0;
-
-    const expireDate = new Date(userData.trialExpireAt);
-    const today = new Date();
-    const diffTime = expireDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
-
-  // Format expiration date nicely
-  const formatExpirationDate = () => {
-    if (!userData?.trialExpireAt) return "N/A";
-
-    const expireDate = new Date(userData.trialExpireAt);
-    return expireDate.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   if (isLoading)
     return (
       <div className="flex justify-center items-center h-60">Loading...</div>
@@ -162,7 +321,6 @@ export default function ProfileDashboardComponents() {
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Image Preview */}
               {imagePreview && (
                 <div className="flex justify-center mb-4">
                   <img
@@ -173,7 +331,6 @@ export default function ProfileDashboardComponents() {
                 </div>
               )}
 
-              {/* Profile Image Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Profile Image
@@ -187,7 +344,6 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Name Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">Name</label>
                 <Input
@@ -200,7 +356,6 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Email Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <Input
@@ -213,7 +368,6 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Phone Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">Phone</label>
                 <Input
@@ -226,7 +380,6 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Address Input */}
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Address
@@ -241,12 +394,7 @@ export default function ProfileDashboardComponents() {
                 />
               </div>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full bg-red-500 hover:bg-red-600 py-6"
-                disabled={updating}
-              >
+              <Button type="submit" className="w-full py-6" disabled={updating}>
                 {updating ? "Updating..." : "Update Profile"}
               </Button>
             </form>
@@ -299,32 +447,8 @@ export default function ProfileDashboardComponents() {
         </Card>
       </div>
 
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="text-red-500">
-              <DollarSign size={24} />
-            </div>
-            <h3 className="font-medium">
-              {userData?.isFreeTrial
-                ? "Free Trial Period"
-                : userData?.packageName || "No Active Plan"}
-            </h3>
-          </div>
-
-          <div className="flex flex-col items-center justify-center py-4">
-            <p className="text-6xl font-bold text-red-500 mb-4">
-              {calculateDaysRemaining()}
-            </p>
-            <p className="text-xl mb-4">Days Remaining</p>
-
-            <div className="flex items-center gap-2">
-              <Calendar className="text-gray-700" size={20} />
-              <p className="text-lg">Expires On {formatExpirationDate()}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Use the new Subscription Card Component */}
+      <SubscriptionCard packageData={packageData} userData={userData} />
     </div>
   );
 }

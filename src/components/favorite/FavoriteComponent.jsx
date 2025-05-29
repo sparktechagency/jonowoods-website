@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Heart, Download, X } from "lucide-react";
 import { useFavouriteVideoListQuery } from "@/redux/featured/favouriteVideo/favouriteVideoApi";
 import { getImageUrl, getVideoAndThumbnail } from "../share/imageUrl";
+import Image from "next/image";
 
 export default function FavoriteComponents() {
   const { data } = useFavouriteVideoListQuery();
@@ -48,10 +49,12 @@ export default function FavoriteComponents() {
                 className="bg-white rounded-lg overflow-hidden shadow flex flex-col md:flex-row"
               >
                 {/* Left Side - Thumbnail */}
-                <div className="w-full md:w-1/3 h-56 sm:h-64 md:h-auto relative">
-                  <img
+                <div className="w-full md:w-1/3 h-56 sm:h-64 md:h-80 relative">
+                  <Image
                     src={getVideoAndThumbnail(favorite.videoId.thumbnailUrl)}
                     alt={favorite.videoId.title}
+                    height={200}
+                    width={300}
                     className="w-full h-full object-cover"
                   />
                 </div>

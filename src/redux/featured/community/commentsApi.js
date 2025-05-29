@@ -73,7 +73,7 @@ export const commentsApi = api.injectEndpoints({
     // Like a reply
     likeReply: builder.mutation({
       query: (replyId) => ({
-        url: `/comments/reply/like/${replyId}`,
+        url: `/comments/like/${replyId}`,
         method: "POST",
       }),
       invalidatesTags: (result, error, replyId) => [
@@ -92,6 +92,29 @@ export const commentsApi = api.injectEndpoints({
         { type: "Comments", id: "LIST" },
       ],
     }),
+
+    // Update a comment
+    updateReply: builder.mutation({
+      query: ({ replyId, data }) => ({
+        url: `/comments/edit/${replyId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { replyId }) => [
+        { type: "Comments", id: replyId },
+      ],
+    }),
+
+    // Delete a comment
+    deleteReply: builder.mutation({
+      query: (replyId) => ({
+        url: `/comments/delete/${replyId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, replyId) => [
+        { type: "Comments", id: replyId },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -105,4 +128,6 @@ export const {
   useAddReplyMutation,
   useLikeReplyMutation,
   useReplyToReplyMutation,
+  useDeleteReplyMutation,
+  useUpdateReplyMutation
 } = commentsApi;
