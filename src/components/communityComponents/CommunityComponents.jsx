@@ -28,7 +28,10 @@ export default function CommunityComponents() {
     isLoading,
     isError,
     refetch,
-  } = useGetAllPostQuery([{ name: "page", value: currentPage }]);
+  } = useGetAllPostQuery([
+    { name: "page", value: currentPage },
+    { name: "limit", value: 10 },
+  ]);
 
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation();
 
@@ -41,7 +44,7 @@ export default function CommunityComponents() {
 
   const pagination = apiResponse?.data?.meta || {
     page: 1,
-    limit: 10,
+    limit: 2,
     total: 0,
     totalPage: 1,
   };

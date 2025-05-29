@@ -81,8 +81,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
               onClick={() => onPageChange(pageNum)}
               className={`px-3 py-2 text-sm font-medium border ${
                 currentPage === pageNum
-                  ? "bg-[#a92c2c] text-red-50 border-red-300 hover:bg-[FF0000]"
-                  : "text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                  ? "bg-[#ca3939] text-red-50 rounded-full border-red-300 hover:bg-[FF0000]"
+                  : "text-gray-500 bg-white rounded-full border-gray-300 hover:bg-gray-100 hover:text-gray-700"
               }`}
             >
               {pageNum}

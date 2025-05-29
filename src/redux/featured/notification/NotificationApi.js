@@ -4,9 +4,9 @@ import { api } from "@/redux/baseUrl/baseUrl";
 const notificationSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     getNotification: builder.query({
-      query: () => {
+      query: ({ page = 1, limit = 10 } = {}) => {
         return {
-          url: `/notifications`,
+          url: `/notifications?page=${page}&limit=${limit}`,
           method: "GET",
         };
       },
@@ -14,7 +14,7 @@ const notificationSlice = api.injectEndpoints({
     readOneNotification: builder.mutation({
       query: (id) => {
         return {
-          url: `/notifications/admin/single/${id}`,
+          url: `/notifications/single/${id}`,
           method: "PATCH",
         };
       },
