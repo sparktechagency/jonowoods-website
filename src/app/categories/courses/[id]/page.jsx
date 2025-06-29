@@ -1,58 +1,77 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useSubCategoryVideoQuery } from '../../../../redux/featured/homeApi.jsx/homeApi';
 import Spinner from '../../../(commonLayout)/Spinner';
+import { useMarkVideoWatchedMutation, useSubCategoryVideoQuery } from '../../../../redux/featured/homeApi.jsx/homeApi';
 
 export default function CoursePage({ params }) {
+
+
   const { id } = React.use(params);
   const { data: course, isLoading: courseLoading } = useSubCategoryVideoQuery(id, { skip: !id });
+
   const [completedVideos, setCompletedVideos] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(0);
   const [videos, setVideos] = useState([]);
+  const [markVideoWatched, { isLoading }] = useMarkVideoWatchedMutation();
+  const [accessibleVideos, setAccessibleVideos] = useState([]);
 
-  // Initialize videos and sort by serial number
+  // Initialize videos, completed videos, and accessible videos
   useEffect(() => {
     if (course?.data?.result) {
       const sortedVideos = [...course.data.result].sort((a, b) => a.serial - b.serial);
       setVideos(sortedVideos);
+
+      // Find all completed videos
+      const completed = sortedVideos
+        .filter(video => video.isVideoCompleted)
+        .map(video => video._id);
+      setCompletedVideos(completed);
+
+      // Determine accessible videos
+      const accessible = [];
+      for (let i = 0; i < sortedVideos.length; i++) {
+        if (i === 0 || sortedVideos[i - 1].isVideoCompleted) {
+          accessible.push(i);
+        } else {
+          break; // Stop at the first locked video
+        }
+      }
+      setAccessibleVideos(accessible);
+
+      // Set current video to first accessible video if current is out of bounds
+      if (!accessible.includes(currentVideo)) {
+        setCurrentVideo(accessible[0] || 0);
+      }
     }
   }, [course]);
 
-  const markVideoAsCompleted = (videoId) => {
-    if (!completedVideos.includes(videoId)) {
-      const newCompletedVideos = [...completedVideos, videoId];
-      setCompletedVideos(newCompletedVideos);
+  const markVideoAsCompleted = async (videoId) => {
+    try {
+      const response = await markVideoWatched(videoId).unwrap();
+      if (response.success) {
+        // Update completed videos
+        setCompletedVideos(prev => [...prev, videoId]);
 
-      // Save to localStorage for persistence
-      localStorage.setItem(`completedVideos-${id}`, JSON.stringify(newCompletedVideos));
+        // Unlock next video if available
+        const currentIndex = videos.findIndex(v => v._id === videoId);
+        if (currentIndex < videos.length - 1 && !accessibleVideos.includes(currentIndex + 1)) {
+          setAccessibleVideos(prev => [...prev, currentIndex + 1]);
+        }
+      }
+    } catch (error) {
+      console.error("Error marking video as watched:", error);
     }
   };
 
-  // Load completed videos from localStorage on component mount
-  useEffect(() => {
-    const savedCompletedVideos = localStorage.getItem(`completedVideos-${id}`);
-    if (savedCompletedVideos) {
-      setCompletedVideos(JSON.parse(savedCompletedVideos));
-    }
-  }, [id]);
-
   const isVideoAccessible = (videoIndex) => {
-    // First video is always accessible
-    if (videoIndex === 0) return true;
-
-    // Video is accessible if the previous one is completed
-    const previousVideo = videos[videoIndex - 1];
-    return previousVideo && completedVideos.includes(previousVideo._id);
+    return accessibleVideos.includes(videoIndex);
   };
 
   const handleVideoEnd = () => {
     const currentVideoData = videos[currentVideo];
-    markVideoAsCompleted(currentVideoData._id);
-
-    // Auto-play next video if available and accessible
-    if (currentVideo < videos.length - 1 && isVideoAccessible(currentVideo + 1)) {
-      setCurrentVideo(currentVideo + 1);
+    if (currentVideoData && !completedVideos.includes(currentVideoData._id)) {
+      markVideoAsCompleted(currentVideoData._id);
     }
   };
 
@@ -119,8 +138,7 @@ export default function CoursePage({ params }) {
               className={`relative rounded-lg overflow-hidden transition-all duration-200 ${isAccessible
                 ? 'cursor-pointer hover:shadow-lg hover:scale-[1.02]'
                 : 'opacity-70 cursor-not-allowed'
-                } ${isCurrent ? 'ring-4 ring-blue-500' : ''
-                }`}
+                } ${isCurrent ? 'ring-4 ring-blue-500' : ''}`}
             >
               <div className="relative">
                 <img
@@ -153,7 +171,7 @@ export default function CoursePage({ params }) {
                 )}
 
                 {/* Completion checkmark */}
-                {isCompleted && (
+                {(isCompleted || video.isVideoCompleted) && (
                   <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

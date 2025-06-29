@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 const ClassSilder = ({ data }) => {
-  console.log(data)
   const router = useRouter();
 
   const [currentSlide, setCurrentSlide] = useState(0);

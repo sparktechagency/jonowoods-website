@@ -59,6 +59,16 @@ const homeSlice = api.injectEndpoints({
       },
     }),
 
+    markVideoWatched: builder.mutation({
+      query: (id) => {
+        return {
+          method: "POST",
+          url: `/videos/mark-video-watched/${id}`,
+        };
+      },
+    }),
+
+
     singleSubcategory: builder.query({
       query: (id) => {
         return {
@@ -92,5 +102,6 @@ export const {
   useCategoryVideoQuery,
   useSubCategoryVideoQuery,
   useSingleSubcategoryQuery,
-  useSingleVidoeQuery
+  useSingleVidoeQuery,
+  useMarkVideoWatchedMutation
 } = homeSlice;
