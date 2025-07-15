@@ -5,9 +5,10 @@ const nextConfig = {
       "cdn.pixabay.com",
       "images.unsplash.com",
       "i.ibb.co.",
-      "10.0.60.126",
-      "http://10.0.60.126:7000",
-      "rakib.b-cdn.net"
+      "10.10.7.37",
+      "http://10.10.7.37:7000",
+      "rakib.b-cdn.net",
+       "10.0.60.126"
     ],
   },
   safelist: ["lg:grid-cols-3", "lg:grid-cols-4"],

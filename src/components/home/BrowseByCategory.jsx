@@ -9,6 +9,10 @@ export default function BrowseByCategory({
   onSeeMore,
   linkPath,
 }) {
+  console.log(classes);
+  console.log(title);
+  console.log(linkPath);
+  console.log(onSeeMore);
   return (
     <section className="mb-10 mx-3">
       <div className="flex justify-between items-center mb-4">

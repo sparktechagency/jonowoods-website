@@ -34,7 +34,7 @@ export default function UserCreate() {
       const email = encodeURIComponent(data.email);
 
       // Here we're setting a verification type parameter so OTP page knows this is for account creation
-      router.push(`/otp-verify?email=${email}&type=registration`);
+      router.push(`/login`);
 
       // You might want to show a success message before redirecting
       setRegistrationStatus("Account created! Please verify your email.");

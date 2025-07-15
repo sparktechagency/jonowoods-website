@@ -9,7 +9,8 @@ import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
 export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   const router = useRouter();
   const { data, isLoading } = useGetCategoryQuery();
-
+  console.log(data);
+  
 
   return (
     <section className="mb-10 mx-3">

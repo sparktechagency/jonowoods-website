@@ -12,7 +12,7 @@ const commignSoonSlice = api.injectEndpoints({
       },
     }),
 
-    comingSoonLetestVideo: builder.query({
+    comingSoonLatestVideo: builder.query({
       query: () => {
         return {
           method: "GET",
@@ -65,7 +65,7 @@ const commignSoonSlice = api.injectEndpoints({
 
 export const {
   useQuotationQuery,
-  useComingSoonLetestVideoQuery,
+  useComingSoonLatestVideoQuery,
   useInspirationLetestVideoQuery,
   useTodayLetestVideoQuery,
   useChallengeVideoQuery,
