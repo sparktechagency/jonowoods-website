@@ -21,11 +21,11 @@ const commignSoonSlice = api.injectEndpoints({
       },
     }),
 
-    inspirationLetestVideo: builder.query({
+    inspirationLatestVideo: builder.query({
       query: () => {
         return {
           method: "GET",
-          url: "/comingSoon/latest",
+          url: "/dailyInspiration/letest",
         };
       },
     }),
@@ -43,7 +43,7 @@ const commignSoonSlice = api.injectEndpoints({
       query: () => {
         return {
           method: "GET",
-          url: "/challenge/letest",
+          url: "/admin/challenge-category/get-all-challenge-category-for-user",
         };
       },
       overrideExisting: true,
@@ -53,12 +53,20 @@ const commignSoonSlice = api.injectEndpoints({
       query: (id) => {
         return {
           method: "GET",
-          url: `/challenge/single/${id}`,
+          url: `/challenge/get-challenges-videos-for-users/${id}`,
         };
       },
       overrideExisting: true,
     }),
-
+    
+    markWatchChallengeVideo: builder.mutation({
+      query: (id) => {
+        return {
+          method: "POST",
+          url: `/challenge/mark-video-watched/${id}`,
+        };
+      },
+    }),
 
   }),
 });
@@ -66,8 +74,9 @@ const commignSoonSlice = api.injectEndpoints({
 export const {
   useQuotationQuery,
   useComingSoonLatestVideoQuery,
-  useInspirationLetestVideoQuery,
+  useInspirationLatestVideoQuery,
   useTodayLetestVideoQuery,
   useChallengeVideoQuery,
-  useSingleChallengeVideoQuery
+  useSingleChallengeVideoQuery,
+  useMarkWatchChallengeVideoMutation
 } = commignSoonSlice;

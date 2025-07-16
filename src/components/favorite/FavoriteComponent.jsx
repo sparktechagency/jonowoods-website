@@ -23,6 +23,8 @@ export default function FavoriteComponents() {
   const favouriteVideos = data?.data?.favouritList || [];
   const pagination = data?.data?.meta || {};
 
+  console.log(favouriteVideos)
+
   const toggleLike = async (id) => {
     try {
       setErrorMessage('');

@@ -15,6 +15,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Badge } from "../ui/badge";
 
 const SubscriptionPageComponent = () => {
   const router = useRouter();
@@ -22,6 +23,7 @@ const SubscriptionPageComponent = () => {
   const [checkoutForSubscription, { isLoading: isCheckoutLoading }] =
     useCheckoutForSubscriptionMutation();
   const [selectedPlan, setSelectedPlan] = useState("");
+  console.log(data);
 
   // Filter packages to show only web subscription types
   const webPackages = React.useMemo(() => {
@@ -93,7 +95,6 @@ const SubscriptionPageComponent = () => {
                 meditations and courses.
               </p>
             </div>
-
             <Card className="p-6">
               <CardContent className="p-0">
                 <RadioGroup
@@ -104,7 +105,7 @@ const SubscriptionPageComponent = () => {
                   {webPackages.map((pkg, index) => (
                     <div
                       key={pkg._id}
-                      className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                      className="flex items-center  space-x-3 p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <RadioGroupItem
                         value={pkg._id}
@@ -115,23 +116,47 @@ const SubscriptionPageComponent = () => {
                         htmlFor={pkg._id}
                         className="flex-1 cursor-pointer"
                       >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {pkg.title}
-                            </h3>
-
+                        <div className="flex justify-between items-center lg:gap-10 xl:gap-16">
+                          <div className="">
+                            <div className="flex justify-between items-center gap-2">
+                              <h3 className="font-semibold text-gray-900">
+                                {pkg.title}
+                              </h3>
+                              {pkg.discount > 0 && (
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
+                                  {pkg.discount}% OFF
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-xs text-gray-500 mt-1">
                               {pkg.description}
                             </p>
                           </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-gray-900">
-                              ${pkg.price}
+
+
+
+                          <div className="text-">
+                            <div className="flex items-center gap-2">
+                              {pkg.discount > 0 && (
+                                <span className="text-lg text-gray-400 line-through">
+                                  ${pkg.originalPrice}
+                                </span>
+                              )}
+                              <div className="text-2xl font-bold text-gray-900">
+                                ${pkg.price}
+                              </div>
                             </div>
                             <div className="text-sm text-gray-500">
                               per {pkg.duration}
                             </div>
+                            {pkg.discount > 0 && (
+                              <div className="text-xs text-green-600 font-medium">
+                                Save ${pkg.originalPrice - pkg.price}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </Label>

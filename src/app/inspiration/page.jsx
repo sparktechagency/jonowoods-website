@@ -2,11 +2,11 @@
 
 import Spinner from "../(commonLayout)/Spinner";
 import VideoPlayer from "../../components/VideoPlayer";
-import { useInspirationLetestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
+import { useInspirationLatestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 
 
 const page = () => {
-  const { data, isLoading } = useInspirationLetestVideoQuery();
+  const { data, isLoading } = useInspirationLatestVideoQuery();
   return (
     <div>
       {

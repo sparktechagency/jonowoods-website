@@ -4,13 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
-import { getVideoAndThumbnail } from "../share/imageUrl";
+import { getImageUrl, getVideoAndThumbnail } from "../share/imageUrl";
 import Spinner from "../../app/(commonLayout)/Spinner";
-
 
 export default function NewClasses() {
   const router = useRouter();
   const { data, isLoading } = useChallengeVideoQuery();
+  console.log(data);
 
   if (isLoading) return <Spinner />;
 
@@ -29,7 +29,7 @@ export default function NewClasses() {
             <Link href={`/challenge/${yogaClass._id}`}>
               <div className="relative w-full h-full">
                 <Image
-                  src={getVideoAndThumbnail(yogaClass.thumbnailUrl)}
+                  src={getImageUrl(yogaClass.image)}
                   alt={yogaClass.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -42,9 +42,14 @@ export default function NewClasses() {
                       "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
                   }}
                 />
-                <div className="absolute inset-0 flex items-end p-4">
-                  <h3 className="text-white font-medium text-lg">
-                    {yogaClass.title}
+                {/* Hover effect for the title with animation */}
+                <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
+                  <h3
+                    className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide drop-shadow-lg 
+                         opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0 
+                         transition-all duration-900 ease-out"
+                  >
+                    {yogaClass.name}
                   </h3>
                 </div>
               </div>
@@ -53,7 +58,11 @@ export default function NewClasses() {
         ))}
       </div>
       <div className="flex justify-end">
-        <Button onClick={() => router.push("/challenge")} variant="link" className="text-rose-500 cursor-pointer hover:text-rose-600">
+        <Button
+          onClick={() => router.push("/challenge")}
+          variant="link"
+          className="text-rose-500 cursor-pointer hover:text-rose-600"
+        >
           See More
         </Button>
       </div>

@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { baseUrlApi } from "../../redux/baseUrl/baseUrlApi";
 import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
+import { getImageUrl } from "../share/imageUrl";
 
 export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   const router = useRouter();
   const { data, isLoading } = useGetCategoryQuery();
   console.log(data);
-  
+
 
   return (
     <section className="mb-10 mx-3">
@@ -28,7 +29,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
               <div className="relative w-full h-full">
                 {/* Image displayed on top */}
                 <Image
-                  src={`${baseUrlApi}${yogaClass.thumbnail}`}
+                  src={getImageUrl(yogaClass?.thumbnail)}
                   alt={yogaClass.name}
                   layout="fill"
                   objectFit="cover"

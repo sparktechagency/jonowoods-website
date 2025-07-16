@@ -2,11 +2,11 @@
 
 import Spinner from "../(commonLayout)/Spinner";
 import VideoPlayer from "../../components/VideoPlayer";
-import { useComingSoonLetestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
+import { useComingSoonLatestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 
 
 const page = () => {
-  const { data, isLoading } = useComingSoonLetestVideoQuery();
+  const { data, isLoading } = useComingSoonLatestVideoQuery();
   return (
     <div>
       {

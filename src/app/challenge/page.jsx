@@ -2,7 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getVideoAndThumbnail } from "../../components/share/imageUrl";
+import { getImageUrl, getVideoAndThumbnail } from "../../components/share/imageUrl";
 import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 import Spinner from "../(commonLayout)/Spinner";
 
@@ -27,7 +27,7 @@ export default function page() {
             <Link href={`/challenge/${yogaClass._id}`}>
               <div className="relative w-full h-full">
                 <Image
-                  src={getVideoAndThumbnail(yogaClass.thumbnailUrl)}
+                  src={getImageUrl(yogaClass?.image)}
                   alt={yogaClass.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
