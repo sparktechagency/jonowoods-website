@@ -1,12 +1,14 @@
 import OTPVerify from "@/components/auth/OTPVerify";
-import React from "react";
+import React, { Suspense } from "react";
 
-const page = () => {
+const OTPVerifyPage = () => {
   return (
     <div>
-      <OTPVerify />
+      <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+        <OTPVerify />
+      </Suspense>
     </div>
   );
 };
 
-export default page;
+export default OTPVerifyPage;

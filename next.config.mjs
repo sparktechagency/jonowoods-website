@@ -12,7 +12,6 @@ const nextConfig = {
        "yoga-app.b-cdn.net"
     ],
   },
-  safelist: ["lg:grid-cols-3", "lg:grid-cols-4"],
 };
 
 export default nextConfig;

@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "src/redux/featured/auth/authSlice";
+// Removing circular import
+// import { useEffect } from "react";
+// import { useDispatch } from "react-redux";
+// import { loginSuccess } from "src/redux/featured/auth/authSlice";
 
 const initialState = {
   user: null,
