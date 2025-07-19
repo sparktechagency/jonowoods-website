@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Image from "next/image";
+import { getImageUrl } from "../share/imageUrl";
 
 export default function ProfileWithEditModal() {
   // State for user data
@@ -68,7 +69,7 @@ export default function ProfileWithEditModal() {
           <div className="mb-4">
             {user && (
               <Image
-                src={user.profilePicture}
+                src={getImageUrl(user?.profilePicture)}
                 alt="Profile"
                 height={120}
                 width={120}

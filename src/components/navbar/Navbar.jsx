@@ -49,11 +49,16 @@ export default function Navbar() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalNotifications, setTotalNotifications] = useState(0);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
   const socketRef = useRef(null);
   const profileRef = useRef(null);
+  const reconnectTimeoutRef = useRef(null);
 
   // Constants
   const NOTIFICATIONS_PER_PAGE = 30;
+  const MAX_RECONNECTION_ATTEMPTS = 5;
+  const RECONNECTION_DELAY = 3000; // 3 seconds
 
   // Redux queries and mutations
   const { data: userData } = useMyProfileQuery();
@@ -72,46 +77,128 @@ export default function Navbar() {
   // Calculate unread count from API response
   const unreadCount = notificationData?.data?.result?.unreadCount || 0;
 
-  // Socket.IO setup for real-time notifications
+  // Improved Socket.IO setup with better error handling and reconnection
   useEffect(() => {
     if (!userData?._id) return;
 
-    // Initialize socket connection
-    socketRef.current = io(
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://69.62.67.86:7000"
-    );
-
-    const handleNewNotification = () => {
-      refetch();
-    };
-
-    socketRef.current.on("connect", () => {
-      console.log("Socket connected");
-    });
-
-    socketRef.current.on(
-      `notification::${userData._id}`,
-      handleNewNotification
-    );
-
-    socketRef.current.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
-
-    socketRef.current.on("connect_error", (err) => {
-      console.error("Socket connection error:", err);
-    });
-
-    return () => {
+    const connectSocket = () => {
+      // Clean up existing connection
       if (socketRef.current) {
-        socketRef.current.off(
-          `notification::${userData._id}`,
-          handleNewNotification
-        );
         socketRef.current.disconnect();
+        socketRef.current = null;
       }
+
+      // Initialize socket connection with improved configuration
+      socketRef.current = io(
+        process.env.NEXT_PUBLIC_SOCKET_URL || "http://69.62.67.86:7000",
+        {
+          transports: ['websocket', 'polling'], // Fallback to polling if websocket fails
+          upgrade: true,
+          rememberUpgrade: true,
+          timeout: 20000, // Connection timeout
+          reconnection: true,
+          reconnectionAttempts: MAX_RECONNECTION_ATTEMPTS,
+          reconnectionDelay: RECONNECTION_DELAY,
+          reconnectionDelayMax: 10000,
+          forceNew: true, // Force a new connection
+          autoConnect: true,
+          query: {
+            userId: userData._id 
+          }
+        }
+      );
+
+      const handleNewNotification = () => {
+        console.log("New notification received");
+        refetch();
+      };
+
+      // Connection event handlers
+      socketRef.current.on("connect", () => {
+        console.log("Socket connected successfully");
+        setIsSocketConnected(true);
+        setConnectionAttempts(0);
+        
+        // Join user-specific room
+        socketRef.current.emit('join-user-room', userData._id);
+      });
+
+      socketRef.current.on("disconnect", (reason) => {
+        console.log("Socket disconnected:", reason);
+        setIsSocketConnected(false);
+        
+        // Don't attempt to reconnect if it was intentional
+        if (reason === "io client disconnect") return;
+        
+        // Handle automatic reconnection for other disconnect reasons
+        if (connectionAttempts < MAX_RECONNECTION_ATTEMPTS) {
+          setConnectionAttempts(prev => prev + 1);
+          console.log(`Attempting to reconnect... (${connectionAttempts + 1}/${MAX_RECONNECTION_ATTEMPTS})`);
+        }
+      });
+
+      socketRef.current.on("connect_error", (error) => {
+        console.error("Socket connection error:", error.message);
+        setIsSocketConnected(false);
+        
+        // Implement exponential backoff for reconnection
+        if (connectionAttempts < MAX_RECONNECTION_ATTEMPTS) {
+          const delay = RECONNECTION_DELAY * Math.pow(2, connectionAttempts);
+          console.log(`Retrying connection in ${delay / 1000} seconds...`);
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            setConnectionAttempts(prev => prev + 1);
+            connectSocket();
+          }, delay);
+        } else {
+          console.error("Max reconnection attempts reached. Please refresh the page.");
+        }
+      });
+
+      socketRef.current.on("reconnect", (attemptNumber) => {
+        console.log(`Reconnected after ${attemptNumber} attempts`);
+        setIsSocketConnected(true);
+        setConnectionAttempts(0);
+      });
+
+      socketRef.current.on("reconnect_error", (error) => {
+        console.error("Reconnection error:", error.message);
+      });
+
+      socketRef.current.on("reconnect_failed", () => {
+        console.error("Failed to reconnect after maximum attempts");
+        setIsSocketConnected(false);
+      });
+
+      // Listen for notifications
+      socketRef.current.on(
+        `notification::${userData._id}`,
+        handleNewNotification
+      );
+
+      // Listen for general notification events
+      socketRef.current.on("new-notification", handleNewNotification);
     };
-  }, [userData?._id, refetch]);
+
+    // Initial connection
+    connectSocket();
+
+    // Cleanup function
+    return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      
+      if (socketRef.current) {
+        socketRef.current.off(`notification::${userData._id}`);
+        socketRef.current.off("new-notification");
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      
+      setIsSocketConnected(false);
+    };
+  }, [userData?._id, refetch, connectionAttempts]);
 
   // Update notifications state when data changes
   useEffect(() => {
@@ -173,10 +260,23 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
+    // Disconnect socket before logout
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+    
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     setIsProfileOpen(false);
     window.location.href = "/login";
+  };
+
+  // Manual reconnection function
+  const handleManualReconnect = () => {
+    if (userData?._id) {
+      setConnectionAttempts(0);
+      connectSocket();
+    }
   };
 
   // Navigation items
@@ -235,7 +335,7 @@ export default function Navbar() {
             href="/"
             className="flex items-center space-x-2 text-lg font-bold"
           >
-            <Image src="/assests/logo.png" alt="Logo" width={100} height={100}   className="w-16 h-10" />
+            <Image src="/assests/logo.png" alt="Logo" width={100} height={100} className="w-16 h-10" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -258,6 +358,22 @@ export default function Navbar() {
 
           {/* User Controls */}
           <div className="flex items-center space-x-4">
+            {/* Connection Status Indicator */}
+            {userData?._id && (
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                {!isSocketConnected && connectionAttempts >= MAX_RECONNECTION_ATTEMPTS && (
+                  <button
+                    onClick={handleManualReconnect}
+                    className="text-xs text-red-600 hover:text-red-800 underline"
+                    title="Click to reconnect"
+                  >
+                    Reconnect
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Notification Button */}
             <div className="relative">
               <button
@@ -274,7 +390,7 @@ export default function Navbar() {
               </button>
             </div>
 
-            {/* Profile Dropdown - Updated Design */}
+            {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>
               <button
                 className="relative flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
@@ -298,12 +414,12 @@ export default function Navbar() {
                     />
                   )}
                   {/* Online indicator */}
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                 </div>
 
                 {/* User info - hidden on mobile */}
                 <div className="hidden lg:block text-left">
-                  <p className="text-sm  text-gray-900">
+                  <p className="text-sm text-gray-900">
                     {userData?.name || "User"}
                   </p>
                   <p className="text-xs text-gray-500">
@@ -318,11 +434,11 @@ export default function Navbar() {
                 />
               </button>
 
-              {/* Profile Modal - Updated Design */}
+              {/* Profile Modal */}
               {isProfileOpen && (
                 <div className="absolute right-0 mt-3 w-72 bg-white border border-gray-200 shadow-xl rounded-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
                   {/* Header */}
-                  <div className="p-4 bg-primary  border-gray-100">
+                  <div className="p-4 bg-primary border-gray-100">
                     <div className="flex items-center space-x-3">
                       {userData?.image ? (
                         <Image
@@ -336,11 +452,15 @@ export default function Navbar() {
                         <FaUserCircle size={48} className="text-gray-600" />
                       )}
                       <div>
-                        <h3 className=" text-white">
+                        <h3 className="text-white">
                           {userData?.name || "User"}
                         </h3>
                         <p className="text-sm text-white">
                           {userData?.email || "user@example.com"}
+                        </p>
+                        {/* Connection status */}
+                        <p className={`text-xs ${isSocketConnected ? 'text-green-200' : 'text-red-200'}`}>
+                          {isSocketConnected ? 'Online' : 'Offline'}
                         </p>
                       </div>
                     </div>
@@ -358,7 +478,7 @@ export default function Navbar() {
                         <item.icon
                           className={`w-5 h-5 ${item.color} group-hover:scale-110 transition-transform duration-150`}
                         />
-                        <span className="text-gray-700 group-hover:text-gray-900 ">
+                        <span className="text-gray-700 group-hover:text-gray-900">
                           {item.label}
                         </span>
                       </Link>
@@ -373,7 +493,7 @@ export default function Navbar() {
                       >
                         <div className="flex items-center space-x-3">
                           <FaCog className="w-5 h-5 text-gray-600 group-hover:text-blue-600 group-hover:rotate-90 transition-all duration-200" />
-                          <span className="text-gray-700 group-hover:text-gray-900 ">
+                          <span className="text-gray-700 group-hover:text-gray-900">
                             Settings
                           </span>
                         </div>
@@ -411,7 +531,7 @@ export default function Navbar() {
                         className="flex items-center space-x-3 px-4 py-3 w-full hover:bg-red-50 transition-colors duration-150 group"
                       >
                         <FaSignOutAlt className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform duration-150" />
-                        <span className="text-red-600 group-hover:text-red-700 ">
+                        <span className="text-red-600 group-hover:text-red-700">
                           Logout
                         </span>
                       </button>
