@@ -2,9 +2,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getImageUrl, getVideoAndThumbnail } from "../../components/share/imageUrl";
-import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
-import Spinner from "../(commonLayout)/Spinner";
+import { getImageUrl, getVideoAndThumbnail } from "../../../components/share/imageUrl";
+import { useChallengeVideoQuery } from "../../../redux/featured/CommingSoon/commingSoonApi";
+import Spinner from "../Spinner";
 
 export default function page() {
   const router = useRouter();
