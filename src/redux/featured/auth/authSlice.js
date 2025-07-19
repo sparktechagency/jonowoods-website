@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-const token =
-  typeof window !== "undefined" ? localStorage.getItem("token") : null;
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "src/redux/featured/auth/authSlice";
 
 const initialState = {
   user: null,
-  token: token || null,
-  isAuthenticated: !!token,
+  token: null, // Don't read from localStorage here!
+  isAuthenticated: false,
   loading: false,
   error: null,
 };

@@ -1,10 +1,10 @@
 import ProductDetails from '@/components/productDetails/ProductDetails'
 import React from 'react'
 
-const ProductDetailsPage = () => {
+const ProductDetailsPage = ({ params }) => {
   return (
     <div>
-      <ProductDetails />
+      <ProductDetails params={params} />
     </div>
   )
 }

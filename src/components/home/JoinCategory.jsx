@@ -57,7 +57,7 @@ export default function JoinChallengePage() {
             key={yogaClass.id}
             className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group"
           >
-            <Link href={`/challenge/${yogaClass.id}`}>
+            <Link href={`challenge/${yogaClass.id}`}>
               <div className="relative w-full h-full">
                 <Image
                   src={yogaClass.image}

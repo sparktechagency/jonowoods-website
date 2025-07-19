@@ -53,7 +53,7 @@ export default function HomePage() {
         title="Join a Challenge"
         classes={challengeClasses}
         onSeeMore={handleChallengeSeeMore}
-        linkPath="/challenge"
+        linkPath="challenge"
       />
     </div>
   );

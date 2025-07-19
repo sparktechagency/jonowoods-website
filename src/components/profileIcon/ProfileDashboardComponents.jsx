@@ -17,6 +17,8 @@ import {
   DollarSign,
   Crown,
   CheckCircle,
+  Upload,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -26,10 +28,10 @@ import {
 import { getImageUrl } from "../share/imageUrl";
 import { toast } from "sonner";
 import { useRunningPackageQuery } from "@/redux/featured/Package/packageApi";
+import Spinner from "../../app/(commonLayout)/Spinner";
 
 // Subscription Card Component
 const SubscriptionCard = ({ packageData, userData }) => {
-  // Calculate days remaining from package data
   const calculateDaysRemaining = () => {
     if (!packageData?.currentPeriodEnd) return 0;
 
@@ -40,7 +42,6 @@ const SubscriptionCard = ({ packageData, userData }) => {
     return diffDays > 0 ? diffDays : 0;
   };
 
-  // Format expiration date from package data
   const formatExpirationDate = () => {
     if (!packageData?.currentPeriodEnd) return "N/A";
 
@@ -52,7 +53,6 @@ const SubscriptionCard = ({ packageData, userData }) => {
     });
   };
 
-  // Format start date
   const formatStartDate = () => {
     if (!packageData?.currentPeriodStart) return "N/A";
 
@@ -70,9 +70,8 @@ const SubscriptionCard = ({ packageData, userData }) => {
   const packagePrice = packageData?.price || 0;
 
   return (
-    <Card className="mb-6 overflow-hidden">
+    <Card className="mb-6 overflow-hidden border border-gray-200 shadow-sm">
       <CardContent className="pt-6">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div
@@ -108,26 +107,22 @@ const SubscriptionCard = ({ packageData, userData }) => {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Days Remaining Section */}
-          <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg">
+          <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200">
             <p className="text-5xl font-bold text-red-500 mb-2">
               {calculateDaysRemaining()}
             </p>
             <p className="text-lg font-medium text-gray-700 mb-4">
               Days Remaining
             </p>
-
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar size={18} />
               <p className="text-sm">Expires: {formatExpirationDate()}</p>
             </div>
           </div>
 
-          {/* Package Details Section */}
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
               <span className="text-sm font-medium text-gray-600">
                 Package Price
               </span>
@@ -136,14 +131,14 @@ const SubscriptionCard = ({ packageData, userData }) => {
               </span>
             </div>
 
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
               <span className="text-sm font-medium text-gray-600">
                 Started On
               </span>
               <span className="text-sm text-gray-700">{formatStartDate()}</span>
             </div>
 
-            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
               <span className="text-sm font-medium text-gray-600">
                 Customer ID
               </span>
@@ -153,48 +148,13 @@ const SubscriptionCard = ({ packageData, userData }) => {
             </div>
 
             <Button
-              className="w-full mt-4 py-5 text-white font-medium "
+              className="w-full mt-4 py-5 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200"
               onClick={() => (window.location.href = "/subscription-package")}
             >
               Extend Subscription
             </Button>
           </div>
         </div>
-
-        {/* Progress Bar */}
-        {/* {packageData?.currentPeriodStart && packageData?.currentPeriodEnd && (
-          <div className="mt-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Subscription Progress</span>
-              <span>
-                {Math.round(
-                  ((new Date() - new Date(packageData.currentPeriodStart)) /
-                    (new Date(packageData.currentPeriodEnd) -
-                      new Date(packageData.currentPeriodStart))) *
-                    100
-                )}
-                %
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-gradient-to-r from-red-500 to-red-600 h-2 rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    Math.max(
-                      0,
-                      ((new Date() - new Date(packageData.currentPeriodStart)) /
-                        (new Date(packageData.currentPeriodEnd) -
-                          new Date(packageData.currentPeriodStart))) *
-                        100
-                    )
-                  )}%`,
-                }}
-              />
-            </div>
-          </div>
-        )} */}
       </CardContent>
     </Card>
   );
@@ -281,120 +241,153 @@ export default function ProfileDashboardComponents() {
     }
   };
 
-  if (isLoading)
-    return (
-      <div className="flex justify-center items-center h-60">Loading...</div>
-    );
+  if (isLoading) return <Spinner />;
 
   return (
-    <div className="max-w-4xl mx-auto p-10 bg-white rounded-lg border mt-6">
-      <div className="flex items-center justify-center mb-8 relative">
-        <div>
-          <div className="flex items-center">
+    <div className="max-w-4xl mx-auto p-6 md:p-8 bg-white rounded-xl border border-gray-200 shadow-sm mt-6">
+      <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 relative">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="relative group">
             <Image
               src={getImageUrl(userData?.image)}
               alt="Profile"
-              height={100}
-              width={100}
-              className="w-24 h-24 rounded-full object-cover m-2 mx-auto"
+              height={120}
+              width={120}
+              className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-md"
             />
+            {!imagePreview && (
+              <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <User className="text-white" size={24} />
+              </div>
+            )}
           </div>
-          <div>
-            <h2 className="text-xl font-semibold">{userData?.name}</h2>
+          <div className="text-center md:text-left">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {userData?.name}
+            </h2>
             <p className="text-gray-600">{userData?.email}</p>
+            <p className="text-gray-500 mt-1">{userData?.phone}</p>
           </div>
         </div>
 
-        {/* Edit Profile Button with Modal */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
               variant="destructive"
-              className="bg-red absolute top-0 right-5"
+              className="bg-red-600 hover:bg-red-700 shadow-sm"
             >
               Edit Profile
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-lg rounded-lg">
             <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-gray-800">
+                Edit Profile
+              </DialogTitle>
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {imagePreview && (
-                <div className="flex justify-center mb-4">
-                  <img
-                    src={imagePreview}
-                    alt="Selected Preview"
-                    className="w-32 h-32 rounded-full object-cover border"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Profile Image
+              <div className="flex flex-col items-center">
+                <label
+                  htmlFor="image-upload"
+                  className="relative cursor-pointer group"
+                >
+                  <div className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-100">
+                    {imagePreview ? (
+                      <Image
+                        src={imagePreview}
+                        alt="Profile Preview"
+                        width={100}
+                        height={100}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center text-gray-400">
+                        <Upload size={24} className="mb-2" />
+                        <span className="text-sm">Upload Image</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Upload className="text-white" size={20} />
+                  </div>
                 </label>
-                <Input
+                <input
+                  id="image-upload"
                   type="file"
                   name="image"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="py-2"
+                  className="hidden"
                 />
+                <p className="text-xs text-gray-500 mt-2">
+                  Click to upload profile picture
+                </p>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Name</label>
-                <Input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="py-6"
-                />
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <Input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <Input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                    className="py-3"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <Input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    className="py-3"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <Input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="py-6"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Phone</label>
-                <Input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="py-6"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Address
-                </label>
-                <Input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  required
-                  className="py-6"
-                />
-              </div>
-
-              <Button type="submit" className="w-full py-6" disabled={updating}>
+              <Button
+                type="submit"
+                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200"
+                disabled={updating}
+              >
                 {updating ? "Updating..." : "Update Profile"}
               </Button>
             </form>
@@ -402,52 +395,51 @@ export default function ProfileDashboardComponents() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="text-red-500">
                 <Flame size={24} />
               </div>
-              <h3 className="font-medium">Streak</h3>
+              <h3 className="font-medium text-gray-700">Streak</h3>
             </div>
-            <p className="text-4xl font-bold mt-4">
+            <p className="text-4xl font-bold mt-4 text-gray-800">
               {userData?.loginCount || 0} Days
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="text-red-500">
                 <Clock size={24} />
               </div>
-              <h3 className="font-medium">Yoga Sessions</h3>
+              <h3 className="font-medium text-gray-700">Yoga Sessions</h3>
             </div>
-            <p className="text-4xl font-bold mt-4">
+            <p className="text-4xl font-bold mt-4 text-gray-800">
               {userData?.completedSessions?.length || 0} Session
               {userData?.completedSessions?.length !== 1 ? "s" : ""}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="text-red-500">
                 <Clock size={24} />
               </div>
-              <h3 className="font-medium">Total Mat Time</h3>
+              <h3 className="font-medium text-gray-700">Total Mat Time</h3>
             </div>
-            <p className="text-4xl font-bold mt-4">
+            <p className="text-4xl font-bold mt-4 text-gray-800">
               {userData?.matTime || 0} Min
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Use the new Subscription Card Component */}
       <SubscriptionCard packageData={packageData} userData={userData} />
     </div>
   );

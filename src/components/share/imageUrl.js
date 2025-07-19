@@ -6,11 +6,19 @@ export const getImageUrl = (path) => {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   } else {
-    const baseUrl = "http://10.0.60.126:7000";
+    const baseUrl = "http://10.10.7.37:7000";
     return `${baseUrl}/${path}`;
   }
 };
 
-export const getVideoAndThumbnail = (Url) => {
-  return `https://${Url}`;
-};
+export function getVideoAndThumbnail(url) {
+  if (!url) return ''; // handle undefined/null cases
+  
+  // If already has http/https, return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // Otherwise, add https://
+  return `https://${url}`;
+}

@@ -1,25 +1,49 @@
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-export const VideoCard = ({ title, imageUrl, overlayText }) => {
-  // Display the image inside the video card
+export const VideoCard = ({
+  title = "Cooling Yoga Flow",
+  imageUrl,
+  route,
+}) => {
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push(route);
+  };
+
   return (
-    <Card className="w-full overflow-hidden rounded-lg shadow-md mb-8">
-      <CardContent className="p-0 relative">
-        <div className=" w-full h-48 md:h-64 lg:h-[570px]">
-          <Image
-            src={imageUrl}
-            alt={title}
-            layout="fill"
-            className="object-cover" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-red-500/70 to-blue-500/30 mix-blend-overlay" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <h3 className="text-white text-xl font-medium">{overlayText}</h3>
-          </div>
+    <section className="w-full overflow-hidden rounded-lg mb-8">
+      <div onClick={handleClick} className="relative h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group">
+        {/* Background Image using next/image */}
+        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat">
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={title || "Thumbnail"}
+              fill
+              className="object-cover"
+              unoptimized // use if CDN doesn't support resizing or optimization
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-800"></div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
+
+        {/* Animated Title - Initially hidden, appears on hover */}
+        <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
+          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide drop-shadow-lg 
+                         opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0 
+                         transition-all duration-500 ease-out">
+            {title}
+          </h3>
+        </div>
+      </div>
+    </section>
   );
 };

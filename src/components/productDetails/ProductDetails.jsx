@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import React from "react";
 
 // Sample product data
 const products = [
@@ -114,7 +115,8 @@ const similarProducts = [
 ];
 
 export default function ProductDetails({ params }) {
-  const { id } = useSearchParams();
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 

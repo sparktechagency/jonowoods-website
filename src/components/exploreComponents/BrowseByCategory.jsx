@@ -1,22 +1,17 @@
 "use client";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { baseUrlApi } from "../../redux/baseUrl/baseUrlApi";
+import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
+import { getImageUrl } from "../share/imageUrl";
 
 export default function BrowseByCategory({ onSeeMore, onClassClick }) {
-  // Sample data for category browsing
-  const categorizedClasses = [
-    {
-      id: 1,
-      title: "Cooling Yoga Flow",
-      image: "/assests/Rectangle (15).png",
-    },
-    { id: 2, title: "Cooling Yoga Flow", image: "/assests/Rectangle (7).png" },
-    { id: 3, title: "Cooling Yoga Flow", image: "/assests/Rectangle (9).png" },
-    { id: 4, title: "Cooling Yoga Flow", image: "/assests/Rectangle (11).png" },
-    { id: 5, title: "Cooling Yoga Flow", image: "/assests/Rectangle (12).png" },
-    { id: 6, title: "Cooling Yoga Flow", image: "/assests/Rectangle (13).png" },
-  ];
+  const router = useRouter();
+  const { data, isLoading } = useGetCategoryQuery();
+  console.log(data);
+
 
   return (
     <section className="mb-10 mx-3">
@@ -24,18 +19,18 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
         <h2 className="text-xl font-semibold">Browse By Categories</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-10">
-        {categorizedClasses.map((yogaClass) => (
+        {data?.data.map((yogaClass) => (
           <div
-            key={yogaClass.id}
+            key={yogaClass._id}
             className="relative h-80 rounded-lg overflow-hidden cursor-pointer group"
-            onClick={() => onClassClick(yogaClass.id)}
+            onClick={() => router.push(`/categories/${yogaClass._id}`)}
           >
-            <Link href={`/favorite/${yogaClass.id}`}>
+            <Link href={`/categories/${yogaClass._id}`}>
               <div className="relative w-full h-full">
                 {/* Image displayed on top */}
                 <Image
-                  src={yogaClass.image}
-                  alt={yogaClass.title}
+                  src={getImageUrl(yogaClass?.thumbnail)}
+                  alt={yogaClass.name}
                   layout="fill"
                   objectFit="cover"
                   className="absolute inset-0 w-full h-full"
@@ -50,7 +45,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
                 />
                 <div className="absolute inset-0 flex items-end p-4">
                   <h3 className="text-white font-medium text-lg">
-                    {yogaClass.title}
+                    {yogaClass.name}
                   </h3>
                 </div>
               </div>
@@ -62,8 +57,8 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
       <div className="flex justify-end">
         <Button
           variant="link"
-          className="text-rose-500 hover:text-rose-600"
-          onClick={onSeeMore}
+          className="text-rose-500 hover:text-rose-600 cursor-pointer"
+          onClick={() => router.push("/categories")}
         >
           See More
         </Button>

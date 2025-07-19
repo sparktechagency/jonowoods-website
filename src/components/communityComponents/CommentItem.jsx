@@ -172,13 +172,12 @@ const CommentItem = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleDeleteComment(comment._id)}
+                    disabled={loadingStates.deleting[comment._id]}
                     className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700"
                   >
-                    {loadingStates.deleting[comment._id] ? (
-                      <ButtonSpinner className="h-4 w-4 animate-spin" />
-                    ) : (
+                    
                       <Trash className="h-4 w-4" />
-                    )}
+                    
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>

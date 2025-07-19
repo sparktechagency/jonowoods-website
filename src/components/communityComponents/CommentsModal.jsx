@@ -124,7 +124,7 @@ export const CommentsModal = ({
                 formatTimeAgo={formatTimeAgo}
               />
             ))
-          ) : isCommenting ? (
+          ) : isLoading ? (
             <Spinner />
           ) : (
             <div className="text-center py-6 text-gray-500">

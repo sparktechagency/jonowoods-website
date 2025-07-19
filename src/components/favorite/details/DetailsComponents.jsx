@@ -1,18 +1,24 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import { Heart, ArrowLeft, PictureInPicture } from "lucide-react";
-import { useParams } from "next/navigation";
-import CommentsSection from "./CommentSection";
+import "@videojs/themes/dist/city/index.css";
+import { ArrowLeft, Heart, PictureInPicture } from "lucide-react";
+import React from "react";
+import { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
-import "@videojs/themes/dist/city/index.css"; 
-import { useSingleVideoQuery } from "@/redux/featured/favouriteVideo/favouriteVideoApi";
+import { useCategoryWithSubcategoryQuery } from "../../../redux/featured/homeApi.jsx/homeApi";
+import CommentsSection from "./CommentSection";
+import Spinner from "../../../app/(commonLayout)/Spinner";
 
-export default function EnhancedVideoDetails() {
-  const {id} = useParams();
+export default function EnhancedVideoDetails({ params }) {
+  const { id } = React.use(params);
 
-  const { data } = useSingleVideoQuery(id)
-  console.log(data)
+  // const { data } = useSingleVideoQuery(id)
+  const { data } = useCategoryWithSubcategoryQuery(id, {
+    skip: !id,
+  });
+
+  console.log(data?.data?.result)
+
 
   const [liked, setLiked] = useState(false);
   const videoNode = useRef(null);
@@ -27,7 +33,7 @@ export default function EnhancedVideoDetails() {
     description:
       "A holistic practice that blends physical postures, breath control, meditation, and ethical principles to promote overall well-being.",
     equipmentNeeded: "None",
-    captionUrl: "/captions.vtt", 
+    captionUrl: "/captions.vtt",
   };
 
   useEffect(() => {
@@ -84,7 +90,7 @@ export default function EnhancedVideoDetails() {
   };
 
   if (!id) {
-    return <div className="container mx-auto py-8 px-4">Loading...</div>;
+    return <Spinner />;
   }
 
   return (
@@ -110,9 +116,8 @@ export default function EnhancedVideoDetails() {
           {/* Like Button */}
           <button onClick={toggleLike} className="bg-gray-100 p-2 rounded-full">
             <Heart
-              className={`h-5 w-5 ${
-                liked ? "fill-rose-500 text-rose-500" : "text-gray-400"
-              }`}
+              className={`h-5 w-5 ${liked ? "fill-rose-500 text-rose-500" : "text-gray-400"
+                }`}
             />
           </button>
         </div>

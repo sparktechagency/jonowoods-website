@@ -11,6 +11,7 @@ import { useMyProfileQuery } from "@/redux/featured/auth/authApi";
 import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communityLeaderBoard";
 import Spinner from "@/app/(commonLayout)/Spinner";
 import Pagination from "./PaginationComponent";
+import { FeaturedPostSection } from "./FeaturedPost";
 
 export default function CommunityComponents() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -122,6 +123,7 @@ export default function CommunityComponents() {
           onPostSuccess={handlePostSuccess}
         />
 
+        {/* <FeaturedPostSection /> */}
         <PostDisplay
           posts={posts}
           currentUserId={currentUserId}

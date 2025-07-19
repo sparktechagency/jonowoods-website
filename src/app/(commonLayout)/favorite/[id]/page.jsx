@@ -1,10 +1,9 @@
 import DetailsComponents from "@/components/favorite/details/DetailsComponents";
-import React from "react";
 
-const page = () => {
+const page = ({ params }) => {
   return (
     <div>
-      <DetailsComponents />
+      <DetailsComponents params={params} />
     </div>
   );
 };

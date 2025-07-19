@@ -179,13 +179,12 @@ const ReplyItem = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleDeleteReply}
+                  disabled={loadingStates.editingReply[reply._id]}
                   className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700"
                 >
-                  {loadingStates.deletingReply[reply._id] ? (
-                    <ButtonSpinner className="h-3 w-3 animate-spin" />
-                  ) : (
+                 
                     <Trash className="h-3 w-3" />
-                  )}
+                 
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
