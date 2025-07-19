@@ -1,21 +1,24 @@
 "use client";
 
+import ClassSilder from '@/components/Category/ClassSilder';
+import CourseSlider from '@/components/Category/CourseSlider';
+import { useCategoryVideoQuery, useCategoryWithSubcategoryQuery } from '@/redux/featured/homeApi.jsx/homeApi';
 import { Search } from 'lucide-react';
 import React from 'react';
-import Spinner from '../../(commonLayout)/Spinner';
-import ClassSilder from '../../../components/Category/ClassSilder';
-import CourseSlider from '../../../components/Category/CourseSlider';
-import { useCategoryVideoQuery, useCategoryWithSubcategoryQuery } from '../../../redux/featured/homeApi.jsx/homeApi';
+import Spinner from '../../Spinner';
+// import Spinner from '../../(commonLayout)/Spinner';
+// import ClassSilder from '../../../components/Category/ClassSilder';
+// import CourseSlider from '../../../components/Category/CourseSlider';
+// import { useCategoryVideoQuery, useCategoryWithSubcategoryQuery } from '../../../redux/featured/homeApi.jsx/homeApi';
 
 const page = ({ params }) => {
   const { id } = React.use(params);
 
   const { data: category, isLoading: categoryLoading } = useCategoryWithSubcategoryQuery(id, { skip: !id });
-  console.log(category?.data.result)
+  console.log(category?.data?.result)
 
   const { data: classVideo, isLoading: classVideoLoading } = useCategoryVideoQuery(id, { skip: !id });
-
-  // console.log(category?.data?.result[0].categoryId._id);
+  console.log(classVideo?.data?.result)
 
   if (categoryLoading || classVideoLoading) return <Spinner />
 

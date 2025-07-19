@@ -1,12 +1,15 @@
 "use client";
-import { useParams } from "next/navigation";
-import { useComingSoonLetestSingleVideoQuery } from "../../../redux/featured/homeApi.jsx/homeApi";
-import Spinner from "../../(commonLayout)/Spinner";
+import { useComingSoonLetestSingleVideoQuery } from "@/redux/featured/homeApi.jsx/homeApi";
+import React from "react";
+import Spinner from "../../Spinner";
+import Image from "next/image";
+// import { useComingSoonLetestSingleVideoQuery } from "../../../redux/featured/homeApi.jsx/homeApi";
+// import Spinner from "../../(commonLayout)/Spinner";
 
 
 
-const SingleVideoPage = () => {
-  const { id } = useParams();
+const SingleVideoPage = ({ params }) => {
+  const { id } = React.use(params);
   const { data, isLoading, isError } = useComingSoonLetestSingleVideoQuery(id, {
     skip: !id,
   });
@@ -54,9 +57,11 @@ const SingleVideoPage = () => {
         </button>
         {/* Thumbnail Banner */}
         <div className="relative">
-          <img
+          <Image
             src={`https://${video.thumbnailUrl}`}
             alt={video.title}
+            width={100}
+            height={100}
             className="w-full h-72 object-cover"
           />
           <div className="absolute top-4 left-4">

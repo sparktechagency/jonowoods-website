@@ -22,9 +22,9 @@ export default function page() {
           <div
             key={yogaClass._id} // Changed from id to _id
             className="relative h-80 rounded-lg overflow-hidden cursor-pointer group"
-            onClick={() => router.push(`/challenge/${yogaClass._id}`)}
+            onClick={() => router.push(`challenge/${yogaClass._id}`)}
           >
-            <Link href={`/challenge/${yogaClass._id}`}>
+            <Link href={`challenge/${yogaClass._id}`}>
               <div className="relative w-full h-full">
                 <Image
                   src={getImageUrl(yogaClass?.image)}

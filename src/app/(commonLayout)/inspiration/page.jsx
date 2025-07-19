@@ -1,8 +1,8 @@
 "use client";
 
-import Spinner from "../(commonLayout)/Spinner";
-import VideoPlayer from "../../components/VideoPlayer";
-import { useInspirationLatestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
+import Spinner from "../Spinner";
+import VideoPlayer from "../../../components/VideoPlayer";
+import { useInspirationLatestVideoQuery } from "../../../redux/featured/CommingSoon/commingSoonApi";
 
 
 const page = () => {

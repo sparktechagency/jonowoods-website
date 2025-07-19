@@ -1,10 +1,9 @@
 import DetailsComponents from "@/components/favorite/details/DetailsComponents";
 
-const page = () => {
-
+const page = ({ params }) => {
   return (
     <div>
-      <DetailsComponents />
+      <DetailsComponents params={params} />
     </div>
   );
 };

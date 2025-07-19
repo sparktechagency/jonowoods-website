@@ -1,13 +1,14 @@
 "use client";
+import { baseUrlApi } from "@/redux/baseUrl/baseUrlApi";
+import { useGetCategoryQuery } from "@/redux/featured/homeApi.jsx/homeApi";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { baseUrlApi } from "../../redux/baseUrl/baseUrlApi";
-import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
 
 export default function CategoriesPage() {
   const router = useRouter();
   const { data, isLoading, isError } = useGetCategoryQuery();
+  console.log(data?.data);
 
   if (isLoading) {
     return (

@@ -1,17 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import VideoPlayer from '../../../components/VideoPlayer';
-import { useMarkWatchChallengeVideoMutation, useSingleChallengeVideoQuery } from '../../../redux/featured/CommingSoon/commingSoonApi';
-import Spinner from '../../(commonLayout)/Spinner';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { useMarkWatchChallengeVideoMutation, useSingleChallengeVideoQuery } from '@/redux/featured/CommingSoon/commingSoonApi';
+import Spinner from '../../Spinner';
+import VideoPlayer from '@/components/VideoPlayer';
+import { getVideoAndThumbnail } from '@/components/share/imageUrl';
+import Image from 'next/image';
 
 const ChallengePage = ({ params }) => {
   const { id } = React.use(params);
   const router = useRouter();
   const { data, isLoading, refetch } = useSingleChallengeVideoQuery(id, { skip: !id });
   const [markWatchChallengeVideo] = useMarkWatchChallengeVideoMutation();
+  console.log(data?.data?.result) 
   
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [completedVideos, setCompletedVideos] = useState([]);
@@ -68,9 +71,6 @@ const ChallengePage = ({ params }) => {
     }
   };
   
-  
-  
-
   // Check if a video is accessible
   const isVideoAccessible = (index) => {
     if (index === 0) return true; // First video always accessible
@@ -95,6 +95,7 @@ const ChallengePage = ({ params }) => {
   }
 
   const currentVideo = videos[currentVideoIndex];
+  console.log(currentVideo)
 
   return (
     <div className="container mx-auto p-4">
@@ -138,9 +139,12 @@ const ChallengePage = ({ params }) => {
               >
                 {/* Thumbnail */}
                 <div className="relative h-40">
-                  <img
+                  <Image
+                    // src={getVideoAndThumbnail(video?.thumbnailUrl || video.image)}
                     src={`https://${video.thumbnailUrl || video.image}`}
                     alt={video.title}
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                   />
                   

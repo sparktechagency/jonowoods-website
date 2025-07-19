@@ -1,12 +1,13 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 const ClassSilder = ({ data }) => {
   const router = useRouter();
-
+  console.log(data)
   const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef(null);
 
@@ -64,6 +65,11 @@ const ClassSilder = ({ data }) => {
     }
   };
 
+  const handleVideoClick = (videoId) => {
+    // Use the correct path for Next.js App Router with route groups
+    router.push(`/categories/class/${videoId}`);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-5">
       {/* Header */}
@@ -105,14 +111,16 @@ const ClassSilder = ({ data }) => {
         >
           {data.map((classItem, index) => (
             <div
-              key={classItem.id}
-              onClick={() => router.push(`/categories/class/${classItem._id}`)}
+              key={classItem._id || index}
+              onClick={() => handleVideoClick(classItem._id)}
               className={`flex-shrink-0 w-80 h-96 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 snap-start ${classItem.background}`}
             >
               <div className="relative w-full h-full">
-                <img
+                <Image
                   src={`https://${classItem.thumbnailUrl}`}
                   alt={classItem.title}
+                  width={100}
+                  height={100}
                   className="w-full h-full object-cover"
                 />
 

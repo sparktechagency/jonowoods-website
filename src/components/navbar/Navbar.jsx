@@ -78,7 +78,7 @@ export default function Navbar() {
 
     // Initialize socket connection
     socketRef.current = io(
-      process.env.NEXT_PUBLIC_SOCKET_URL || "http://10.0.60.126:6002"
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://69.62.67.86:7000"
     );
 
     const handleNewNotification = () => {
@@ -235,7 +235,7 @@ export default function Navbar() {
             href="/"
             className="flex items-center space-x-2 text-lg font-bold"
           >
-            <img src="/assests/logo.png" alt="Logo" className="w-16 h-10" />
+            <Image src="/assests/logo.png" alt="Logo" width={100} height={100}   className="w-16 h-10" />
           </Link>
 
           {/* Desktop Navigation */}

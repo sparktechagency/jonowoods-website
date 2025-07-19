@@ -1,7 +1,7 @@
 "use client";
 import "@videojs/themes/dist/city/index.css";
 import { ArrowLeft, Heart, PictureInPicture } from "lucide-react";
-import { useParams } from "next/navigation";
+import React from "react";
 import { useEffect, useRef, useState } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
@@ -9,8 +9,8 @@ import { useCategoryWithSubcategoryQuery } from "../../../redux/featured/homeApi
 import CommentsSection from "./CommentSection";
 import Spinner from "../../../app/(commonLayout)/Spinner";
 
-export default function EnhancedVideoDetails() {
-  const { id } = useParams();
+export default function EnhancedVideoDetails({ params }) {
+  const { id } = React.use(params);
 
   // const { data } = useSingleVideoQuery(id)
   const { data } = useCategoryWithSubcategoryQuery(id, {

@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { baseUrlApi } from '../../redux/baseUrl/baseUrlApi';
+import Image from 'next/image';
 
 const CourseSlider = ({ data }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -64,6 +65,11 @@ const CourseSlider = ({ data }) => {
     }
   };
 
+  const handleCourseClick = (courseId) => {
+    // Use the correct path for Next.js App Router with route groups
+    router.push(`/categories/courses/${courseId}`);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-5">
       {/* Header */}
@@ -106,14 +112,16 @@ const CourseSlider = ({ data }) => {
         >
           {data?.map((classItem, index) => (
             <div
-              key={classItem.id}
-              onClick={() => router.push(`/categories/courses/${classItem._id}`)}
+              key={classItem._id || index}
+              onClick={() => handleCourseClick(classItem._id)}
               className={`flex-shrink-0 w-80 h-96 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 snap-start ${classItem.background}`}
             >
               <div className="relative w-full h-full">
-                <img
+                <Image
                   src={`${baseUrlApi}${classItem?.thumbnail}`}
                   alt={classItem.name}
+                  width={100}
+                  height={100}
                   className="w-full h-full object-cover"
                 />
 

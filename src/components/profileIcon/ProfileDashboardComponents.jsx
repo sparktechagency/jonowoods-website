@@ -294,9 +294,11 @@ export default function ProfileDashboardComponents() {
                 >
                   <div className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-100">
                     {imagePreview ? (
-                      <img
+                      <Image
                         src={imagePreview}
                         alt="Profile Preview"
+                        width={100}
+                        height={100}
                         className="w-full h-full object-cover"
                       />
                     ) : (

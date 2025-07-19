@@ -5,11 +5,11 @@ import { jwtDecode } from 'jwt-decode';
 import { Heart, MoreHorizontal, Send } from 'lucide-react';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
-import Spinner from '../../../(commonLayout)/Spinner';
-import commectIcon from '../../../../../public/assests/comment.png';
-import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation } from '../../../../redux/featured/commentApi/commentApi';
-import { useVideoFavouriteMutation } from '../../../../redux/featured/favouritApi/favouritApi';
-import { useSingleVidoeQuery } from '../../../../redux/featured/homeApi.jsx/homeApi';
+import commectIcon from '../../../../../../public/assests/comment.png';
+import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation } from '../../../../../redux/featured/commentApi/commentApi';
+import Spinner from '../../../Spinner';
+import { useSingleVidoeQuery } from '@/redux/featured/homeApi.jsx/homeApi';
+import { useVideoFavouriteMutation } from '@/redux/featured/favouritApi/favouritApi';
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);

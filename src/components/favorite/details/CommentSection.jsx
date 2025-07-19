@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 // Mock data for initial comments
 const initialComments = [
@@ -72,9 +73,11 @@ const Comment = ({ comment, onReply, currentUser }) => {
     <div className="mb-6">
       <div className="flex items-start gap-3">
         <Avatar className="h-16 w-16">
-          <img
+          <Image
             src={comment.avatarSrc || "/avatars/default.png"}
             alt={comment.user}
+            width={100}
+            height={100}
             className="h-full w-full object-cover rounded-full"
           />
         </Avatar>
@@ -124,9 +127,11 @@ const Comment = ({ comment, onReply, currentUser }) => {
           {isReplying && (
             <div className="mt-3 flex items-center gap-2">
               <Avatar className="h-12 w-12">
-                <img
+                <Image
                   src="/avatars/current-user.png"
                   alt={currentUser}
+                  width={100}
+                  height={100}
                   className="h-full w-full object-cover rounded-full"
                 />
               </Avatar>
@@ -155,9 +160,11 @@ const Comment = ({ comment, onReply, currentUser }) => {
                 <div key={reply.id} className="mt-3">
                   <div className="flex items-start gap-3">
                     <Avatar className="h-6 w-6">
-                      <img
+                      <Image
                         src={reply.avatarSrc || "/avatars/default.png"}
                         alt={reply.user}
+                        width={100}
+                        height={100}
                         className="h-full w-full object-cover rounded-full"
                       />
                     </Avatar>

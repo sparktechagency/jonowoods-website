@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
@@ -114,9 +115,11 @@ const CourseVideoSilder = ({ data }) => {
                 className="flex-shrink-0 w-80 h-96 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 snap-start"
               >
                 <div className="relative w-full h-full">
-                  <img
+                  <Image
                     src={imageUrl}
                     alt={classItem.title || 'Course thumbnail'}
+                    width={100}
+                    height={100}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.src = '/fallback-image.jpg'; // Add this in public/ folder

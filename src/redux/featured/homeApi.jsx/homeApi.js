@@ -50,6 +50,15 @@ const homeSlice = api.injectEndpoints({
       },
     }),
 
+    categoryVideoById: builder.query({
+      query: (id) => {
+        return {
+          method: "GET",
+          url: `/videos/${id}`,
+        };
+      },
+    }),
+
     subCategoryVideo: builder.query({
       query: (id) => {
         return {
@@ -100,6 +109,7 @@ export const {
   useComingSoonLetestVideoQuery,
   useComingSoonLetestSingleVideoQuery,
   useCategoryVideoQuery,
+  useCategoryVideoByIdQuery,
   useSubCategoryVideoQuery,
   useSingleSubcategoryQuery,
   useSingleVidoeQuery,
