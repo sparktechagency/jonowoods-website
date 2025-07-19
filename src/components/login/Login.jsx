@@ -25,18 +25,22 @@ export default function LoginUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const res = await login({ email, password }).unwrap();
-   
-
       const { accessToken, refreshToken } = res.data;
-
+      // Save tokens and dispatch success
       localStorage.setItem("token", accessToken);
       dispatch(loginSuccess(accessToken));
+  
+      toast.success("Login successful! Welcome back.");
       router.push("/");
     } catch (error) {
       console.error("Login failed:", error);
+  
+      // Show error toast message
+      const errorMessage = error?.message || "An error occurred while logging in.";
+      toast.error(errorMessage); 
     }
   };
 
