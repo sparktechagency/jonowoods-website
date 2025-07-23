@@ -22,8 +22,15 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
     }
   }, [editPost]);
 
+  // Check if content has at least 10 non-space characters
+  const isContentValid = (text) => {
+    const strippedContent = text.replace(/<[^>]*>/g, ""); // Remove HTML tags
+    const nonSpaceChars = strippedContent.replace(/\s/g, "").length;
+    return nonSpaceChars >= 10;
+  };
+
   const handlePost = async () => {
-    if (content.trim()) {
+    if (content.trim() && isContentValid(content)) {
       try {
         if (editPost) {
           // Update existing post
@@ -53,6 +60,8 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
           `Failed to ${editPost ? "update" : "create"} post. Please try again.`
         );
       }
+    } else if (!isContentValid(content)) {
+      toast.error("Post must contain at least 10 characters (excluding spaces).");
     }
   };
 
@@ -64,6 +73,7 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
   };
 
   const isLoading = isCreating || isUpdating;
+  const isValid = content.trim() && isContentValid(content);
 
   return (
     <div className="w-full mb-6">
@@ -101,7 +111,7 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
           <Button
             onClick={handlePost}
             className="bg-red-500 text-white rounded-full px-6"
-            disabled={isLoading || !content.trim()}
+            disabled={isLoading || !isValid}
           >
             {isLoading
               ? editPost

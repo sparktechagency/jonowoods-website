@@ -40,8 +40,8 @@ export default function LoginUser() {
       console.error("Login failed:", error);
   
       // Show error toast message
-      const errorMessage = error?.message || "An error occurred while logging in.";
-      toast.error(errorMessage); 
+      // const errorMessage = error?.message || "An error occurred while logging in.";
+      toast.error(error); 
     }
   };
 
@@ -133,16 +133,16 @@ export default function LoginUser() {
             </Button>
 
             {/* Links */}
-            <div className="flex justify-between text-sm text-center mt-6 md:mt-8 gap-4 md:gap-0">
+            <div className="flex justify-end text-sm text-center mt-6 md:mt-8 gap-4 md:gap-0">
               <Link href="/register" className="text-white hover:text-red-400">
                 Create account
               </Link>
-              <Link
+              {/* <Link
                 href="/forgot-password"
                 className="text-white hover:text-red-400"
               >
                 Forgot password?
-              </Link>
+              </Link> */}
             </div>
           </form>
         </div>

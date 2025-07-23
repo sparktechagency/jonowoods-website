@@ -22,7 +22,7 @@ export default function ProfileWithEditModal() {
     profilePicture: "",
   });
   const [open, setOpen] = useState(false);
-
+  console.log(user)
   // Load user data (Demo user for now)
   useEffect(() => {
     const fetchedUser = {
@@ -67,7 +67,7 @@ export default function ProfileWithEditModal() {
       <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex flex-col items-center">
           <div className="mb-4">
-            {user && (
+            {user?.profilePicture ? (
               <Image
                 src={getImageUrl(user?.profilePicture)}
                 alt="Profile"
@@ -75,6 +75,16 @@ export default function ProfileWithEditModal() {
                 width={120}
                 className="rounded-full object-cover"
               />
+            ) : (
+              <div className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 cursor-pointer">
+                <Image
+                  src="https://i.ibb.co/PGZ7TG64/blue-circle-with-white-user-78370-4707.jpg"
+                  alt="Profile"
+                  height={100}
+                  width={100}
+                  className="rounded-full object-cover"
+                />
+              </div>
             )}
           </div>
           <h2 className="text-2xl font-bold mb-2">{user?.name}</h2>

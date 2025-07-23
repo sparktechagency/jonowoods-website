@@ -29,6 +29,9 @@ import { getImageUrl } from "../share/imageUrl";
 import { toast } from "sonner";
 import { useRunningPackageQuery } from "@/redux/featured/Package/packageApi";
 import Spinner from "../../app/(commonLayout)/Spinner";
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 // Subscription Card Component
 const SubscriptionCard = ({ packageData, userData }) => {
@@ -172,7 +175,8 @@ export default function ProfileDashboardComponents() {
     phone: "",
     address: "",
   });
-
+  const [phoneError, setPhoneError] = useState("");
+  console.log(userData);
   const { data: packageResponse } = useRunningPackageQuery();
   const packageData = packageResponse?.data;
 
@@ -201,6 +205,21 @@ export default function ProfileDashboardComponents() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handlePhoneChange = (value) => {
+    setFormData({ ...formData, phone: value || "" });
+    
+    // Validate phone number
+    if (value) {
+      if (!isValidPhoneNumber(value)) {
+        setPhoneError("Invalid phone number for selected country");
+      } else {
+        setPhoneError("");
+      }
+    } else {
+      setPhoneError("");
+    }
+  };
+
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setImageFile(e.target.files[0]);
@@ -209,12 +228,19 @@ export default function ProfileDashboardComponents() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Check if phone is valid before submitting
+    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+      setPhoneError("Please enter a valid phone number for the selected country");
+      return;
+    }
+    
     try {
       const userData = {
-        name: e.target.elements.name.value,
-        email: e.target.elements.email.value,
-        address: e.target.elements.address.value,
-        phone: e.target.elements.phone?.value || "",
+        name: formData.name,
+        email: formData.email,
+        address: formData.address,
+        phone: formData.phone,
       };
 
       const formDataToSend = new FormData();
@@ -248,18 +274,28 @@ export default function ProfileDashboardComponents() {
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 relative">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="relative group">
-            <Image
-              src={getImageUrl(userData?.image)}
-              alt="Profile"
-              height={120}
-              width={120}
-              className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-md"
-            />
-            {!imagePreview && (
+            {userData?.image ? (
+              <Image
+                src={getImageUrl(userData?.image)}
+                alt="Profile"
+                height={140}
+                width={140}
+                className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-md"
+              />
+            ) : (
+              <Image
+                src="https://i.ibb.co/PGZ7TG64/blue-circle-with-white-user-78370-4707.jpg"
+                alt="Profile"
+                height={140}
+                width={140}
+                className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-md"
+              />
+            )}
+            {/* {!imagePreview && (
               <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <User className="text-white" size={24} />
               </div>
-            )}
+            )} */}
           </div>
           <div className="text-center md:text-left">
             <h2 className="text-2xl font-bold text-gray-800">
@@ -308,9 +344,9 @@ export default function ProfileDashboardComponents() {
                       </div>
                     )}
                   </div>
-                  <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Upload className="text-white" size={20} />
-                  </div>
+                  </div> */}
                 </label>
                 <input
                   id="image-upload"
@@ -350,22 +386,26 @@ export default function ProfileDashboardComponents() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="py-3"
+                    className="py-3  cursor-not-allowed"
+                    disabled
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phone
                   </label>
-                  <Input
-                    type="text"
-                    name="phone"
+                  <PhoneInput
+                    international
+                    defaultCountry="US"
                     value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="py-3"
+                    onChange={handlePhoneChange}
+                    className={`w-full border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 ${
+                      phoneError ? "border-red-500" : "border-gray-300"
+                    }`}
                   />
+                  {phoneError && (
+                    <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+                  )}
                 </div>
 
                 <div>
@@ -386,7 +426,7 @@ export default function ProfileDashboardComponents() {
               <Button
                 type="submit"
                 className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200"
-                disabled={updating}
+                disabled={updating || (formData.phone && phoneError)}
               >
                 {updating ? "Updating..." : "Update Profile"}
               </Button>

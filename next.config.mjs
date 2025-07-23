@@ -9,7 +9,9 @@ const nextConfig = {
       "http://10.10.7.37:7000",
       "rakib.b-cdn.net",
        "10.0.60.126",
-       "yoga-app.b-cdn.net"
+       "yoga-app.b-cdn.net",
+       "69.62.67.86",
+       "i.ibb.co"
     ],
   },
 };

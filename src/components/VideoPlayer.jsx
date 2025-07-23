@@ -51,9 +51,14 @@ const VideoPlayer = ({ data, onComplete }) => {
 
   return (
     <div className="relative">
+      <div>
+        <h2 className='lg:text-3xl font-bold mt-8 text-xl '>
+          {data?.title}
+        </h2>
+      </div>
       <div className="container mx-auto bg-white">
         {/* Video Section */}
-        <div className="mt-10 relative">
+        <div className="mt-4 relative">
           <video
             ref={videoRef}
             controls

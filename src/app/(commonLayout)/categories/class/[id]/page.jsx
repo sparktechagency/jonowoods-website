@@ -266,7 +266,7 @@ export default function FitnessVideoPage({ params }) {
                   className="absolute right-2 top-1/2 transform -translate-y-1/2"
                   disabled={replyLoading || !replyText.trim()}
                 >
-                  <Send className="w-4 h-4 text-red-500" />
+                  <Send className="w-8 h-8 text-red-500" />
                 </button>
               </div>
             </div>
@@ -385,10 +385,10 @@ export default function FitnessVideoPage({ params }) {
             />
             <button
               type="submit"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              className="absolute right-6 top-1/2 transform -translate-y-1/2"
               disabled={commentLoading || editLoading || !comment.trim()}
             >
-              <Send className="w-4 h-4 text-red-500" />
+              <Send className="w-12 h-12 text-red-500" />
             </button>
           </div>
           {editingComment && (

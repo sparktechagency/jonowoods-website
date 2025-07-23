@@ -168,11 +168,11 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="order-2 md:order-1">
               <p className="text-sm text-gray-600 text-center md:text-left">
-                © {new Date().getFullYear()} jowelahmed@gmail.com. All rights
+                © {new Date().getFullYear()} yogawebapp@gmail.com. All rights
                 reserved.
               </p>
             </div>
-            <div className="order-1 md:order-2 flex flex-wrap justify-center gap-x-4 gap-y-2">
+            {/* <div className="order-1 md:order-2 flex flex-wrap justify-center gap-x-4 gap-y-2">
               <Link
                 href="/terms"
                 className="text-sm text-gray-600 hover:text-gray-900"
@@ -186,7 +186,7 @@ export default function Footer() {
               >
                 Privacy Notice
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
       </footer>

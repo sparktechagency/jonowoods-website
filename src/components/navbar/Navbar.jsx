@@ -358,8 +358,7 @@ export default function Navbar() {
 
           {/* User Controls */}
           <div className="flex items-center space-x-4">
-            {/* Connection Status Indicator */}
-            {userData?._id && (
+            {/* {userData?._id && (
               <div className="flex items-center space-x-2">
                 <div className={`w-2 h-2 rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 {!isSocketConnected && connectionAttempts >= MAX_RECONNECTION_ATTEMPTS && (
@@ -372,181 +371,193 @@ export default function Navbar() {
                   </button>
                 )}
               </div>
+            )} */}
+
+            {/* Notification Button - Only show if user is logged in */}
+            {userData?._id && (
+              <div className="relative">
+                <button
+                  onClick={() => setIsNotificationModalOpen(true)}
+                  className="relative p-2 text-black hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Notifications"
+                >
+                  <FaBell size={20} />
+                  {unreadCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full p-0">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </Badge>
+                  )}
+                </button>
+              </div>
             )}
 
-            {/* Notification Button */}
-            <div className="relative">
-              <button
-                onClick={() => setIsNotificationModalOpen(true)}
-                className="relative p-2 text-black hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Notifications"
-              >
-                <FaBell size={20} />
-                {unreadCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full p-0">
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </Badge>
-                )}
-              </button>
-            </div>
-
-            {/* Profile Dropdown */}
-            <div className="relative" ref={profileRef}>
-              <button
-                className="relative flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                aria-expanded={isProfileOpen}
-                aria-label="User profile menu"
-              >
-                <div className="relative">
-                  {userData?.image ? (
-                    <Image
-                      src={getImageUrl(userData?.image)}
-                      height={40}
-                      width={40}
-                      alt="Profile"
-                      className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-400 transition-colors duration-200"
-                    />
-                  ) : (
-                    <FaUserCircle
-                      size={40}
-                      className="text-gray-600 group-hover:text-blue-600 transition-colors duration-200"
-                    />
-                  )}
-                  {/* Online indicator */}
-                  <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                </div>
-
-                {/* User info - hidden on mobile */}
-                <div className="hidden lg:block text-left">
-                  <p className="text-sm text-gray-900">
-                    {userData?.name || "User"}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {userData?.email || "user@example.com"}
-                  </p>
-                </div>
-
-                <FaChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                    isProfileOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {/* Profile Modal */}
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-3 w-72 bg-white border border-gray-200 shadow-xl rounded-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                  {/* Header */}
-                  <div className="p-4 bg-primary border-gray-100">
-                    <div className="flex items-center space-x-3">
-                      {userData?.image ? (
-                        <Image
-                          src={getImageUrl(userData?.image)}
-                          height={48}
-                          width={48}
-                          alt="Profile"
-                          className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-                        />
-                      ) : (
-                        <FaUserCircle size={48} className="text-gray-600" />
-                      )}
-                      <div>
-                        <h3 className="text-white">
-                          {userData?.name || "User"}
-                        </h3>
-                        <p className="text-sm text-white">
-                          {userData?.email || "user@example.com"}
-                        </p>
-                        {/* Connection status */}
-                        <p className={`text-xs ${isSocketConnected ? 'text-green-200' : 'text-red-200'}`}>
-                          {isSocketConnected ? 'Online' : 'Offline'}
-                        </p>
-                      </div>
-                    </div>
+            {/* Login Button - Show when no user is logged in */}
+            {!userData?._id ? (
+              <Link href="/login">
+                <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors duration-200 flex items-center gap-2">
+                  <FaUser size={16} />
+                  Login
+                </button>
+              </Link>
+            ) : (
+              /* Profile Dropdown - Only show if user is logged in */
+              <div className="relative" ref={profileRef}>
+                <button
+                  className="relative flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 group"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  aria-expanded={isProfileOpen}
+                  aria-label="User profile menu"
+                >
+                  <div className="relative">
+                    {userData?.image ? (
+                      <Image
+                        src={getImageUrl(userData?.image)}
+                        height={40}
+                        width={40}
+                        alt="Profile"
+                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-400 transition-colors duration-200"
+                      />
+                    ) : (
+                      <FaUserCircle
+                        size={40}
+                        className="text-gray-600 group-hover:text-blue-600 transition-colors duration-200"
+                      />
+                    )}
+                    {/* Online indicator */}
+                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                   </div>
 
-                  {/* Menu Items */}
-                  <div className="py-2">
-                    {profileMenuItems.map((item, index) => (
-                      <Link
-                        key={index}
-                        href={item.href}
-                        className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-150 group"
-                        onClick={() => setIsProfileOpen(false)}
-                      >
-                        <item.icon
-                          className={`w-5 h-5 ${item.color} group-hover:scale-110 transition-transform duration-150`}
-                        />
-                        <span className="text-gray-700 group-hover:text-gray-900">
-                          {item.label}
-                        </span>
-                      </Link>
-                    ))}
-
-                    {/* Settings Dropdown */}
-                    <div className="border-t border-gray-100 mt-2 pt-2">
-                      <button
-                        className="flex items-center justify-between w-full px-4 py-3 hover:bg-gray-50 transition-colors duration-150 group"
-                        onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                        aria-expanded={isSettingsOpen}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <FaCog className="w-5 h-5 text-gray-600 group-hover:text-blue-600 group-hover:rotate-90 transition-all duration-200" />
-                          <span className="text-gray-700 group-hover:text-gray-900">
-                            Settings
-                          </span>
-                        </div>
-                        <FaChevronRight
-                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-                            isSettingsOpen ? "rotate-90" : ""
-                          }`}
-                        />
-                      </button>
-
-                      {/* Settings Submenu */}
-                      {isSettingsOpen && (
-                        <div className="bg-gray-50 border-l-2 border-blue-200 ml-4">
-                          {settingsItems.map((item, index) => (
-                            <Link
-                              key={index}
-                              href={item.href}
-                              className="flex items-center space-x-3 px-4 py-2.5 hover:bg-white transition-colors duration-150 group"
-                              onClick={() => setIsProfileOpen(false)}
-                            >
-                              <item.icon className="w-4 h-4 text-gray-500 group-hover:text-blue-600 transition-colors duration-150" />
-                              <span className="text-sm text-gray-600 group-hover:text-gray-800">
-                                {item.label}
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Logout */}
-                    <div className="border-t border-gray-100 mt-2 pt-2">
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center space-x-3 px-4 py-3 w-full hover:bg-red-50 transition-colors duration-150 group"
-                      >
-                        <FaSignOutAlt className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform duration-150" />
-                        <span className="text-red-600 group-hover:text-red-700">
-                          Logout
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
-                    <p className="text-xs text-gray-500 text-center">
-                      Last login: Today
+                  {/* User info - hidden on mobile */}
+                  <div className="hidden lg:block text-left">
+                    <p className="text-sm text-gray-900">
+                      {userData?.name }
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {userData?.email }
                     </p>
                   </div>
-                </div>
-              )}
-            </div>
+
+                  <FaChevronDown
+                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                      isProfileOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* Profile Modal */}
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-3 w-72 bg-white border border-gray-200 shadow-xl rounded-xl z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                    {/* Header */}
+                    <div className="p-4 bg-primary border-gray-100">
+                      <div className="flex items-center space-x-3">
+                        {userData?.image ? (
+                          <Image
+                            src={getImageUrl(userData?.image)}
+                            height={48}
+                            width={48}
+                            alt="Profile"
+                            className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                          />
+                        ) : (
+                          <FaUserCircle size={48} className="text-gray-600" />
+                        )}
+                        <div>
+                          <h3 className="text-white">
+                            {userData?.name || "User"}
+                          </h3>
+                          <p className="text-sm text-white">
+                            {userData?.email || "user@example.com"}
+                          </p>
+                          {/* Connection status */}
+                          <p className={`text-xs ${isSocketConnected ? 'text-green-200' : 'text-red-200'}`}>
+                            {isSocketConnected ? 'Online' : 'Offline'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="py-2">
+                      {profileMenuItems.map((item, index) => (
+                        <Link
+                          key={index}
+                          href={item.href}
+                          className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-50 transition-colors duration-150 group"
+                          onClick={() => setIsProfileOpen(false)}
+                        >
+                          <item.icon
+                            className={`w-5 h-5 ${item.color} group-hover:scale-110 transition-transform duration-150`}
+                          />
+                          <span className="text-gray-700 group-hover:text-gray-900">
+                            {item.label}
+                          </span>
+                        </Link>
+                      ))}
+
+                      {/* Settings Dropdown */}
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <button
+                          className="flex items-center justify-between w-full px-4 py-3 hover:bg-gray-50 transition-colors duration-150 group"
+                          onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                          aria-expanded={isSettingsOpen}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <FaCog className="w-5 h-5 text-gray-600 group-hover:text-blue-600 group-hover:rotate-90 transition-all duration-200" />
+                            <span className="text-gray-700 group-hover:text-gray-900">
+                              Settings
+                            </span>
+                          </div>
+                          <FaChevronRight
+                            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+                              isSettingsOpen ? "rotate-90" : ""
+                            }`}
+                          />
+                        </button>
+
+                        {/* Settings Submenu */}
+                        {isSettingsOpen && (
+                          <div className="bg-gray-50 border-l-2 border-blue-200 ml-4">
+                            {settingsItems.map((item, index) => (
+                              <Link
+                                key={index}
+                                href={item.href}
+                                className="flex items-center space-x-3 px-4 py-2.5 hover:bg-white transition-colors duration-150 group"
+                                onClick={() => setIsProfileOpen(false)}
+                              >
+                                <item.icon className="w-4 h-4 text-gray-500 group-hover:text-blue-600 transition-colors duration-150" />
+                                <span className="text-sm text-gray-600 group-hover:text-gray-800">
+                                  {item.label}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Logout */}
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center space-x-3 px-4 py-3 w-full hover:bg-red-50 transition-colors duration-150 group"
+                        >
+                          <FaSignOutAlt className="w-5 h-5 text-red-500 group-hover:scale-110 transition-transform duration-150" />
+                          <span className="text-red-600 group-hover:text-red-700">
+                            Logout
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                      <p className="text-xs text-gray-500 text-center">
+                        Last login: Today
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
