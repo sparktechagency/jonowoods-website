@@ -89,8 +89,7 @@ export default function Navbar() {
       }
 
       // Initialize socket connection with improved configuration
-      socketRef.current = io(
-        process.env.NEXT_PUBLIC_SOCKET_URL || "http://69.62.67.86:7000",
+      socketRef.current = io( "http://69.62.67.86:7000",
         {
           transports: ['websocket', 'polling'], // Fallback to polling if websocket fails
           upgrade: true,

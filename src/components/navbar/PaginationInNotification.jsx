@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 const NotificationPagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
-  const maxVisiblePages = 8; // এখন ৮ পেজ দেখাবে
+  const maxVisiblePages = 8; 
 
   const getPageNumbers = () => {
     const pageNumbers = [];
