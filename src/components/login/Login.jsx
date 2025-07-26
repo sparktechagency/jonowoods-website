@@ -137,12 +137,12 @@ export default function LoginUser() {
               <Link href="/register" className="text-white hover:text-red-400">
                 Create account
               </Link>
-              {/* <Link
+              <Link
                 href="/forgot-password"
                 className="text-white hover:text-red-400"
               >
                 Forgot password?
-              </Link> */}
+              </Link>
             </div>
           </form>
         </div>
