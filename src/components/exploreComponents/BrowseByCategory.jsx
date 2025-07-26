@@ -69,7 +69,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
       </div>
 
       {/* Show the "See More" button if the number of categories exceeds 6 */}
-      {data?.data?.length > 3 && (
+      {data?.data?.length > 6 && (
         <div className="flex justify-end">
           <Button
             variant="link"
