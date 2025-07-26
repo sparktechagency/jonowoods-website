@@ -133,7 +133,7 @@ export default function LoginUser() {
             </Button>
 
             {/* Links */}
-            <div className="flex justify-end text-sm text-center mt-6 md:mt-8 gap-4 md:gap-0">
+            <div className="flex justify-between text-sm text-center mt-6 md:mt-8 gap-4 md:gap-0">
               <Link href="/register" className="text-white hover:text-red-400">
                 Create account
               </Link>
