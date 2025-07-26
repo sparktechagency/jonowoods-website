@@ -6,13 +6,22 @@ import { useRouter } from "next/navigation";
 import { useChallengeVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 import { getImageUrl, getVideoAndThumbnail } from "../share/imageUrl";
 import Spinner from "../../app/(commonLayout)/Spinner";
+import { useState } from "react";
 
 export default function NewClasses() {
   const router = useRouter();
   const { data, isLoading } = useChallengeVideoQuery();
-  console.log(data);
+  const [showAll, setShowAll] = useState(false); // State to handle "See More"
 
   if (isLoading) return <Spinner />;
+
+  // Show only the first 6 items if showAll is false, otherwise show all items
+  const classesToShow = showAll ? data?.data : data?.data?.slice(0, 6);
+
+  const handleSeeMoreClick = () => {
+    // Navigate to the challenges page when "See More" is clicked
+    router.push("/challenges");
+  };
 
   return (
     <section className="my-10 mx-3">
@@ -20,9 +29,9 @@ export default function NewClasses() {
         <h2 className="text-xl font-semibold">Join a Challenge</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-10">
-        {data?.data?.map((yogaClass) => (
+        {classesToShow?.map((yogaClass) => (
           <div
-            key={yogaClass._id} // Changed from id to _id
+            key={yogaClass._id}
             className="relative h-80 rounded-lg overflow-hidden cursor-pointer group"
             onClick={() => router.push(`challenge/${yogaClass._id}`)}
           >
@@ -59,15 +68,17 @@ export default function NewClasses() {
           </div>
         ))}
       </div>
-      <div className="flex justify-end">
-        <Button
-          onClick={() => router.push("challenge")}
-          variant="link"
-          className="text-rose-500 cursor-pointer hover:text-rose-600"
-        >
-          See More
-        </Button>
-      </div>
+      {data?.data?.length > 6 && (
+        <div className="flex justify-end">
+          <Button
+            onClick={handleSeeMoreClick} // Navigate to the challenges page on click
+            variant="link"
+            className="text-rose-500 cursor-pointer hover:text-rose-600"
+          >
+            See More
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

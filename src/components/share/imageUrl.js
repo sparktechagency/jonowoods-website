@@ -7,7 +7,7 @@ export const getImageUrl = (path) => {
     return path;
   } else {
     // const baseUrl = "http://10.10.7.37:7000";
-   const baseUrl = "http://69.62.67.86:7000"
+   const baseUrl = "https://api.yogawithjen.life"
     return `${baseUrl}/${path}`;
   }
 };

@@ -3,15 +3,24 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { baseUrlApi } from "../../redux/baseUrl/baseUrlApi";
 import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
 import { getImageUrl } from "../share/imageUrl";
+import { useState } from "react";
 
 export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   const router = useRouter();
   const { data, isLoading } = useGetCategoryQuery();
-  console.log(data);
+  const [showAll, setShowAll] = useState(false); // State to handle "See More"
 
+  if (isLoading) return <div>Loading...</div>; // Loading state, you can customize it
+
+  // Show only the first 6 categories if showAll is false, otherwise show all categories
+  const categoriesToShow = showAll ? data?.data : data?.data?.slice(0, 6);
+
+  const handleSeeMoreClick = () => {
+    // Navigate to the categories page when "See More" is clicked
+    router.push("/categories");
+  };
 
   return (
     <section className="mb-10 mx-3">
@@ -19,7 +28,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
         <h2 className="text-xl font-semibold">Browse By Categories</h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-10">
-        {data?.data.map((yogaClass) => (
+        {categoriesToShow?.map((yogaClass) => (
           <div
             key={yogaClass._id}
             className="relative h-80 rounded-lg overflow-hidden cursor-pointer group"
@@ -59,15 +68,18 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
         ))}
       </div>
 
-      <div className="flex justify-end">
-        <Button
-          variant="link"
-          className="text-rose-500 hover:text-rose-600 cursor-pointer"
-          onClick={() => router.push("/categories")}
-        >
-          See More
-        </Button>
-      </div>
+      {/* Show the "See More" button if the number of categories exceeds 6 */}
+      {data?.data?.length > 3 && (
+        <div className="flex justify-end">
+          <Button
+            variant="link"
+            className="text-rose-500 hover:text-rose-600 cursor-pointer"
+            onClick={handleSeeMoreClick} // Navigate to the categories page
+          >
+            See More
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
