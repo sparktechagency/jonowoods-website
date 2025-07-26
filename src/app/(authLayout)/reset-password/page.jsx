@@ -1,10 +1,11 @@
 import ResetPasswordCom from "@/components/auth/ResetPassword";
+import { Suspense } from "react";
 
 const page = () => {
   return (
-    <div>
-      <ResetPasswordCom />
-    </div>
+    <Suspense fallback={<div>Loading...</div>}>
+    <ResetPasswordCom />
+  </Suspense>
   );
 };
 

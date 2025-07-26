@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner"; // For toast notifications
 import { useOtpVerifyMutation, useResendOtpMutation } from "@/redux/featured/auth/authApi";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 
 export default function OTPVerify() {

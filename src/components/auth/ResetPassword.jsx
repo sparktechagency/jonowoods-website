@@ -2,12 +2,11 @@
 
 "use client";
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input"; // ShadCN's Input Component
-import { Button } from "@/components/ui/button"; // ShadCN's Button Component
-import { HiEye, HiEyeOff } from "react-icons/hi"; // Password eye icons for toggle
-import { useRouter, useSearchParams } from "next/navigation"; // Next.js router
-// import { useResetPasswordMutation } from "@/redux/api/authApi"; // API hook
-import { toast } from "sonner"; // Toast notifications
+import { Input } from "@/components/ui/input"; 
+import { Button } from "@/components/ui/button"; 
+import { HiEye, HiEyeOff } from "react-icons/hi"; 
+import { useRouter, useSearchParams } from "next/navigation"; 
+import { toast } from "sonner"; 
 import { useResetPasswordMutation } from "@/redux/featured/auth/authApi";
 import Image from "next/image";
 
