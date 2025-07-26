@@ -4,17 +4,40 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useForgotPasswordMutation } from "@/redux/featured/auth/authApi";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [forgetPassword, { isLoading, error }] = useForgotPasswordMutation();
   const router = useRouter();
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit =async (e) => {
     e.preventDefault();
-    // Redirect to the verify-otp page and pass email as a query parameter
-    router.push(`/otp-verify?email=${email}`);
+    setIsSubmitting(true); // Start submission
+
+    try {
+      // Call the API to send an OTP for password reset
+      const response = await forgetPassword({ email });
+      console.log(response)
+
+      if (response?.data?.success) {
+        // Redirect to the verify-otp page and pass email as a query parameter
+        router.push(
+          `/otp-verify?email=${encodeURIComponent(
+            email
+          )}&type=password-reset`
+        );
+      } else {
+        console.error("Error during password reset request:", response?.error);
+      }
+    } catch (err) {
+      console.error("Error during password reset request:", err);
+      toast.error("There was an error sending the OTP. Please try again.");
+    } finally {
+      setIsSubmitting(false); // End submission
+    }
   };
 
   return (
