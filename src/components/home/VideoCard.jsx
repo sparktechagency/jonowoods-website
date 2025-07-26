@@ -15,7 +15,7 @@ export const VideoCard = ({
 
   return (
     <section className="w-full overflow-hidden rounded-lg mb-8">
-      <div onClick={handleClick} className="relative h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group">
+      <div onClick={handleClick} className="relative h-[30vh] lg:h-[60vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group">
         {/* Background Image using next/image */}
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat">
           {imageUrl ? (
@@ -35,11 +35,13 @@ export const VideoCard = ({
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
 
-        {/* Animated Title - Initially hidden, appears on hover */}
+        {/* Title - Static on mobile/tablet, animated on larger screens */}
         <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
           <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide drop-shadow-lg 
-                         opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0 
-                         transition-all duration-500 ease-out">
+                         md:opacity-100 md:translate-y-0
+                         lg:opacity-0 lg:translate-y-60 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 
+                         lg:transition-all lg:duration-500 lg:ease-out bg-[#A92C2C]/80 px-2 py-1 rounded"
+                        >
             {title}
           </h3>
         </div>
