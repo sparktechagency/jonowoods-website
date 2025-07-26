@@ -3,14 +3,14 @@ export const getImageUrl = (path) => {
     return "";
   }
 
-  if (path.startsWith("https://") || path.startsWith("https://")) {
+  if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   } else {
-    // const baseUrl = "http://10.10.7.37:7000";
-   const baseUrl = "https://api.yogawithjen.life"
+    const baseUrl = "https://api.yogawithjen.life";
     return `${baseUrl}/${path}`;
   }
 };
+
 
 export function getVideoAndThumbnail(url) {
   if (!url) return ''; // handle undefined/null cases
