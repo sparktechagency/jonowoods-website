@@ -37,7 +37,7 @@ export const VideoCard = ({
 
         {/* Title - Static on mobile/tablet, animated on larger screens */}
         <div className="absolute inset-0 flex items-center justify-center text-center text-white px-4">
-          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-wide drop-shadow-lg 
+          <h3 className="text-2xl lg:text-2xl font-bold tracking-wide drop-shadow-lg 
                          md:opacity-100 md:translate-y-0
                          lg:opacity-0 lg:translate-y-60 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 
                          lg:transition-all lg:duration-500 lg:ease-out bg-[#A92C2C]/80 px-2 py-1 rounded"
