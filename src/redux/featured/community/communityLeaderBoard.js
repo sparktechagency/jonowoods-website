@@ -9,7 +9,7 @@ const favouriteVideoApi = api.injectEndpoints({
           url: `/community/leaderboard`,
         };
       },
-      invalidatesTags: ["Posts"],
+      providesTags: ["Community"],
     }),
     singleVideo: builder.query({
       query: (id) => {
@@ -18,8 +18,22 @@ const favouriteVideoApi = api.injectEndpoints({
           url: `/videos/${id}`,
         };
       },
+      
+
+    }),
+
+    getFeaturedPost: builder.query({
+      query: () => {
+        return {
+          method: "GET",
+          url: `/post/letest`,
+        };
+      },
+      providesTags: ["Community"],
+
     }),
   }),
 });
 
-export const { useCommunityLeaderBoardQuery,useSingleVideoQuery } = favouriteVideoApi;
+export const { useCommunityLeaderBoardQuery,useSingleVideoQuery,useGetFeaturedPostQuery } = favouriteVideoApi;
+

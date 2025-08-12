@@ -66,9 +66,9 @@ export const JoditEditor = ({ value, onChange }) => {
   return (
     <JoditEditorComponent
       ref={editor}
-      value={value}
-      // config={config}
-      onChange={onChange}
+      value={undefined} 
+      defaultValue={value} 
+      onBlur={(newContent) => onChange(newContent)} 
     />
   );
 };

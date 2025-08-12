@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import { getImageUrl } from "../share/imageUrl";
+import ProfileIcon from "../profileIcon/ProfileIcon";
 import { Heart, MessageSquare, Edit, Trash, MoreVertical } from "lucide-react";
 import ButtonSpinner from "@/app/(commonLayout)/ButtonSpinner";
 
@@ -132,18 +133,11 @@ const ReplyItem = ({
       }`}
     >
       <Avatar className="h-9 w-9">
-        {reply?.commentCreatorId?.image ? (
-          <Image
-            src={getImageUrl(reply.commentCreatorId.image)}
-            height={36}
-            width={36}
-            alt={reply?.commentCreatorId?.name || "User"}
-          />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">
-            {(reply?.commentCreatorId?.name || "U").charAt(0).toUpperCase()}
-          </div>
-        )}
+        <ProfileIcon 
+          image={reply?.commentCreatorId?.image}
+          size={36}
+          className="h-full w-full"
+        />
       </Avatar>
       <div className="flex-1">
         <div className="flex items-center gap-2 justify-between">

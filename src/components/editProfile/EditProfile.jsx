@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { getImageUrl } from "../share/imageUrl";
+import ProfileIcon from "../profileIcon/ProfileIcon";
 
 export default function ProfileWithEditModal() {
   // State for user data
@@ -67,25 +68,14 @@ export default function ProfileWithEditModal() {
       <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="flex flex-col items-center">
           <div className="mb-4">
-            {user?.profilePicture ? (
-              <Image
-                src={getImageUrl(user?.profilePicture)}
-                alt="Profile"
-                height={120}
-                width={120}
+            <div className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 cursor-pointer">
+              <ProfileIcon 
+                image={user?.profilePicture}
+                size={120}
                 className="rounded-full object-cover"
+                hasBorder={true}
               />
-            ) : (
-              <div className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 cursor-pointer">
-                <Image
-                  src="https://i.ibb.co/PGZ7TG64/blue-circle-with-white-user-78370-4707.jpg"
-                  alt="Profile"
-                  height={100}
-                  width={100}
-                  className="rounded-full object-cover"
-                />
-              </div>
-            )}
+            </div>
           </div>
           <h2 className="text-2xl font-bold mb-2">{user?.name}</h2>
           <p className="text-gray-600 mb-1">{user?.email}</p>
@@ -110,14 +100,13 @@ export default function ProfileWithEditModal() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Profile Picture */}
                   <div className="flex justify-center">
-                    <Image
-                      src={formData.profilePicture}
-                      alt="Profile"
-                      height={100}
-                      width={100}
-                      className="w-24 h-24 rounded-full object-cover border-2 border-gray-300 cursor-pointer"
-                      onClick={handleProfileClick}
-                    />
+                    <div className="w-24 h-24 rounded-full border-2 border-gray-300 cursor-pointer" onClick={handleProfileClick}>
+                      <ProfileIcon 
+                        image={formData.profilePicture}
+                        size={100}
+                        className="rounded-full object-cover"
+                      />
+                    </div>
                   </div>
                   <input
                     type="file"

@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  FaUserCircle,
   FaBell,
   FaUser,
   FaRss,
@@ -12,6 +11,7 @@ import {
   FaChevronDown,
   FaChevronRight,
 } from "react-icons/fa";
+import ProfileIcon from "../profileIcon/ProfileIcon";
 import {
   MdContactSupport,
   MdSecurity,
@@ -408,20 +408,13 @@ export default function Navbar() {
                   aria-label="User profile menu"
                 >
                   <div className="relative">
-                    {userData?.image ? (
-                      <Image
-                        src={getImageUrl(userData?.image)}
-                        height={40}
-                        width={40}
-                        alt="Profile"
-                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-200 group-hover:border-blue-400 transition-colors duration-200"
-                      />
-                    ) : (
-                      <FaUserCircle
-                        size={40}
-                        className="text-gray-600 group-hover:text-blue-600 transition-colors duration-200"
-                      />
-                    )}
+                    <ProfileIcon 
+                      image={userData?.image}
+                      size={40}
+                      showBorder={true}
+                      borderColor="border-gray-200"
+                      hoverEffect={true}
+                    />
                     {/* Online indicator */}
                     <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                   </div>
@@ -449,17 +442,13 @@ export default function Navbar() {
                     {/* Header */}
                     <div className="p-4 bg-primary border-gray-100">
                       <div className="flex items-center space-x-3">
-                        {userData?.image ? (
-                          <Image
-                            src={getImageUrl(userData?.image)}
-                            height={48}
-                            width={48}
-                            alt="Profile"
-                            className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
-                          />
-                        ) : (
-                          <FaUserCircle size={48} className="text-gray-600" />
-                        )}
+                        <ProfileIcon 
+                          image={userData?.image}
+                          size={48}
+                          showBorder={true}
+                          borderColor="border-white"
+                          className="shadow-sm"
+                        />
                         <div>
                           <h3 className="text-white">
                             {userData?.name || "User"}

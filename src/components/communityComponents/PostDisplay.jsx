@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { HeartIcon, MoreVertical, Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { getImageUrl } from "../share/imageUrl";
+import ProfileIcon from "../profileIcon/ProfileIcon";
 import { formatDistanceToNow } from "date-fns";
 import {
   useLazyLikePostQuery,
@@ -111,18 +112,11 @@ const PostDisplay = ({
             <div className="flex items-center mb-3 justify-between">
               <div className="flex items-center">
                 <Avatar className="h-12 w-12 mr-2">
-                  {post?.userId?.image ? (
-                    <Image
-                      src={getImageUrl(post.userId.image)}
-                      height={50}
-                      width={50}
-                      alt={post?.userId?.name || "User"}
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                      {(post?.userId?.name || "U").charAt(0)}
-                    </div>
-                  )}
+                  <ProfileIcon 
+                    image={post?.userId?.image}
+                    size={48}
+                    className="h-full w-full"
+                  />
                 </Avatar>
                 <div className="flex flex-col gap-1">
                   <span className="font-bold">

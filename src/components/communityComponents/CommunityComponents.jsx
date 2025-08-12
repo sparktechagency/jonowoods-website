@@ -123,7 +123,7 @@ export default function CommunityComponents() {
           onPostSuccess={handlePostSuccess}
         />
 
-        {/* <FeaturedPostSection /> */}
+        <FeaturedPostSection />
         <PostDisplay
           posts={posts}
           currentUserId={currentUserId}
@@ -135,7 +135,7 @@ export default function CommunityComponents() {
         <Pagination
           currentPage={currentPage}
           totalPages={pagination.totalPage}
-          onPageChange={handlePageChange}
+          onPageChange={handlePageChange} 
         />
 
         <Leaderboard leaderboardData={leaderboardData} />

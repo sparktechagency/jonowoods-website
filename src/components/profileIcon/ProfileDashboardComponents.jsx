@@ -21,10 +21,8 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
-import {
-  useMyProfileQuery,
-  useUpdateProfileMutation,
-} from "@/redux/featured/auth/authApi";
+import { useMyProfileQuery, useUpdateProfileMutation } from "@/redux/featured/auth/authApi";
+import ProfileIcon from "./ProfileIcon";
 import { getImageUrl } from "../share/imageUrl";
 import { toast } from "sonner";
 import { useRunningPackageQuery } from "@/redux/featured/Package/packageApi";
@@ -274,23 +272,13 @@ export default function ProfileDashboardComponents() {
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6 relative">
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="relative group">
-            {userData?.image ? (
-              <Image
-                src={getImageUrl(userData?.image)}
-                alt="Profile"
-                height={140}
-                width={140}
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-md"
-              />
-            ) : (
-              <Image
-                src="https://i.ibb.co/PGZ7TG64/blue-circle-with-white-user-78370-4707.jpg"
-                alt="Profile"
-                height={140}
-                width={140}
-                className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover border-4 border-white shadow-md"
-              />
-            )}
+            <ProfileIcon 
+              image={userData?.image}
+              size={112} /* 28*4 */
+              showBorder={true}
+              borderColor="border-white"
+              className="shadow-md"
+            />
             {/* {!imagePreview && (
               <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <User className="text-white" size={24} />
