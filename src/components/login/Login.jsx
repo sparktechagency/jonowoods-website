@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { loginSuccess } from "@/redux/featured/auth/authSlice"; // Import your authSlice actions
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
 
 export default function LoginUser() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,6 +23,11 @@ export default function LoginUser() {
   const router = useRouter();
 
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
+  const {data:accessData}=useGetMyAccessQuery()
+  const access=accessData?.data?.hasAccess
+  console.log(access)
+
+
 
 
   const handleSubmit = async (e) => {
@@ -33,9 +39,14 @@ export default function LoginUser() {
       // Save tokens and dispatch success
       localStorage.setItem("token", accessToken);
       dispatch(loginSuccess(accessToken));
-  
+      if(access){
+        router.push("/");
+      }else{
+        router.push("/subscription");
+      }
+
       toast.success("Login successful! Welcome back.");
-      router.push("/");
+      // router.push("/");
     } catch (error) {
       console.error("Login failed:", error);
   

@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import {
   FaBell,
   FaUser,
@@ -10,6 +12,7 @@ import {
   FaSignOutAlt,
   FaChevronDown,
   FaChevronRight,
+  FaTrash,
 } from "react-icons/fa";
 import ProfileIcon from "../profileIcon/ProfileIcon";
 import {
@@ -18,12 +21,16 @@ import {
   MdPrivacyTip,
   MdDescription,
 } from "react-icons/md";
-import { useMyProfileQuery } from "@/redux/featured/auth/authApi";
+import {
+  useMyProfileQuery,
+  useUserDeleteAccountMutation,
+} from "@/redux/featured/auth/authApi";
 import {
   useGetNotificationQuery,
   useReadOneNotificationMutation,
   useReadAllNotificationMutation,
 } from "@/redux/featured/notification/NotificationApi";
+import { deleteAccountSuccess, logout } from "@/redux/featured/auth/authSlice";
 import { getImageUrl } from "../share/imageUrl";
 import Image from "next/image";
 import io from "socket.io-client";
@@ -36,15 +43,21 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import NotificationPagination from "./PaginationInNotification";
 import Spinner from "@/app/(commonLayout)/Spinner";
+import { toast } from "react-hot-toast";
+import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -54,6 +67,7 @@ export default function Navbar() {
   const socketRef = useRef(null);
   const profileRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const { data: accessData } = useGetMyAccessQuery();
 
   // Constants
   const NOTIFICATIONS_PER_PAGE = 30;
@@ -73,6 +87,8 @@ export default function Navbar() {
 
   const [readOneNotification] = useReadOneNotificationMutation();
   const [readAllNotification] = useReadAllNotificationMutation();
+  const [userDeleteAccount, { isLoading: isDeleteLoading }] =
+    useUserDeleteAccountMutation();
 
   // Calculate unread count from API response
   const unreadCount = notificationData?.data?.result?.unreadCount || 0;
@@ -89,23 +105,21 @@ export default function Navbar() {
       }
 
       // Initialize socket connection with improved configuration
-      socketRef.current = io( "https://api.yogawithjen.life",
-        {
-          transports: ['websocket', 'polling'], // Fallback to polling if websocket fails
-          upgrade: true,
-          rememberUpgrade: true,
-          timeout: 20000, // Connection timeout
-          reconnection: true,
-          reconnectionAttempts: MAX_RECONNECTION_ATTEMPTS,
-          reconnectionDelay: RECONNECTION_DELAY,
-          reconnectionDelayMax: 10000,
-          forceNew: true, // Force a new connection
-          autoConnect: true,
-          query: {
-            userId: userData._id 
-          }
-        }
-      );
+      socketRef.current = io("https://api.yogawithjen.life", {
+        transports: ["websocket", "polling"], // Fallback to polling if websocket fails
+        upgrade: true,
+        rememberUpgrade: true,
+        timeout: 20000, // Connection timeout
+        reconnection: true,
+        reconnectionAttempts: MAX_RECONNECTION_ATTEMPTS,
+        reconnectionDelay: RECONNECTION_DELAY,
+        reconnectionDelayMax: 10000,
+        forceNew: true, // Force a new connection
+        autoConnect: true,
+        query: {
+          userId: userData._id,
+        },
+      });
 
       const handleNewNotification = () => {
         console.log("New notification received");
@@ -117,40 +131,46 @@ export default function Navbar() {
         console.log("Socket connected successfully");
         setIsSocketConnected(true);
         setConnectionAttempts(0);
-        
+
         // Join user-specific room
-        socketRef.current.emit('join-user-room', userData._id);
+        socketRef.current.emit("join-user-room", userData._id);
       });
 
       socketRef.current.on("disconnect", (reason) => {
         console.log("Socket disconnected:", reason);
         setIsSocketConnected(false);
-        
+
         // Don't attempt to reconnect if it was intentional
         if (reason === "io client disconnect") return;
-        
+
         // Handle automatic reconnection for other disconnect reasons
         if (connectionAttempts < MAX_RECONNECTION_ATTEMPTS) {
-          setConnectionAttempts(prev => prev + 1);
-          console.log(`Attempting to reconnect... (${connectionAttempts + 1}/${MAX_RECONNECTION_ATTEMPTS})`);
+          setConnectionAttempts((prev) => prev + 1);
+          console.log(
+            `Attempting to reconnect... (${
+              connectionAttempts + 1
+            }/${MAX_RECONNECTION_ATTEMPTS})`
+          );
         }
       });
 
       socketRef.current.on("connect_error", (error) => {
         console.error("Socket connection error:", error.message);
         setIsSocketConnected(false);
-        
+
         // Implement exponential backoff for reconnection
         if (connectionAttempts < MAX_RECONNECTION_ATTEMPTS) {
           const delay = RECONNECTION_DELAY * Math.pow(2, connectionAttempts);
           console.log(`Retrying connection in ${delay / 1000} seconds...`);
-          
+
           reconnectTimeoutRef.current = setTimeout(() => {
-            setConnectionAttempts(prev => prev + 1);
+            setConnectionAttempts((prev) => prev + 1);
             connectSocket();
           }, delay);
         } else {
-          console.error("Max reconnection attempts reached. Please refresh the page.");
+          console.error(
+            "Max reconnection attempts reached. Please refresh the page."
+          );
         }
       });
 
@@ -187,17 +207,91 @@ export default function Navbar() {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      
+
       if (socketRef.current) {
         socketRef.current.off(`notification::${userData._id}`);
         socketRef.current.off("new-notification");
         socketRef.current.disconnect();
         socketRef.current = null;
       }
-      
+
       setIsSocketConnected(false);
     };
   }, [userData?._id, refetch, connectionAttempts]);
+
+  // Enhanced account delete handler with better debugging and error handling
+  const handleDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      toast.error("Please enter your password");
+      return;
+    }
+
+    // Debug logs
+    console.log("=== Account Deletion Debug Info ===");
+    console.log("User data:", userData);
+    console.log("Password being sent:", deletePassword);
+    console.log("Current token:", localStorage.getItem('token'));
+    console.log("====================================");
+
+    try {
+      // Call the API
+      const result = await userDeleteAccount({ password: deletePassword }).unwrap();
+      
+      console.log("Account deletion API response:", result);
+      
+      // Success - update Redux state
+      dispatch(deleteAccountSuccess());
+      
+      toast.success("Account deleted successfully");
+      setDeletePassword("");
+      setOpen(false);
+      
+      // Disconnect socket
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+      
+      // Clear all storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Force redirect after a brief delay
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1500);
+      
+    } catch (error) {
+      console.error("=== Account Deletion Error ===");
+      console.error("Full error object:", error);
+      console.error("Error status:", error?.status);
+      console.error("Error data:", error?.data);
+      console.error("Error message:", error?.message);
+      console.error("==============================");
+      
+      // Handle specific error cases
+      let errorMessage = "Failed to delete account. Please try again.";
+      
+      if (error?.status === 400) {
+        errorMessage = "Invalid request. Please check your password.";
+      } else if (error?.status === 401) {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (error?.status === 403) {
+        errorMessage = "You don't have permission to delete this account.";
+      } else if (error?.status === 404) {
+        errorMessage = "Account not found.";
+      } else if (error?.status === 500) {
+        errorMessage = "Server error. Please try again later.";
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+      setDeletePassword("");
+    }
+  };
 
   // Update notifications state when data changes
   useEffect(() => {
@@ -263,9 +357,14 @@ export default function Navbar() {
     if (socketRef.current) {
       socketRef.current.disconnect();
     }
+
+    // Dispatch logout action
+    dispatch(logout());
     
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    // Clear storage
+    localStorage.clear();
+    sessionStorage.clear();
+    
     setIsProfileOpen(false);
     window.location.href = "/login";
   };
@@ -334,7 +433,13 @@ export default function Navbar() {
             href="/"
             className="flex items-center space-x-2 text-lg font-bold"
           >
-            <Image src="/assests/logo.png" alt="Logo" width={100} height={100} className="w-16 h-10" />
+            <Image
+              src="/assests/logo.png"
+              alt="Logo"
+              width={100}
+              height={100}
+              className="w-16 h-10"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -357,7 +462,8 @@ export default function Navbar() {
 
           {/* User Controls */}
           <div className="flex items-center space-x-4">
-            {/* {userData?._id && (
+            {/* Debug Connection Status (for development) */}
+            {process.env.NODE_ENV === 'development' && userData?._id && (
               <div className="flex items-center space-x-2">
                 <div className={`w-2 h-2 rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 {!isSocketConnected && connectionAttempts >= MAX_RECONNECTION_ATTEMPTS && (
@@ -370,7 +476,7 @@ export default function Navbar() {
                   </button>
                 )}
               </div>
-            )} */}
+            )}
 
             {/* Notification Button - Only show if user is logged in */}
             {userData?._id && (
@@ -408,7 +514,7 @@ export default function Navbar() {
                   aria-label="User profile menu"
                 >
                   <div className="relative">
-                    <ProfileIcon 
+                    <ProfileIcon
                       image={userData?.image}
                       size={40}
                       showBorder={true}
@@ -416,17 +522,17 @@ export default function Navbar() {
                       hoverEffect={true}
                     />
                     {/* Online indicator */}
-                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                    <div
+                      className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${
+                        isSocketConnected ? "bg-green-500" : "bg-gray-400"
+                      }`}
+                    ></div>
                   </div>
 
                   {/* User info - hidden on mobile */}
                   <div className="hidden lg:block text-left">
-                    <p className="text-sm text-gray-900">
-                      {userData?.name }
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {userData?.email }
-                    </p>
+                    <p className="text-sm text-gray-900">{userData?.name}</p>
+                    <p className="text-xs text-gray-500">{userData?.email}</p>
                   </div>
 
                   <FaChevronDown
@@ -442,7 +548,7 @@ export default function Navbar() {
                     {/* Header */}
                     <div className="p-4 bg-primary border-gray-100">
                       <div className="flex items-center space-x-3">
-                        <ProfileIcon 
+                        <ProfileIcon
                           image={userData?.image}
                           size={48}
                           showBorder={true}
@@ -457,8 +563,14 @@ export default function Navbar() {
                             {userData?.email || "user@example.com"}
                           </p>
                           {/* Connection status */}
-                          <p className={`text-xs ${isSocketConnected ? 'text-green-200' : 'text-red-200'}`}>
-                            {isSocketConnected ? 'Online' : 'Offline'}
+                          <p
+                            className={`text-xs ${
+                              isSocketConnected
+                                ? "text-green-200"
+                                : "text-red-200"
+                            }`}
+                          >
+                            {isSocketConnected ? "Online" : "Offline"}
                           </p>
                         </div>
                       </div>
@@ -518,6 +630,20 @@ export default function Navbar() {
                                 </span>
                               </Link>
                             ))}
+                            
+                            {/* Delete Account in Settings */}
+                            <button
+                              onClick={() => {
+                                setOpen(true);
+                                setIsProfileOpen(false);
+                              }}
+                              className="flex items-center space-x-3 px-4 py-2.5 w-full hover:bg-red-50 transition-colors duration-150 group border-t border-gray-200 mt-2 pt-2"
+                            >
+                              <FaTrash className="w-4 h-4 text-red-600 group-hover:scale-110 transition-transform duration-150" />
+                              <span className="text-sm text-red-700 group-hover:text-red-800">
+                                Delete Account
+                              </span>
+                            </button>
                           </div>
                         )}
                       </div>
@@ -535,7 +661,6 @@ export default function Navbar() {
                         </button>
                       </div>
                     </div>
-
                     {/* Footer */}
                     <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
                       <p className="text-xs text-gray-500 text-center">
@@ -651,6 +776,73 @@ export default function Navbar() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Enhanced Delete Account Modal */}
+      <AlertDialog open={open} onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          setDeletePassword("");
+        }
+      }}>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" className="hidden">Delete Account</Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600">
+              Delete Your Account
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-2">
+                <p>This action cannot be undone. This will permanently delete your account and remove your data from our servers.</p>
+                <p className="font-medium text-gray-800">Please enter your password to confirm:</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Input
+              type="password"
+              placeholder="Enter your current password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              className="w-full"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && deletePassword.trim() && !isDeleteLoading) {
+                  handleDeleteAccount();
+                }
+              }}
+            />
+            {/* Password validation feedback */}
+            {deletePassword && deletePassword.length < 3 && (
+              <p className="text-sm text-amber-600 mt-1">
+                Please enter your complete password
+              </p>
+            )}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              onClick={() => setDeletePassword("")}
+              disabled={isDeleteLoading}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAccount}
+              disabled={isDeleteLoading || !deletePassword.trim()}
+              className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
+            >
+              {isDeleteLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Deleting...
+                </div>
+              ) : (
+                "Delete Account"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

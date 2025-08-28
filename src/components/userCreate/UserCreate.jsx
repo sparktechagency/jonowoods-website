@@ -45,7 +45,7 @@ export default function UserCreate() {
     <div className="min-h-screen w-full flex flex-col lg:flex-row justify-center">
       {/* Left side image */}
       <div className="hidden lg:flex lg:w-1/2 items-center justify-center">
-        <div className="h-auto max-h-[900px] w-full max-w-[900px] p-4">
+        <div className="h-auto  w-full max-w-[900px] p-4">
           <Image
             src="/assests/registerImage.png"
             alt="Side Illustration"

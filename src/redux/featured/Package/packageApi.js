@@ -9,6 +9,8 @@ const packagesApi = api.injectEndpoints({
                     url: `/package/users`,
                 };
             },
+            providesTags: ["Package"],
+
         }),
         runningPackage: builder.query({
             query: () => {
@@ -17,6 +19,8 @@ const packagesApi = api.injectEndpoints({
                   url: `/subscription/details`,
                 };
             },
+            providesTags: ["Package"],
+
         }),
         checkoutForSubscription: builder.mutation({
             query: (id) => {
@@ -25,8 +29,21 @@ const packagesApi = api.injectEndpoints({
                   url: `/subscription/create-checkout-session/${id}`,
                 };
             },
+            invalidatesTags: ["Package"],
+
         }),
+        getMyAccess: builder.query({
+            query: () => {
+                return {
+                  method: "GET",
+                  url: `/subscription/check-access`,
+                };
+            },
+            providesTags: ["Package"],
+        }),
+
     }),
 });
 
-export const { useGetWebPackagesQuery, useCheckoutForSubscriptionMutation,useRunningPackageQuery } = packagesApi;
+export const { useGetWebPackagesQuery, useCheckoutForSubscriptionMutation,useRunningPackageQuery,useGetMyAccessQuery } = packagesApi;
+
