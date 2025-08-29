@@ -68,6 +68,10 @@ export default function Navbar() {
   const profileRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
   const { data: accessData } = useGetMyAccessQuery();
+  const access = accessData?.data;
+  console.log(access);
+
+
 
   // Constants
   const NOTIFICATIONS_PER_PAGE = 30;
@@ -105,7 +109,8 @@ export default function Navbar() {
       }
 
       // Initialize socket connection with improved configuration
-      socketRef.current = io("https://api.yogawithjen.life", {
+      socketRef.current = io("http://10.10.7.62:7000", {
+      // socketRef.current = io("https://api.yogawithjen.life", {
         transports: ["websocket", "polling"], // Fallback to polling if websocket fails
         upgrade: true,
         rememberUpgrade: true,
@@ -380,7 +385,7 @@ export default function Navbar() {
   // Navigation items
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "Favorite", path: "/favorite" },
+    { name: "favorite", path: "/favorite" },
     { name: "Explore", path: "/explore" },
     { name: "Community", path: "/community" },
   ];

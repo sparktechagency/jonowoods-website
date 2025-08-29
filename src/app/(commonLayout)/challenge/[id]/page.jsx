@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { useMarkWatchChallengeVideoMutation, useSingleChallengeVideoQuery } from '@/redux/featured/CommingSoon/commingSoonApi';
 import Spinner from '../../Spinner';
 import VideoPlayer from '@/components/VideoPlayer';
-import { getVideoAndThumbnail } from '@/components/share/imageUrl';
 import Image from 'next/image';
 
 const ChallengePage = ({ params }) => {
@@ -140,7 +139,6 @@ const ChallengePage = ({ params }) => {
                 {/* Thumbnail */}
                 <div className="relative h-40">
                   <Image
-                    // src={getVideoAndThumbnail(video?.thumbnailUrl || video.image)}
                     src={`https://${video.thumbnailUrl || video.image}`}
                     alt={video.title}
                     width={100}

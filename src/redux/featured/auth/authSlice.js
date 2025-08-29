@@ -3,15 +3,28 @@ import { createSlice } from "@reduxjs/toolkit";
 // Helper functions for localStorage operations
 const getTokenFromStorage = () => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem("token");
+    try {
+      const token = localStorage.getItem("token");
+      return token && token !== 'undefined' && token !== 'null' ? token : null;
+    } catch (error) {
+      console.error('Error getting token from localStorage:', error);
+      localStorage.removeItem("token");
+      return null;
+    }
   }
   return null;
 };
 
 const getUserFromStorage = () => {
   if (typeof window !== 'undefined') {
-    const userData = localStorage.getItem("user");
-    return userData ? JSON.parse(userData) : null;
+    try {
+      const userData = localStorage.getItem("user");
+      return userData && userData !== 'undefined' ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage:', error);
+      localStorage.removeItem("user");
+      return null;
+    }
   }
   return null;
 };

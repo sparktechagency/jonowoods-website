@@ -12,6 +12,9 @@ const CourseVideoPage = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   const { data: videoData, isLoading: videoLoading } = useSingleVidoeQuery(id, { skip: !id });
+  console.log("videoData1", videoData)
+
+
   
   useEffect(() => {
     if (videoData) {
@@ -54,26 +57,25 @@ const CourseVideoPage = ({ params }) => {
         videoUrl={`https://${video.videoUrl}`}
         thumbnailUrl={`https://${video.thumbnailUrl}`}
         title={video.title}
-        autoPlay={true}
+        autoPlay={false}
         controls={true}
-        className="mb-8"
       />
 
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Description</h2>
-        <p className="text-gray-700">{video.description}</p>
-        
-        {video.equipment && video.equipment.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Equipment Needed</h3>
-            <ul className="list-disc pl-5">
-              {video.equipment.map((item, index) => (
-                <li key={index} className="text-gray-700">{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Description</h2>
+        <p className="text-gray-700 leading-relaxed">{video.description}</p>
       </div>
+      
+      {video.equipmentNeeded && video.equipmentNeeded.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Equipment Needed</h2>
+          <ul className="list-disc list-inside space-y-2">
+            {video.equipmentNeeded.map((equipment, index) => (
+              <li key={index} className="text-gray-700">{equipment}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

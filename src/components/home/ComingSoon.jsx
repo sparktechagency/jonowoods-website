@@ -5,6 +5,7 @@ import { VideoCard } from "./VideoCard";
 
 export const ComingSoon = () => {
   const { data } = useComingSoonLatestVideoQuery();
+  console.log(data)
   const image = `https://${data?.data?.thumbnailUrl}`;
   console.log(data);
   return (

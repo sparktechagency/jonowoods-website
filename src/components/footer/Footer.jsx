@@ -36,7 +36,7 @@ export default function Footer() {
                 href="/favorite"
                 className="text-gray-800 hover:text-gray-600 text-sm"
               >
-                Favorite
+                favorite
               </Link>
               <Link
                 href="/explore"
@@ -68,7 +68,7 @@ export default function Footer() {
               href="/favorite"
               className="text-gray-800 hover:text-gray-600"
             >
-              Favorite
+              favorite
             </Link>
             <Link href="/explore" className="text-gray-800 hover:text-gray-600">
               Explore

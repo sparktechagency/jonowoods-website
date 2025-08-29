@@ -1,29 +1,29 @@
 // pages/index.js
 "use client";
-import { useFavouriteVideoListQuery } from "@/redux/featured/favouriteVideo/favouriteVideoApi";
 import { Heart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Spinner from "../../app/(commonLayout)/Spinner";
-import { useVideoFavouriteMutation } from "../../redux/featured/favouritApi/favouritApi";
 import { getVideoAndThumbnail } from "../share/imageUrl";
+import { useVideoFavoriteMutation } from "@/redux/featured/favoriteApi/favoriteApi";
+import { useFavoriteVideoListQuery } from "@/redux/featured/favoriteVideo/favoriteVideoApi";
 
 export default function FavoriteComponents() {
   const router = useRouter();
-  const [favorite, { isLoading: isFavouriteLoading }] = useVideoFavouriteMutation();
-  const { data, isLoading, isError, refetch } = useFavouriteVideoListQuery();
+  const [favorite, { isLoading: isFavoriteLoading }] = useVideoFavoriteMutation();
+  const { data, isLoading, isError, refetch } = useFavoriteVideoListQuery();
 
   const [likedVideos, setLikedVideos] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const favouriteVideos = data?.data?.favouritList || [];
+  const favoriteVideos = data?.data?.favoriteList || [];
   const pagination = data?.data?.meta || {};
 
-  console.log(favouriteVideos)
+  console.log(favoriteVideos)
 
   const toggleLike = async (id) => {
     try {
@@ -86,11 +86,11 @@ export default function FavoriteComponents() {
         </div>
       )}
 
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">My Favorite Videos</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">My favorite Videos</h1>
 
       <div className="grid grid-cols-1 gap-6">
-        {favouriteVideos.length > 0 ? (
-          favouriteVideos.map(
+        {favoriteVideos.length > 0 ? (
+          favoriteVideos.map(
             (favorite) =>
               isValidVideo(favorite) && (
                 <div
@@ -102,7 +102,7 @@ export default function FavoriteComponents() {
                     {favorite.videoId.thumbnailUrl ? (
                       <Image
                         src={getVideoAndThumbnail(favorite.videoId.thumbnailUrl)}
-                        alt={favorite.videoId.title || 'Favorite video thumbnail'}
+                        alt={favorite.videoId.title || 'favorite video thumbnail'}
                         height={200}
                         width={300}
                         className="w-full h-full object-cover"
@@ -112,7 +112,7 @@ export default function FavoriteComponents() {
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-500">No Favorite Video available</span>
+                        <span className="text-gray-500">No favorite Video available</span>
                       </div>
                     )}
                   </div>
@@ -159,7 +159,7 @@ export default function FavoriteComponents() {
                           onClick={() => toggleLike(favorite?.videoId?._id)}
                           className="flex items-center"
                           aria-label="Like video"
-                          disabled={isFavouriteLoading}
+                          disabled={isFavoriteLoading}
                         >
                           <Heart
                             className={`h-5 w-5 ${favorite.liked || likedVideos[favorite._id]
@@ -200,7 +200,7 @@ export default function FavoriteComponents() {
                         onClick={() => toggleLike(favorite?.videoId?._id)}
                         className="flex items-center"
                         aria-label="Like video"
-                        disabled={isFavouriteLoading}
+                        disabled={isFavoriteLoading}
                       >
 
                         <Heart

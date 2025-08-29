@@ -1,8 +1,8 @@
 import { api } from "@/redux/baseUrl/baseUrl";
 
-const favouriteVideoApi = api.injectEndpoints({
+const favoriteVideoApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    favouriteVideoList: builder.query({
+    favoriteVideoList: builder.query({
       query: (args) => {
         const urlPath = args?.length
           ? "/" + args.map((arg) => `${arg.name}/${arg.value}`).join("/")
@@ -10,7 +10,7 @@ const favouriteVideoApi = api.injectEndpoints({
 
         return {
           method: "GET",
-          url: `/favourit${urlPath}`, 
+          url: `/favorite${urlPath}`, 
         };
       },
     }),
@@ -25,4 +25,4 @@ const favouriteVideoApi = api.injectEndpoints({
   }),
 });
 
-export const { useFavouriteVideoListQuery,useSingleVideoQuery } = favouriteVideoApi;
+export const { useFavoriteVideoListQuery,useSingleVideoQuery } = favoriteVideoApi;

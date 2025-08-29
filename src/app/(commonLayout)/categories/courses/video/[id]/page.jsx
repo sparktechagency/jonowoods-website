@@ -12,6 +12,8 @@ const CourseVideoItemPage = ({ params }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   const { data: videoData, isLoading: videoLoading } = useSingleVidoeQuery(id, { skip: !id });
+  console.log(videoData)
+
   
   useEffect(() => {
     if (videoData) {

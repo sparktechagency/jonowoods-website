@@ -25,7 +25,6 @@ export default function LoginUser() {
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
   const {data:accessData}=useGetMyAccessQuery()
   const access=accessData?.data?.hasAccess
-  console.log(access)
 
 
 
@@ -39,14 +38,22 @@ export default function LoginUser() {
       // Save tokens and dispatch success
       localStorage.setItem("token", accessToken);
       dispatch(loginSuccess(accessToken));
-      if(access){
-        router.push("/");
-      }else{
-        router.push("/subscription");
-      }
-
+      
       toast.success("Login successful! Welcome back.");
-      // router.push("/");
+      
+      // Check if there's a redirect path saved
+      const redirectPath = localStorage.getItem("redirectPath");
+      if (redirectPath) {
+        localStorage.removeItem("redirectPath");
+        router.push(redirectPath);
+      } else {
+        // Default redirect based on access
+        if(access){
+          router.push("/");
+        } else {
+          router.push("/subscription");
+        }
+      }
     } catch (error) {
       console.error("Login failed:", error);
   

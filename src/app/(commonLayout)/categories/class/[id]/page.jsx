@@ -9,7 +9,7 @@ import commectIcon from '../../../../../../public/assests/comment.png';
 import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation } from '../../../../../redux/featured/commentApi/commentApi';
 import Spinner from '../../../Spinner';
 import { useSingleVidoeQuery } from '@/redux/featured/homeApi.jsx/homeApi';
-import { useVideoFavouriteMutation } from '@/redux/featured/favouritApi/favouritApi';
+import { useVideoFavoriteMutation } from '@/redux/featured/favoriteApi/favoriteApi';
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -29,7 +29,7 @@ export default function FitnessVideoPage({ params }) {
   const [deleteComment, { isLoading: deleteLoading }] = useDeleteCommentMutation();
   const [replyComment, { isLoading: replyLoading }] = useReplyCommentMutation();
   const [likeReply, { isLoading: likeLoading }] = useLikeReplyMutation();
-  const [favrite, { isLoading: favLoading }] = useVideoFavouriteMutation();
+  const [favorite, { isLoading: favLoading }] = useVideoFavoriteMutation();
 
   // State management
   const [comments, setComments] = useState([]);
@@ -49,14 +49,16 @@ export default function FitnessVideoPage({ params }) {
   useEffect(() => {
     if (data?.data) {
       setLikeCount(data.data.likes || 0);
-      // You might want to check if current user has liked this video
-      // setIsLiked(data.data.isLikedByCurrentUser || false);
+      // Set initial favorite status from API response
+      setIsLiked(data.data.isFavorite || false);
     }
   }, [data]);
 
   const handleLike = async (id) => {
     try {
-      const response = await favrite(id).unwrap();
+      const response = await favorite(id).unwrap();
+      // Update local state immediately for better UX
+      setIsLiked(!isLiked);
       refetch();
     } catch (error) {
       console.error('Error liking video:', error)
@@ -346,21 +348,18 @@ export default function FitnessVideoPage({ params }) {
         <div className="flex items-center space-x-4 pb-4 border-b border-gray-100">
           <button
             onClick={() => handleLike(videoData._id)}
-            className="flex items-center space-x-2"
-            aria-label={videoData.isFavorite ? 'Unlike video' : 'Like video'}
+            className="flex items-center space-x-2 min-w-[24px] min-h-[24px]"
+            aria-label={isLiked ? 'Unlike video' : 'Like video'}
+            disabled={favLoading}
           >
-            {favLoading ? (
-              <h3>Loading</h3>
-            ) : (
-              <Heart
-                className={`w-6 h-6 cursor-pointer transition-colors ${videoData.isFavorite ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
-                  }`}
-              />
-            )}
+            <Heart
+              className={`w-6 h-6 cursor-pointer transition-colors ${favLoading ? 'opacity-50' : ''} ${isLiked ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
+                }`}
+            />
           </button>
 
           <div className="flex items-center space-x-2">
-            <div className="w-5 h-5 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 flex items-center justify-center">
               <Image src={commectIcon} alt="comment icons" width={20} height={20} />
             </div>
             <span className="text-sm font-medium text-gray-900">{comments.length}</span>

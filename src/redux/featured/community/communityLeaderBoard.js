@@ -1,6 +1,6 @@
 import { api } from "@/redux/baseUrl/baseUrl";
 
-const favouriteVideoApi = api.injectEndpoints({
+const favoriteVideoApi = api.injectEndpoints({
   endpoints: (builder) => ({
     communityLeaderBoard: builder.query({
       query: () => {
@@ -35,5 +35,5 @@ const favouriteVideoApi = api.injectEndpoints({
   }),
 });
 
-export const { useCommunityLeaderBoardQuery,useSingleVideoQuery,useGetFeaturedPostQuery } = favouriteVideoApi;
+export const { useCommunityLeaderBoardQuery,useSingleVideoQuery,useGetFeaturedPostQuery } = favoriteVideoApi;
 

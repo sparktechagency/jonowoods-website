@@ -93,7 +93,7 @@ export default function ClassDetails({ classId, onBack }) {
               size={16}
               className={isFavorite ? "fill-rose-500 text-rose-500" : ""}
             />
-            {isFavorite ? "Added to Favorites" : "Add to Favorites"}
+            {isFavorite ? "Added to favorites" : "Add to favorites"}
           </Button>
 
           <div className="mt-8">
