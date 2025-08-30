@@ -180,13 +180,19 @@ const CommentItem = ({
           </div>
 
           {editingComment === comment._id ? (
-            <div className="mt-1 flex items-center gap-2">
-              <input
-                type="text"
-                value={editText}
-                onChange={(e) => setEditText(e.target.value)}
-                className="flex-1 text-sm p-2 border rounded cursor-text"
-              />
+          <div className="mt-1 flex items-center gap-2">
+            <input
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleEditComment();
+                }
+              }}
+              className="flex-1 text-sm p-2 border rounded cursor-text"
+            />
               <Button
                 size="sm"
                 onClick={() => handleEditComment(comment._id)}
@@ -258,6 +264,12 @@ const CommentItem = ({
                 [`${comment._id}-`]: e.target.value,
               })
             }
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAddReply(comment._id);
+              }
+            }}
             placeholder="Write a reply..."
             className="flex-1 text-sm p-2 border rounded cursor-text"
             disabled={loadingStates.replying[`${comment._id}-`]}

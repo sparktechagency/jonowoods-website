@@ -192,6 +192,12 @@ const ReplyItem = ({
               type="text"
               value={editReplyText}
               onChange={(e) => setEditReplyText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleEditReply();
+                }
+              }}
               className="flex-1 text-sm p-2 border rounded cursor-text"
             />
             <Button
@@ -261,6 +267,12 @@ const ReplyItem = ({
                   [replyKey]: e.target.value,
                 })
               }
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAddReply(reply._id);
+                }
+              }}
               placeholder="Write a reply..."
               className="flex-1 text-sm p-2 border rounded cursor-text"
               disabled={loadingStates.replying[replyKey]}

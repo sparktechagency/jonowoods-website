@@ -88,6 +88,8 @@ export default function Navbar() {
     page: currentPage,
     limit: NOTIFICATIONS_PER_PAGE,
   });
+  console.log(notificationData);
+
 
   const [readOneNotification] = useReadOneNotificationMutation();
   const [readAllNotification] = useReadAllNotificationMutation();
@@ -96,6 +98,8 @@ export default function Navbar() {
 
   // Calculate unread count from API response
   const unreadCount = notificationData?.data?.result?.unreadCount || 0;
+  console.log(unreadCount);
+
 
   // Improved Socket.IO setup with better error handling and reconnection
   useEffect(() => {
@@ -302,7 +306,7 @@ export default function Navbar() {
   useEffect(() => {
     if (notificationData?.data?.result) {
       const result = notificationData.data.result;
-      setNotifications(result.result || []);
+      setNotifications(result || []);
       setTotalPages(result.meta?.totalPage || 1);
       setTotalNotifications(result.meta?.total || 0);
     }

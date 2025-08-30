@@ -9,6 +9,7 @@ export const commentsApi = api.injectEndpoints({
       }),
       providesTags: (result, error, postId) => [
         { type: "Comments", id: postId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
 
@@ -32,7 +33,7 @@ export const commentsApi = api.injectEndpoints({
         body: data,
       }),
       invalidatesTags: (result, error, { commentId }) => [
-        { type: "Comments", id: commentId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
 
@@ -43,7 +44,7 @@ export const commentsApi = api.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: (result, error, commentId) => [
-        { type: "Comments", id: commentId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
 
@@ -54,7 +55,7 @@ export const commentsApi = api.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: (result, error, commentId) => [
-        { type: "Comments", id: commentId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
 
@@ -66,7 +67,7 @@ export const commentsApi = api.injectEndpoints({
         body: data,
       }),
       invalidatesTags: (result, error, { commentId }) => [
-        { type: "Comments", id: commentId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
 
@@ -101,7 +102,7 @@ export const commentsApi = api.injectEndpoints({
         body: data,
       }),
       invalidatesTags: (result, error, { replyId }) => [
-        { type: "Comments", id: replyId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
 
@@ -112,7 +113,7 @@ export const commentsApi = api.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: (result, error, replyId) => [
-        { type: "Comments", id: replyId },
+        { type: "Comments", id: "LIST" },
       ],
     }),
   }),

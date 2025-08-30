@@ -58,8 +58,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
     try {
       await addComment({
         data: { content: commentText, postId },
-      });
-      refetch();
+      }).unwrap();
     } catch (error) {
       console.error("Failed to add comment:", error);
     }
@@ -76,14 +75,13 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
         await replyToReply({
           replyId: parentReplyId,
           data: { content: replyText },
-        });
+        }).unwrap();
       } else {
         await addReply({
           commentId,
           data: { content: replyText },
-        });
+        }).unwrap();
       }
-      refetch();
     } catch (error) {
       console.error("Failed to add reply:", error);
     }
@@ -114,8 +112,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
     setLocalComments(updatedComments);
 
     try {
-      await likeComment(commentId);
-      refetch();
+      await likeComment(commentId).unwrap();
     } catch (error) {
       console.error("Failed to like comment:", error);
       setLocalComments(localComments);
@@ -159,8 +156,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
     setLocalComments(updatedComments);
 
     try {
-      await likeReply(replyId);
-      refetch(); 
+      await likeReply(replyId).unwrap();
     } catch (error) {
       console.error("Failed to like reply:", error);
       setLocalComments(localComments); // revert on error
@@ -169,8 +165,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
 
   const handleDeleteComment = async (commentId) => {
     try {
-      await deleteComment( commentId );
-      refetch();
+      await deleteComment( commentId ).unwrap();
     } catch (error) {
       console.error("Failed to delete comment:", error);
     }
@@ -181,8 +176,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
       await updateComment({
         commentId,
         data: { content: newContent },
-      });
-      refetch();
+      }).unwrap();
     } catch (error) {
       console.error("Failed to edit comment:", error);
     }
@@ -193,8 +187,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
       await updateReply({
         replyId,
         data: { content: newContent },
-      });
-      refetch();
+      }).unwrap();
     } catch (error) {
       console.error("Failed to edit reply:", error);
     }
@@ -202,8 +195,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
 
   const handleDeleteReply = async (replyId) => {
     try {
-      await deleteReply(replyId );
-      refetch();
+      await deleteReply(replyId ).unwrap();
     } catch (error) {
       console.error("Failed to delete reply:", error);
     }

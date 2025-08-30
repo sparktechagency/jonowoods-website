@@ -81,6 +81,12 @@ export const CommentsModal = ({
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAddComment();
+              }
+            }}
             placeholder="Add a comment..."
             className="flex-1 text-sm p-[9px] border rounded rounded-r-none  cursor-text"
             disabled={loadingStates.commenting}
