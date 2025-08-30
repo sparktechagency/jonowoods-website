@@ -10,6 +10,7 @@ import { useRegisterMutation } from "@/redux/featured/auth/authApi";
 import { useDispatch } from "react-redux";
 import { registerSuccess } from "@/redux/featured/auth/authSlice";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function UserCreate() {
   const {
@@ -37,6 +38,10 @@ export default function UserCreate() {
       setRegistrationStatus("Account created! Please verify your email.");
     } catch (error) {
       console.error("Registration failed:", error);
+      toast.error(error);
+
+
+
       setRegistrationStatus("Failed to create account. Please try again.");
     }
   };

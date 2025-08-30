@@ -10,7 +10,14 @@ const notificationSlice = api.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ['Notification']
+      providesTags: (result, error, { page }) => [
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: `PAGE_${page}` }
+      ],
+      keepUnusedDataFor: 0, // Don't cache for real-time updates
+      refetchOnMountOrArgChange: true, // Always refetch on mount
+      refetchOnFocus: true, // Refetch when window gains focus
+      refetchOnReconnect: true, // Refetch on network reconnect
 
     }),
     readOneNotification: builder.mutation({
@@ -20,7 +27,10 @@ const notificationSlice = api.injectEndpoints({
           method: "PATCH",
         };
       },
-      invalidatesTags: ['Notification']
+      invalidatesTags: [
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'PARTIAL-LIST' }
+      ]
 
     }),
     readAllNotification: builder.mutation({
@@ -30,7 +40,10 @@ const notificationSlice = api.injectEndpoints({
           method: "PATCH",
         };
       },
-      invalidatesTags: ['Notification']
+      invalidatesTags: [
+        { type: 'Notification', id: 'LIST' },
+        { type: 'Notification', id: 'PARTIAL-LIST' }
+      ]
 
     }),
   }),

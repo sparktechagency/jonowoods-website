@@ -87,6 +87,11 @@ export default function Navbar() {
   } = useGetNotificationQuery({
     page: currentPage,
     limit: NOTIFICATIONS_PER_PAGE,
+  }, {
+    pollingInterval: 30000, // Poll every 30 seconds
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
   });
   console.log(notificationData);
 
@@ -97,7 +102,7 @@ export default function Navbar() {
     useUserDeleteAccountMutation();
 
   // Calculate unread count from API response
-  const unreadCount = notificationData?.data?.result?.unreadCount || 0;
+  const unreadCount = notificationData?.data?.unreadCount || 0;
   console.log(unreadCount);
 
 
@@ -113,8 +118,8 @@ export default function Navbar() {
       }
 
       // Initialize socket connection with improved configuration
-      socketRef.current = io("http://10.10.7.62:7000", {
-      // socketRef.current = io("https://api.yogawithjen.life", {
+      // socketRef.current = io("http://10.10.7.62:7000", {
+      socketRef.current = io("https://api.yogawithjen.life", {
         transports: ["websocket", "polling"], // Fallback to polling if websocket fails
         upgrade: true,
         rememberUpgrade: true,
@@ -130,19 +135,32 @@ export default function Navbar() {
         },
       });
 
-      const handleNewNotification = () => {
-        console.log("New notification received");
+      const handleNewNotification = (data) => {
+        console.log("New notification received:", data);
+        // Force refetch to get latest notifications
         refetch();
+        
+        // Show toast notification if data is provided
+        if (data && data.message) {
+          toast.success(`New notification: ${data.message}`);
+        }
       };
 
       // Connection event handlers
       socketRef.current.on("connect", () => {
-        console.log("Socket connected successfully");
+        console.log("Socket connected successfully with ID:", socketRef.current.id);
         setIsSocketConnected(true);
         setConnectionAttempts(0);
 
-        // Join user-specific room
-        socketRef.current.emit("join-user-room", userData._id);
+        // Join user-specific room with confirmation
+        socketRef.current.emit("join-user-room", userData._id, (response) => {
+          console.log("Joined user room response:", response);
+        });
+        
+        // Also emit join-room event as fallback
+        socketRef.current.emit("join-room", userData._id);
+        
+        console.log(`User ${userData._id} joined notification room`);
       });
 
       socketRef.current.on("disconnect", (reason) => {
@@ -198,14 +216,15 @@ export default function Navbar() {
         setIsSocketConnected(false);
       });
 
-      // Listen for notifications
+      // Listen for notifications with proper event names
       socketRef.current.on(
         `notification::${userData._id}`,
         handleNewNotification
       );
-
-      // Listen for general notification events
+      
       socketRef.current.on("new-notification", handleNewNotification);
+      socketRef.current.on("notification", handleNewNotification);
+      socketRef.current.on(`user-${userData._id}-notification`, handleNewNotification);
     };
 
     // Initial connection
@@ -220,6 +239,8 @@ export default function Navbar() {
       if (socketRef.current) {
         socketRef.current.off(`notification::${userData._id}`);
         socketRef.current.off("new-notification");
+        socketRef.current.off("notification");
+        socketRef.current.off(`user-${userData._id}-notification`);
         socketRef.current.disconnect();
         socketRef.current = null;
       }
@@ -236,11 +257,7 @@ export default function Navbar() {
     }
 
     // Debug logs
-    console.log("=== Account Deletion Debug Info ===");
-    console.log("User data:", userData);
-    console.log("Password being sent:", deletePassword);
-    console.log("Current token:", localStorage.getItem('token'));
-    console.log("====================================");
+
 
     try {
       // Call the API
@@ -272,11 +289,6 @@ export default function Navbar() {
       
     } catch (error) {
       console.error("=== Account Deletion Error ===");
-      console.error("Full error object:", error);
-      console.error("Error status:", error?.status);
-      console.error("Error data:", error?.data);
-      console.error("Error message:", error?.message);
-      console.error("==============================");
       
       // Handle specific error cases
       let errorMessage = "Failed to delete account. Please try again.";
@@ -304,11 +316,11 @@ export default function Navbar() {
 
   // Update notifications state when data changes
   useEffect(() => {
-    if (notificationData?.data?.result) {
-      const result = notificationData.data.result;
-      setNotifications(result || []);
-      setTotalPages(result.meta?.totalPage || 1);
-      setTotalNotifications(result.meta?.total || 0);
+    if (notificationData?.data) {
+      const data = notificationData.data;
+      setNotifications(data.result || []);
+      setTotalPages(data.pagination?.totalPage || 1);
+      setTotalNotifications(data.pagination?.total || 0);
     }
   }, [notificationData]);
 
@@ -709,7 +721,7 @@ export default function Navbar() {
         <DialogContent className="w-[400px] max-w-[400px] top-96 right-4 lg:left-auto lg:transform-none max-h-[640px] overflow-hidden">
           <DialogHeader className="px- pt-4">
             <DialogTitle className="flex items-center justify-between">
-              <span>Notifications ({totalNotifications})</span>
+              <span>Notifications </span>
               <div className="flex items-center space-x-2">
                 {unreadCount > 0 && (
                   <Button
