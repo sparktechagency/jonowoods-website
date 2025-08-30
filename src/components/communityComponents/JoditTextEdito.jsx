@@ -24,6 +24,13 @@ export const JoditEditor = ({ value, onChange }) => {
     setIsMounted(true);
   }, []);
 
+  // Clear editor when value is empty
+  useEffect(() => {
+    if (editor.current && value === "") {
+      editor.current.value = "";
+    }
+  }, [value]);
+
   // const config = {
   //   readonly: false,
   //   height: 120,
@@ -66,9 +73,9 @@ export const JoditEditor = ({ value, onChange }) => {
   return (
     <JoditEditorComponent
       ref={editor}
-      value={undefined} 
-      defaultValue={value} 
+      value={value} 
       onBlur={(newContent) => onChange(newContent)} 
+      onChange={(newContent) => onChange(newContent)}
     />
   );
 };

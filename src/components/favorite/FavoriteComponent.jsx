@@ -30,7 +30,7 @@ export default function FavoriteComponents() {
     try {
       setErrorMessage('');
       await favorite(id).unwrap();
-      refetch();
+      // No need for manual refetch - RTK Query will auto-invalidate cache
     } catch (error) {
       console.error('Error toggling favorite:', error);
       setErrorMessage('Failed to update favorite. Please try again.');

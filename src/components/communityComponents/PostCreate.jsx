@@ -34,19 +34,19 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
       try {
         if (editPost) {
           // Update existing post
-          await updatePost({
+          const result = await updatePost({
             id: editPost._id,
             data: { content: content },
-          });
+          }).unwrap();
           setContent("");
           toast.success("Post updated successfully!");
           if (onEditCancel) onEditCancel();
           if (onPostSuccess) onPostSuccess();
         } else {
           // Create new post
-          await createPost({
+          const result = await createPost({
             content: content,
-          });
+          }).unwrap();
           setContent("");
           toast.success("Post created successfully!");
           if (onPostSuccess) onPostSuccess();
