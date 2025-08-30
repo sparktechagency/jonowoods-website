@@ -10,6 +10,7 @@ import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutat
 import Spinner from '../../../Spinner';
 import { useSingleVidoeQuery } from '@/redux/featured/homeApi.jsx/homeApi';
 import { useVideoFavoriteMutation } from '@/redux/featured/favoriteApi/favoriteApi';
+import { getImageUrl } from '@/components/share/imageUrl';
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -170,14 +171,23 @@ export default function FitnessVideoPage({ params }) {
     // In production, you should check if the comment belongs to the current user
     const isCurrentUser = true; // Change this to proper user check: comment.userId === currentUser?.id
     // const isCurrentUser = comment.userId === currentUserId;
-
+    console.log("comment", comment)
     return (
       <div key={comment._id} className="mb-4">
         <div className="flex items-start space-x-3 group" style={{ marginLeft: `${depth * 20}px` }}>
           {/* Avatar */}
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-xs font-medium text-gray-600">
-              {comment.userName ? comment.userName.charAt(0).toUpperCase() : 'U'}
+              <Image
+                src={getImageUrl(comment.commentCreatorId?.image) || '/assests/profile.png'}
+
+
+                alt={comment.commentCreatorId?.name || 'User'}
+                width={32}
+                height={32}
+                className="rounded-full object-cover"
+              />
+              {/* {comment.commentCreatorId ? comment.commentCreatorId.name.charAt(0).toUpperCase() : 'U'} */}
             </span>
           </div>
 
@@ -185,7 +195,8 @@ export default function FitnessVideoPage({ params }) {
             {/* User info and time */}
             <div className="flex items-center space-x-2 mb-1">
               <span className="text-sm font-medium text-gray-900">
-                {comment.userName || 'Anonymous'}
+                {comment.commentCreatorId?.name || 'Anonymous'}
+
               </span>
               <span className="text-xs text-gray-500">
                 {formatTimeAgo(comment.createdAt)}

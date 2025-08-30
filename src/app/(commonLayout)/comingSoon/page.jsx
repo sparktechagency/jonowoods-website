@@ -16,7 +16,7 @@ const page = () => {
   return (
     <div>
       {
-        isLoading ? <Spinner /> : <ComingSoonComponents data={data?.data} />
+        isLoading ? <Spinner /> : <VideoPlayer data={data?.data} />
 
       }
     </div>

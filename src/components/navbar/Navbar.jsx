@@ -468,7 +468,7 @@ export default function Navbar() {
           {/* User Controls */}
           <div className="flex items-center space-x-4">
             {/* Debug Connection Status (for development) */}
-            {process.env.NODE_ENV === 'development' && userData?._id && (
+            {/* {process.env.NODE_ENV === 'development' && userData?._id && (
               <div className="flex items-center space-x-2">
                 <div className={`w-2 h-2 rounded-full ${isSocketConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 {!isSocketConnected && connectionAttempts >= MAX_RECONNECTION_ATTEMPTS && (
@@ -481,7 +481,7 @@ export default function Navbar() {
                   </button>
                 )}
               </div>
-            )}
+            )} */}
 
             {/* Notification Button - Only show if user is logged in */}
             {userData?._id && (
@@ -527,11 +527,11 @@ export default function Navbar() {
                       hoverEffect={true}
                     />
                     {/* Online indicator */}
-                    <div
+                    {/* <div
                       className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${
                         isSocketConnected ? "bg-green-500" : "bg-gray-400"
                       }`}
-                    ></div>
+                    ></div> */}
                   </div>
 
                   {/* User info - hidden on mobile */}

@@ -6,11 +6,16 @@ export const VideoCard = ({
   title = "Cooling Yoga Flow",
   imageUrl,
   route,
+  onClick,
 }) => {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(route);
+    if (onClick) {
+      onClick();
+    } else if (route) {
+      router.push(route);
+    }
   };
 
   return (

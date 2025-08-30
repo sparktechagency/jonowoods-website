@@ -22,6 +22,7 @@ export default function FavoriteComponents() {
 
   const favoriteVideos = data?.data?.favoriteList || [];
   const pagination = data?.data?.meta || {};
+  console.log(favoriteVideos)
 
   console.log(favoriteVideos)
 
@@ -122,18 +123,18 @@ export default function FavoriteComponents() {
                     {/* Title and Duration */}
                     <div className="mb-3">
                       <h2 className="text-xl font-bold text-gray-900">
-                        {favorite.videoId.title || 'Untitled Video'}
+                        Title: {favorite.videoId.title || 'Untitled Video'}
                       </h2>
-                      {favorite.videoId.duration && (
+                      Duration: {favorite.videoId.duration && (
                         <span className="text-sm font-medium text-gray-500">
                           {favorite.videoId.duration}
                         </span>
                       )}
-                      {favorite.videoId.type && (
+                      {/* {favorite.videoId.type && (
                         <span className="ml-2 px-2 py-1 text-xs font-semibold rounded bg-gray-100">
                           {favorite.videoId.type}
                         </span>
-                      )}
+                      )} */}
                     </div>
 
                     {/* Description */}
@@ -252,7 +253,8 @@ export default function FavoriteComponents() {
             <p className="text-gray-500 mt-2">
               You haven't added any videos to your favorites. Start exploring and add some!
             </p>
-            <Link href="/videos">
+            <Link href="/explore">
+
               <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
                 Browse Videos
               </button>

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Clock, FileText, Image as ImageIcon, ExternalLink } from "lucide-react";
+import { Play, Clock, FileText, ImageIcon, ExternalLink } from "lucide-react";
 import { useGetFeaturedPostQuery } from "@/redux/featured/community/communityApi";
-import { getVideoAndThumbnail } from "../share/imageUrl";
 import Image from "next/image";
+import { getVideoAndThumbnail } from "../share/imageUrl";
 
 const VideoPostCard = ({ post }) => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -28,77 +28,112 @@ const VideoPostCard = ({ post }) => {
     setIsPlaying(true);
   };
 
-  // Function to extract links from HTML and make them clickable
+  // Enhanced function to extract and make URLs clickable
   const makeUrlsClickable = (text) => {
     if (!text) return "";
-    
-    // First, extract href links from HTML <a> tags
-    const hrefPattern = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1[^>]*>(.*?)<\/a>/gi;
-    const parts = [];
-    let lastIndex = 0;
-    let match;
 
-    // Extract all href links first
-    while ((match = hrefPattern.exec(text)) !== null) {
-      // Add text before the link
-      if (match.index > lastIndex) {
-        const beforeText = text.substring(lastIndex, match.index);
-        parts.push(beforeText.replace(/<[^>]*>/g, '')); // Remove other HTML tags
-      }
-      
-      // Add the clickable link
-      const href = match[2];
-      const linkText = match[3];
-      const url = href.startsWith('http') ? href : `https://${href}`;
-      
-      parts.push(
+    let processedText = text;
+    const elements = [];
+    let elementCounter = 0;
+
+    // First, handle existing HTML anchor tags
+    const hrefPattern = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1[^>]*?>(.*?)<\/a>/gi;
+    const hrefMatches = [];
+    let hrefMatch;
+
+    while ((hrefMatch = hrefPattern.exec(text)) !== null) {
+      hrefMatches.push({
+        fullMatch: hrefMatch[0],
+        href: hrefMatch[2],
+        text: hrefMatch[3],
+        index: hrefMatch.index
+      });
+    }
+
+    // Replace href matches with placeholders
+    hrefMatches.reverse().forEach((match) => {
+      const placeholder = `__HREF_${elementCounter}__`;
+      elements[elementCounter] = (
         <a
-          key={match.index}
-          href={url}
+          key={`href-${elementCounter}`}
+          href={match.href.startsWith('http') ? match.href : `https://${match.href}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1"
         >
-          {linkText}
+          {match.text}
           <ExternalLink className="w-3 h-3" />
         </a>
       );
+      processedText = processedText.substring(0, match.index) + placeholder + processedText.substring(match.index + match.fullMatch.length);
+      elementCounter++;
+    });
+
+    // Remove any remaining HTML tags
+    processedText = processedText.replace(/<[^>]*>/g, '');
+
+    // Enhanced URL pattern to catch various URL formats
+    const urlPatterns = [
+      // Standard HTTP/HTTPS URLs
+      /https?:\/\/[^\s<>"{}|\\^`\[\]]+/gi,
+      // www.domain.com
+      /www\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.([a-zA-Z]{2,})(\/[^\s<>"{}|\\^`\[\]]*)?/gi,
+      // domain.com (without www)
+      /(?<![@\w])[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.([a-zA-Z]{2,})(\/[^\s<>"{}|\\^`\[\]]*)?/gi,
+      // IP addresses with ports (like 10.10.7.48:3001)
+      /(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/[^\s<>"{}|\\^`\[\]]*)?/gi,
+      // API endpoints (like api.yogawithjen.life)
+      /api\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.([a-zA-Z]{2,})(\/[^\s<>"{}|\\^`\[\]]*)?/gi
+    ];
+
+    // Process each URL pattern
+    urlPatterns.forEach((pattern) => {
+      const matches = [...processedText.matchAll(pattern)];
       
-      lastIndex = hrefPattern.lastIndex;
-    }
-    
-    // Add remaining text after last link
-    if (lastIndex < text.length) {
-      const remainingText = text.substring(lastIndex);
-      parts.push(remainingText.replace(/<[^>]*>/g, '')); // Remove HTML tags
-    }
-    
-    // If no href links found, process as plain text with URL detection
-    if (parts.length === 0) {
-      const cleanText = text.replace(/<[^>]*>/g, '');
-      const urlPattern = /((?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/g;
-      
-      return cleanText.split(urlPattern).map((part, index) => {
-        if (urlPattern.test(part)) {
-          const url = part.startsWith('http') ? part : `https://${part}`;
-          return (
-            <a
-              key={index}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1"
-            >
-              {part}
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          );
+      matches.reverse().forEach((match) => {
+        const url = match[0];
+        const placeholder = `__URL_${elementCounter}__`;
+        
+        // Determine the proper URL format
+        let href = url;
+        if (!url.startsWith('http')) {
+          // For IP addresses or domains without protocol
+          if (/^\d/.test(url) || url.includes(':')) {
+            href = `http://${url}`;
+          } else {
+            href = `https://${url}`;
+          }
         }
-        return part;
+
+        elements[elementCounter] = (
+          <a
+            key={`url-${elementCounter}`}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1 break-all"
+          >
+            {url}
+            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+          </a>
+        );
+
+        processedText = processedText.substring(0, match.index) + placeholder + processedText.substring(match.index + url.length);
+        elementCounter++;
       });
-    }
+    });
+
+    // Split by placeholders and reconstruct with elements
+    const parts = processedText.split(/(__(?:HREF|URL)_\d+__)/);
     
-    return parts;
+    return parts.map((part, index) => {
+      const placeholderMatch = part.match(/^__(?:HREF|URL)_(\d+)__$/);
+      if (placeholderMatch) {
+        const elementIndex = parseInt(placeholderMatch[1]);
+        return elements[elementIndex];
+      }
+      return part;
+    });
   };
 
   // Function to get the appropriate icon based on post type
@@ -122,13 +157,9 @@ const VideoPostCard = ({ post }) => {
         <div className="relative w-full h-80 max-h-80 rounded-lg overflow-hidden">
           {!isPlaying ? (
             <>
-              <Image
-                src={getVideoAndThumbnail(post.thumbnailUrl)}
-                height={320}
-                width={600}
-                alt={post.title}
-                className="w-full h-full max-h-80 object-cover rounded-lg"
-              />
+              <div className="w-full h-full bg-gray-300 flex items-center justify-center rounded-lg">
+                <span className="text-gray-600">Video Thumbnail</span>
+              </div>
               {/* Play Button Overlay */}
               <div
                 className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 hover:bg-opacity-30 transition-all duration-300 cursor-pointer group rounded-lg"
@@ -167,13 +198,13 @@ const VideoPostCard = ({ post }) => {
     } else if (post.type === 'image' && post.thumbnailUrl) {
       return (
         <div className="relative w-full h-80 max-h-80 rounded-lg overflow-hidden">
-          <Image
-            src={getVideoAndThumbnail(post.thumbnailUrl)}
-            height={320}
-            width={600}
-            alt={post.title}
-            className="w-full h-full max-h-80 object-cover rounded-lg"
-          />
+          <div className="w-full h-full bg-gray-300 flex items-center justify-center rounded-lg">
+            <Image src={getVideoAndThumbnail(post.thumbnailUrl)} width={120} height={120} className="w-full h-full object-cover text-gray-600" />
+
+
+
+
+          </div>
         </div>
       );
     } else {
@@ -211,12 +242,12 @@ const VideoPostCard = ({ post }) => {
             {/* Right: Text Content Section */}
             <div className="w-full p-6 flex flex-col justify-between bg-gray-50 lg:bg-white">
               <div className="space-y-4">
-                {/* Title with URL detection */}
+                {/* Title with enhanced URL detection */}
                 <div className="text-lg lg:text-xl font-bold text-gray-900 line-clamp-3 leading-tight">
                   {makeUrlsClickable(post.title)}
                 </div>
 
-                {/* Description with URL detection */}
+                {/* Description with enhanced URL detection */}
                 {post.description && (
                   <div className="text-gray-600 text-sm lg:text-base line-clamp-4 leading-relaxed">
                     {makeUrlsClickable(post.description)}
@@ -276,6 +307,8 @@ const VideoPostCard = ({ post }) => {
 // Usage Example with RTK Query
 const FeaturedPostSection = () => {
   const { data: postData, isLoading, error } = useGetFeaturedPostQuery();
+  console.log(postData);
+
 
   if (isLoading) {
     return (
@@ -323,7 +356,7 @@ const FeaturedPostSection = () => {
   );
 };
 
-// Component to display multiple posts
+// Component to display multiple posts from API
 const PostList = ({ posts }) => {
   if (!posts || posts.length === 0) {
     return (

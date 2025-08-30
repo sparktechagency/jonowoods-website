@@ -1,49 +1,40 @@
 "use client";
-import React, { useRef, useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import React, { useRef, useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const VideoPlayer = ({ data, onComplete }) => {
   const videoRef = useRef(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [progress, setProgress] = useState(0);
-  console.log(data, onComplete);
+  const progressRef = useRef(0); // 👈 state এর পরিবর্তে ref ব্যবহার
 
-  const hasRedirectUrl = data?.redirectUrl && data.redirectUrl.trim() !== '';
+  const hasRedirectUrl = data?.redirectUrl && data.redirectUrl.trim() !== "";
 
   // Handle video completion
   const handleVideoEnd = () => {
     if (!isCompleted && onComplete) {
       setIsCompleted(true);
-      
-      // Show completion toast
-      toast.success('Video Completed!', {
-        description: 'Great job finishing this video.'
+      toast.success("Video Completed!", {
+        description: "Great job finishing this video.",
       });
-      
       onComplete();
     }
   };
 
-  // Track video progress with throttling to prevent infinite renders
+  // Track video progress with throttling (using ref to avoid re-renders)
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       const video = videoRef.current;
       const currentProgress = (video.currentTime / video.duration) * 100;
-      
-      // Only update progress if there's a significant change (reduce renders)
-      if (Math.abs(currentProgress - progress) > 1) {
-        setProgress(currentProgress);
+
+      if (Math.abs(currentProgress - progressRef.current) > 1) {
+        progressRef.current = currentProgress; // 👈 re-render হবে না
       }
-      
-      // Consider video completed if user watched 90% of it
+
       if (currentProgress >= 90 && !isCompleted && onComplete) {
         setIsCompleted(true);
-        
-        // Show completion toast
-        toast.success('Video Completed!', {
-          description: 'Great job finishing this video.'
+        toast.success("Video Completed!", {
+          description: "Great job finishing this video.",
         });
-        
         onComplete();
       }
     }
@@ -52,31 +43,25 @@ const VideoPlayer = ({ data, onComplete }) => {
   // Reset completion state when video changes
   useEffect(() => {
     setIsCompleted(false);
-    setProgress(0);
+    progressRef.current = 0;
   }, [data?.videoUrl]);
 
   // Handle redirect button click
   const handleRedirect = () => {
     if (hasRedirectUrl) {
-      // Check if URL starts with http/https, if not add https://
-      const url = data.redirectUrl.startsWith('http') 
-        ? data.redirectUrl 
+      const url = data.redirectUrl.startsWith("http")
+        ? data.redirectUrl
         : `https://${data.redirectUrl}`;
-      
-      window.open(url, '_blank');
+      window.open(url, "_blank");
     }
   };
 
-  // Show video player directly
   return (
     <div className="relative">
       <div>
-        <h2 className='lg:text-3xl font-bold mt-8 text-xl'>
-          {data?.title}
-        </h2>
+        <h2 className="lg:text-3xl font-bold mt-8 text-xl">{data?.title}</h2>
       </div>
       <div className="container mx-auto bg-white">
-        {/* Video Section */}
         <div className="mt-4 relative">
           <video
             ref={videoRef}
@@ -91,17 +76,18 @@ const VideoPlayer = ({ data, onComplete }) => {
           </video>
         </div>
 
-        {/* Content Section */}
         <div className="p-4">
-          {/* Title and Details */}
           <div className="mb-4">
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">Title: {data?.title}</h1>
-            <p className="text-sm text-gray-600 mb-1">Duration: {data?.duration} Min</p>
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              Title: {data?.title}
+            </h1>
+            <p className="text-sm text-gray-600 mb-1">
+              Duration: {data?.duration} Min
+            </p>
             <p className="text-xs text-gray-600 leading-relaxed mb-4">
               Description: {data?.description}
             </p>
-            
-            {/* Redirect Button if redirectUrl exists */}
+
             {hasRedirectUrl && (
               <button
                 onClick={handleRedirect}

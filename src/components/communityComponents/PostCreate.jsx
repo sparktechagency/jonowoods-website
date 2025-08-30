@@ -111,7 +111,6 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
           <Button
             onClick={handlePost}
             className="bg-red-500 text-white rounded-full px-6"
-            disabled={isLoading || !isValid}
           >
             {isLoading
               ? editPost

@@ -13,6 +13,8 @@ const favoriteVideoApi = api.injectEndpoints({
           url: `/favorite${urlPath}`, 
         };
       },
+      providesTags: ["Favorite"],
+
     }),
     singleVideo: builder.query({
       query: (id) => {
@@ -21,6 +23,8 @@ const favoriteVideoApi = api.injectEndpoints({
           url: `/videos/${id}`, 
         };
       },
+      providesTags: ["Favorite"],
+
     }),
   }),
 });

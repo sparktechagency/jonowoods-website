@@ -67,6 +67,14 @@ const commignSoonSlice = api.injectEndpoints({
         };
       },
     }),
+    markWatchCoursesVideo: builder.mutation({
+      query: (id) => {
+        return {
+          method: "POST",
+          url: `/videos/mark-video-watched/${id}`,
+        };
+      },
+    }),
 
   }),
 });
@@ -78,5 +86,7 @@ export const {
   useTodayLetestVideoQuery,
   useChallengeVideoQuery,
   useSingleChallengeVideoQuery,
-  useMarkWatchChallengeVideoMutation
+  useMarkWatchChallengeVideoMutation,
+  useMarkWatchCoursesVideoMutation,
+
 } = commignSoonSlice;
