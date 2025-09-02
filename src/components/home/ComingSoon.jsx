@@ -36,9 +36,11 @@ export const ComingSoon = () => {
   const renderContent = () => {
     if (!videoData) {
       return (
-        <div className="mb-4">
+        <div className="mb-4 px-4 lg:px-0">
+
           {/* Animated title - only visible on large devices */}
           <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
+
             Coming Soon
           </h2>
           <div className="animate-pulse bg-gray-200 rounded-lg h-40"></div>
@@ -48,9 +50,9 @@ export const ComingSoon = () => {
 
     if (videoData.isReady === "arrived") {
       return (
-        <div className="mb-4">
+        <div className="mb-4 px-4 lg:px-0">
           {/* Animated title - only visible on large devices */}
-          <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
+          <h2 className="  text-xl font-bold mb-2 ">
             Coming Soon
           </h2>
           <div className="relative">
@@ -71,7 +73,8 @@ export const ComingSoon = () => {
 
                 />
                 {/* Animated Coming Soon text - only visible on large devices */}
-                <p className="hidden lg:block text-lg font-semibold animate-bounce">
+                <p className="hidden lg:block  text-lg font-semibold animate-bounce">
+
                   Coming Soon
                 </p>
                 <p className="hidden lg:block text-sm opacity-80 mt-1">
@@ -96,7 +99,7 @@ export const ComingSoon = () => {
 
     if (videoData.isReady === "ready") {
       return (
-        <div className="mb-4">
+        <div className="mb-4 px-4 lg:px-0">
           <h2 className="text-xl font-bold mb-2">🎉 Ready to Watch!</h2>
           <div className="relative">
             <VideoCard
@@ -113,7 +116,7 @@ export const ComingSoon = () => {
             </div>
             
             {/* Quick access message - no external redirect */}
-            <div className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-green-600 to-blue-600 text-white p-3 rounded-lg">
+            <div className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-primary to-secondary text-white p-3 rounded-lg">
               <p className="text-sm font-medium">
                 🚀 Right now it is publishable! Click to watch this amazing content!
               </p>
@@ -125,7 +128,7 @@ export const ComingSoon = () => {
 
     // Default fallback
     return (
-      <div className="mb-4">
+      <div className="mb-4 px-4 lg:px-0">
         {/* Title with animation - only visible on large devices */}
         <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
           Coming Soon

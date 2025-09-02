@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useMarkWatchChallengeVideoMutation, useSingleChallengeVideoQuery } from '@/redux/featured/CommingSoon/commingSoonApi';
@@ -18,6 +18,7 @@ const ChallengePage = ({ params }) => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [completedVideos, setCompletedVideos] = useState([]);
   const [videos, setVideos] = useState([]);
+  const completionProcessedRef = useRef(new Set()); // Track processed video completions
 
   // Initialize videos and completed videos
   useEffect(() => {
@@ -31,11 +32,26 @@ const ChallengePage = ({ params }) => {
         .filter(video => video.isVideoCompleted)
         .map(video => video._id);
       setCompletedVideos(completed);
+      
+      // Reset completion tracking when data changes
+      completionProcessedRef.current.clear();
     }
   }, [data]);
+  
+  // Reset completion tracking when current video changes
+  useEffect(() => {
+    completionProcessedRef.current.clear();
+  }, [currentVideoIndex]);
 
   // Handle video completion
   const handleVideoComplete = async (videoId) => {
+    // Prevent duplicate completion processing
+    if (completionProcessedRef.current.has(videoId)) {
+      return;
+    }
+    
+    completionProcessedRef.current.add(videoId);
+    
     try {
       // Mark as completed
       await markWatchChallengeVideo(videoId).unwrap();
@@ -97,20 +113,52 @@ const ChallengePage = ({ params }) => {
   console.log(currentVideo)
 
   return (
-    <div className="container mx-auto p-4">
-      {/* Current Video Player */}
-      <div className="mb-8">
+    <div className=" mx-auto p-4">
+      {/* Fixed Video Player - Sticky on mobile */}
+      <div className="sticky top-0 z-10 bg-white shadow-lg mb-4 pb-4 pt-2">
         {currentVideo && (
-          <VideoPlayer 
-            data={currentVideo}
-            onComplete={() => handleVideoComplete(currentVideo._id)}
-          />
+          <div className="">
+            <h2 className="text-lg md:text-2xl font-bold mb-2">{currentVideo.title}</h2>
+            <div className="relative">
+              <video
+                controls
+                src={`https://${currentVideo?.videoUrl}`}
+                className="w-full h-48 md:h-64 lg:h-[500px] object-cover border rounded-md"
+                autoPlay
+                onEnded={() => handleVideoComplete(currentVideo._id)}
+                onTimeUpdate={(e) => {
+                  const video = e.target;
+                  const currentProgress = (video.currentTime / video.duration) * 100;
+                  if (currentProgress >= 90) {
+                    handleVideoComplete(currentVideo._id);
+                  }
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+              
+              {/* Current video indicator */}
+              <div className="absolute top-0 left-0 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
+                Now Playing: Video {currentVideoIndex + 1}
+              </div>
+            </div>
+            
+            {/* Video details */}
+            <div className="mt-2">
+              <p className="text-sm text-gray-600">
+                Duration: {currentVideo?.duration} Min
+              </p>
+              <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                {currentVideo?.description}
+              </p>
+            </div>
+          </div>
         )}
       </div>
 
       {/* Video List */}
       <div className="my-8">
-        <h2 className="text-2xl font-bold mb-4">Challenge Videos</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-4">All Challenge Videos</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {videos.map((video, index) => {
             const isAccessible = isVideoAccessible(index);
@@ -123,6 +171,10 @@ const ChallengePage = ({ params }) => {
                 onClick={() => {
                   if (isAccessible) {
                     setCurrentVideoIndex(index);
+                    // Smooth scroll to top on mobile to show the video player
+                    if (window.innerWidth < 768) {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
                   } else {
                     toast.info('Video locked', {
                       description: 'Complete the previous video to unlock this one.'
@@ -131,8 +183,8 @@ const ChallengePage = ({ params }) => {
                 }}
                 className={`
                   relative rounded-lg overflow-hidden cursor-pointer border
-                  ${isAccessible ? 'hover:shadow-lg' : 'opacity-70 cursor-not-allowed'}
-                  ${isCurrent ? 'ring-2 ring-red-500' : ''}
+                  ${isAccessible ? 'hover:shadow-lg hover:scale-105' : 'opacity-70 cursor-not-allowed'}
+                  ${isCurrent ? 'ring-4 ring-red-500 bg-red-50 shadow-xl  scale-95' : ''}
                   transition-all duration-300
                 `}
               >
@@ -187,16 +239,35 @@ const ChallengePage = ({ params }) => {
                     </div>
                   )}
                   
-                  {/* Video number */}
+                  {/* Video number and playing indicator */}
                   <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
                     Video {index + 1}
                   </div>
+                  
+                  {/* Currently playing indicator */}
+                  {isCurrent && (
+                    <div className="absolute inset-0  bg-opacity-20 flex items-center justify-center">
+                      <div className=" text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        NOW PLAYING
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Video details */}
-                <div className="p-3 bg-white">
-                  <h3 className="font-medium text-sm line-clamp-2">{video.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{video.duration} min</p>
+                <div className={`p-3 transition-colors duration-300 ${
+                  isCurrent ? 'bg-red-50' : 'bg-white'
+                }`}>
+                  <h3 className={`font-medium text-sm line-clamp-2 transition-colors duration-300 ${
+                    isCurrent ? 'text-red-700' : 'text-gray-900'
+                  }`}>{video.title}</h3>
+                  <p className={`text-xs mt-1 transition-colors duration-300 ${
+                    isCurrent ? 'text-red-600' : 'text-gray-500'
+                  }`}>{video.duration} min</p>
+                  {isCurrent && (
+                    <p className="text-xs text-red-600 font-medium mt-1">▶ Currently Playing</p>
+                  )}
                 </div>
               </div>
             );

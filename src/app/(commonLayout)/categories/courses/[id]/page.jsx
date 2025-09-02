@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-// import { useMarkWatchCourseVideoMutation, useSubCategoryVideoQuery } from '@/redux/featured/homeApi.jsx/homeApi';
+import { useSubCategoryVideoQuery } from '@/redux/featured/homeApi.jsx/homeApi';
+import { useMarkWatchCoursesVideoMutation } from '@/redux/featured/CommingSoon/commingSoonApi';
 import Spinner from '../../../Spinner';
 import VideoPlayer from '@/components/VideoPlayer';
 import Image from 'next/image';
-import { useSubCategoryVideoQuery } from '@/redux/featured/homeApi.jsx/homeApi';
-import {  useMarkWatchCoursesVideoMutation } from '@/redux/featured/CommingSoon/commingSoonApi';
 
 const CourseVideoPage = ({ params }) => {
   const { id } = React.use(params);
@@ -21,13 +20,13 @@ const CourseVideoPage = ({ params }) => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [completedVideos, setCompletedVideos] = useState([]);
   const [videos, setVideos] = useState([]);
+  const completionProcessedRef = useRef(new Set()); // Track processed video completions
 
   // Initialize videos and completed videos
   useEffect(() => {
     if (videoData?.data.result) {
       // If videoData.data is an array, use it directly; if single video, wrap in array
       const courseVideos = Array.isArray(videoData.data.result) ? videoData.data.result : [videoData.data.result];
-
       
       // Sort videos by their order if needed
       const sortedVideos = [...courseVideos];
@@ -38,11 +37,26 @@ const CourseVideoPage = ({ params }) => {
         .filter(video => video.isVideoCompleted)
         .map(video => video._id);
       setCompletedVideos(completed);
+      
+      // Reset completion tracking when data changes
+      completionProcessedRef.current.clear();
     }
   }, [videoData]);
+  
+  // Reset completion tracking when current video changes
+  useEffect(() => {
+    completionProcessedRef.current.clear();
+  }, [currentVideoIndex]);
 
   // Handle video completion
   const handleVideoComplete = async (videoId) => {
+    // Prevent duplicate completion processing
+    if (completionProcessedRef.current.has(videoId)) {
+      return;
+    }
+    
+    completionProcessedRef.current.add(videoId);
+    
     try {
       // Mark as completed
       await markWatchCourseVideo(videoId).unwrap();
@@ -92,7 +106,7 @@ const CourseVideoPage = ({ params }) => {
 
   if (videoLoading) return <Spinner />;
 
-  if (!videoData?.data || (Array.isArray(videoData.data) && videoData.data.length === 0)) {
+  if (!videoData?.data?.result || (Array.isArray(videoData.data.result) && videoData.data.result.length === 0)) {
     return (
       <div className="container mx-auto p-8 text-center">
         <h2 className="text-2xl font-bold mb-4">No course videos found</h2>
@@ -107,56 +121,68 @@ const CourseVideoPage = ({ params }) => {
   }
 
   const currentVideo = videos[currentVideoIndex];
+  console.log(currentVideo)
 
   return (
-    <div className="container mx-auto p-4">
-      {/* Navigation */}
-      <div className="mb-6">
-        <button 
-          onClick={() => router.back()}
-          className="mb-4 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-        >
-          Back to Courses
-        </button>
-      </div>
-
-      {/* Current Video Player */}
-      <div className="mb-8">
+    <div className="mx-auto p-4">
+      {/* Fixed Video Player - Sticky on mobile */}
+      <div className="sticky top-0 z-10 bg-white shadow-lg mb-4 pb-4 pt-2">
         {currentVideo && (
-          <div>
-            {/* <h1 className="text-3xl font-bold text-gray-900 mb-4">{currentVideo.title}</h1> */}
-            <VideoPlayer 
-              data={currentVideo}
-              onComplete={() => handleVideoComplete(currentVideo._id)}
-            />
-            
-            {/* Video Description */}
-            {/* {currentVideo.description && (
-              <div className="mt-6">
-                <h2 className="text-2xl font-bold mb-4">Description</h2>
-                <p className="text-gray-700 leading-relaxed">{currentVideo.description}</p>
+          <div className="">
+            <h2 className="text-lg md:text-2xl font-bold mb-2">{currentVideo.title}</h2>
+            <div className="relative">
+              <video
+                controls
+                src={`https://${currentVideo?.videoUrl}`}
+                className="w-full h-48 md:h-64 lg:h-[500px] object-cover border rounded-md"
+                autoPlay
+                onEnded={() => handleVideoComplete(currentVideo._id)}
+                onTimeUpdate={(e) => {
+                  const video = e.target;
+                  const currentProgress = (video.currentTime / video.duration) * 100;
+                  if (currentProgress >= 90) {
+                    handleVideoComplete(currentVideo._id);
+                  }
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+              
+              {/* Current video indicator */}
+              <div className="absolute top-0 left-0 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
+                Now Playing: Video {currentVideoIndex + 1}
               </div>
-            )} */}
+            </div>
             
-            {/* Equipment Needed */}
-            {currentVideo.equipmentNeeded && currentVideo.equipmentNeeded.length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-2xl font-bold mb-4">Equipment Needed</h2>
-                <ul className="list-disc list-inside space-y-2">
-                  {currentVideo.equipmentNeeded.map((equipment, index) => (
-                    <li key={index} className="text-gray-700">{equipment}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* Video details */}
+            <div className="mt-2">
+              <p className="text-sm text-gray-600">
+                Duration: {currentVideo?.duration} Min
+              </p>
+              <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                {currentVideo?.description}
+              </p>
+            </div>
           </div>
         )}
       </div>
 
+      {/* Equipment Needed - Moved to sticky section */}
+      {currentVideo?.equipmentNeeded && currentVideo.equipmentNeeded.length > 0 && (
+        <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold mb-2">Equipment Needed</h3>
+          <ul className="list-disc list-inside space-y-1">
+            {currentVideo.equipmentNeeded.map((equipment, index) => (
+              <li key={index} className="text-gray-700 text-sm">{equipment}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Video List - Only show if there are multiple videos */}
       {videos.length > 1 && (
         <div className="my-8">
-          <h2 className="text-2xl font-bold mb-4">Course Videos</h2>
+          <h2 className="text-xl md:text-2xl font-bold mb-4">All Course Videos</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {videos.map((video, index) => {
               const isAccessible = isVideoAccessible(index);
@@ -169,6 +195,10 @@ const CourseVideoPage = ({ params }) => {
                   onClick={() => {
                     if (isAccessible) {
                       setCurrentVideoIndex(index);
+                      // Smooth scroll to top on mobile to show the video player
+                      if (window.innerWidth < 768) {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }
                     } else {
                       toast.info('Video locked', {
                         description: 'Complete the previous video to unlock this one.'
@@ -177,8 +207,8 @@ const CourseVideoPage = ({ params }) => {
                   }}
                   className={`
                     relative rounded-lg overflow-hidden cursor-pointer border
-                    ${isAccessible ? 'hover:shadow-lg' : 'opacity-70 cursor-not-allowed'}
-                    ${isCurrent ? 'ring-2 ring-red-500' : ''}
+                    ${isAccessible ? 'hover:shadow-lg hover:scale-105' : 'opacity-70 cursor-not-allowed'}
+                    ${isCurrent ? 'ring-4 ring-red-500 bg-red-50 shadow-xl scale-95' : ''}
                     transition-all duration-300
                   `}
                 >
@@ -237,12 +267,31 @@ const CourseVideoPage = ({ params }) => {
                     <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
                       Video {index + 1}
                     </div>
+                    
+                    {/* Currently playing indicator */}
+                    {isCurrent && (
+                      <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center">
+                        <div className="text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                          NOW PLAYING
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Video details */}
-                  <div className="p-3 bg-white">
-                    <h3 className="font-medium text-sm line-clamp-2">{video.title}</h3>
-                    <p className="text-xs text-gray-500 mt-1">{video.duration} min</p>
+                  <div className={`p-3 transition-colors duration-300 ${
+                    isCurrent ? 'bg-red-50' : 'bg-white'
+                  }`}>
+                    <h3 className={`font-medium text-sm line-clamp-2 transition-colors duration-300 ${
+                      isCurrent ? 'text-red-700' : 'text-gray-900'
+                    }`}>{video.title}</h3>
+                    <p className={`text-xs mt-1 transition-colors duration-300 ${
+                      isCurrent ? 'text-red-600' : 'text-gray-500'
+                    }`}>{video.duration} min</p>
+                    {isCurrent && (
+                      <p className="text-xs text-red-600 font-medium mt-1">▶ Currently Playing</p>
+                    )}
                   </div>
                 </div>
               );

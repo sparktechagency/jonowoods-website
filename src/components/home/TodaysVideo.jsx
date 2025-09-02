@@ -7,7 +7,7 @@ export const TodaysVideo = () => {
   const { data } = useTodayLetestVideoQuery();
   const image = `https://${data?.data?.thumbnailUrl}`;
   return (
-    <div className="mb-4">
+    <div className="mb-4 px-4 lg:px-0">
       <h2 className="text-xl font-bold mb-2">Today's Video</h2>
       <VideoCard
         title="Today's Video"

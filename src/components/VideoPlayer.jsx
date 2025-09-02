@@ -61,7 +61,7 @@ const VideoPlayer = ({ data, onComplete }) => {
       <div>
         <h2 className="lg:text-3xl font-bold mt-8 text-xl">{data?.title}</h2>
       </div>
-      <div className="container mx-auto bg-white">
+      <div className=" bg-white">
         <div className="mt-4 relative">
           <video
             ref={videoRef}
@@ -76,7 +76,7 @@ const VideoPlayer = ({ data, onComplete }) => {
           </video>
         </div>
 
-        <div className="p-4">
+        <div className="p-2">
           <div className="mb-4">
             <h1 className="text-xl font-semibold text-gray-900 mb-2">
               Title: {data?.title}

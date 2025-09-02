@@ -8,7 +8,7 @@ export const DailyInspiration = () => {
   const image = `https://${data?.data?.thumbnailUrl}`;
 console.log(image)
   return (
-    <section className="mb-8">
+    <section className="mb-8 px-4 lg:px-0">
       <h2 className="text-xl font-bold mb-4">Daily Inspiration</h2>
       <VideoCard
         title="Cooling Yoga Flow"
