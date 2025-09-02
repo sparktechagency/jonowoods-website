@@ -37,7 +37,10 @@ export const ComingSoon = () => {
     if (!videoData) {
       return (
         <div className="mb-4">
-          <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+          {/* Animated title - only visible on large devices */}
+          <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
+            Coming Soon
+          </h2>
           <div className="animate-pulse bg-gray-200 rounded-lg h-40"></div>
         </div>
       );
@@ -46,7 +49,10 @@ export const ComingSoon = () => {
     if (videoData.isReady === "arrived") {
       return (
         <div className="mb-4">
-          <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+          {/* Animated title - only visible on large devices */}
+          <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
+            Coming Soon
+          </h2>
           <div className="relative">
             <VideoCard
               title="Coming Soon"
@@ -61,12 +67,14 @@ export const ComingSoon = () => {
               <div className="text-center text-white">
                 <Lock 
                   size={48} 
-                  className="mx-auto mb-2 animate-pulse text-yellow-400" 
+                  className="hidden lg:block mx-auto mb-2 animate-pulse text-yellow-400" 
+
                 />
-                <p className="text-lg font-semibold animate-bounce">
+                {/* Animated Coming Soon text - only visible on large devices */}
+                <p className="hidden lg:block text-lg font-semibold animate-bounce">
                   Coming Soon
                 </p>
-                <p className="text-sm opacity-80 mt-1">
+                <p className="hidden lg:block text-sm opacity-80 mt-1">
                   Video is arriving...
                 </p>
                 {videoData.redirectUrl && (
@@ -118,7 +126,10 @@ export const ComingSoon = () => {
     // Default fallback
     return (
       <div className="mb-4">
-        <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+        {/* Title with animation - only visible on large devices */}
+        <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
+          Coming Soon
+        </h2>
         <VideoCard
           title="Coming Soon"
           imageUrl={image}

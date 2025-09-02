@@ -95,6 +95,7 @@ const authSlice = api.injectEndpoints({
           body: data,
         };
       },
+      invalidatesTags: ["User"],
     }),
     getUser: builder.query({
       query: (data) => {

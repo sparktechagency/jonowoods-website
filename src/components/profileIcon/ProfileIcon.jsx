@@ -22,7 +22,8 @@ const ProfileIcon = ({
         height={size}
         width={size}
         alt="Profile"
-        className={`w-${size/4} h-${size/4} rounded-full object-cover ${containerClasses}`}
+        style={{ width: `${size}px`, height: `${size}px` }}
+        className={`rounded-full object-cover ${containerClasses}`}
       />
     );
   }

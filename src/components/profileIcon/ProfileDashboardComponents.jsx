@@ -164,7 +164,7 @@ const SubscriptionCard = ({ packageData, userData }) => {
 export default function ProfileDashboardComponents() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const { data: userData, isLoading } = useMyProfileQuery();
+  const { data: userData, isLoading, refetch } = useMyProfileQuery();
   const [updateProfile, { isLoading: updating }] = useUpdateProfileMutation();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -254,7 +254,11 @@ export default function ProfileDashboardComponents() {
         if (response.token) {
           localStorage.setItem("accessToken", response.token);
         }
+        // Refetch profile data to update UI immediately
+        refetch();
         setOpen(false);
+        // Reset image file state
+        setImageFile(null);
       } else {
         toast.error(response.toast || "Failed to update profile!");
       }

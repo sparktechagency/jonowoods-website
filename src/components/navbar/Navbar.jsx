@@ -13,6 +13,8 @@ import {
   FaChevronDown,
   FaChevronRight,
   FaTrash,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import ProfileIcon from "../profileIcon/ProfileIcon";
 import {
@@ -483,6 +485,14 @@ export default function Navbar() {
 
           {/* User Controls */}
           <div className="flex items-center space-x-4">
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden text-black p-2 rounded-md hover:bg-gray-100 transition-colors"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle mobile menu"
+            >
+              {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+            </button>
             {/* Debug Connection Status (for development) */}
             {/* {process.env.NODE_ENV === 'development' && userData?._id && (
               <div className="flex items-center space-x-2">
@@ -696,13 +706,15 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        {isOpen && (
-          <ul className="md:hidden bg-[#fff] text-black p-4 text-center space-y-3">
+        <div className={`md:hidden bg-[#fff] text-black overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        }`}>
+          <ul className="p-4 text-center space-y-3">
             {navItems.map((item) => (
               <li key={item.name}>
                 <Link
                   href={item.path}
-                  className="block hover:underline"
+                  className="block hover:underline transition-colors duration-200"
                   onClick={() => setIsOpen(false)}
                 >
                   {item.name}
@@ -710,7 +722,7 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
-        )}
+        </div>
       </nav>
 
       {/* Notification Dialog */}
