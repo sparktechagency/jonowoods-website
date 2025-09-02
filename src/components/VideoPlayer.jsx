@@ -66,6 +66,7 @@ const VideoPlayer = ({ data, onComplete }) => {
           <video
             ref={videoRef}
             controls
+            controlsList="nodownload"
             src={`https://${data?.videoUrl}`}
             className="w-full h-auto max-h-[70vh] mx-auto border rounded-md"
             autoPlay

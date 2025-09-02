@@ -133,6 +133,7 @@ const CourseVideoPage = ({ params }) => {
             <div className="relative">
               <video
                 controls
+                 controlsList="nodownload"
                 src={`https://${currentVideo?.videoUrl}`}
                 className="w-full h-48 md:h-64 lg:h-[500px] object-cover border rounded-md"
                 autoPlay
