@@ -14,9 +14,9 @@ export default function OTPVerify() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
-  const [type, setType] = useState(""); // Either 'password-reset' or 'user-registration'
-  const [otpVerify, { isLoading, error }] = useOtpVerifyMutation(); // Assuming you have an API hook for OTP verification
-  const [resendOtp, { isLoading: isResendingOtp }] = useResendOtpMutation(); // Assuming you have an API hook for resending OTP
+  const [type, setType] = useState(""); 
+  const [otpVerify, { isLoading, error }] = useOtpVerifyMutation(); 
+  const [resendOtp, { isLoading: isResendingOtp }] = useResendOtpMutation(); 
 
   // Get query parameters from the URL
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function OTPVerify() {
     setOtp(newOtp);
 
     // Move to next input after entering a digit
-    if (value && index < 3) {
+    if (value && index < 5) {
       document.getElementById(`otp-${index + 1}`).focus();
     }
   };
@@ -205,7 +205,7 @@ export default function OTPVerify() {
                   maxLength={1}
                   value={digit}
                   onChange={(e) => handleOtpChange(e, index)}
-                  onPaste={handlePaste}
+                  onPaste={index === 0 ? handlePaste : undefined}
                   onFocus={(e) => e.target.select()}
                   className="w-10 h-10 md:w-12 md:h-12 text-center bg-white text-black border border-red-500 rounded-lg p-0"
                 />

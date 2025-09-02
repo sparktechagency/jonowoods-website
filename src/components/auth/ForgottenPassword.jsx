@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useForgotPasswordMutation } from "@/redux/featured/auth/authApi";
+import { toast } from "sonner";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -31,10 +32,12 @@ export default function ForgotPassword() {
         );
       } else {
         console.error("Error during password reset request:", response?.error);
+        toast.error(response?.error?.data?.message || "An error occurred. Please try again.");
       }
     } catch (err) {
       console.error("Error during password reset request:", err);
-      toast.error("There was an error sending the OTP. Please try again.");
+      toast.error(err?.data?.message || "An error occurred. Please try again.");
+
     } finally {
       setIsSubmitting(false); // End submission
     }
