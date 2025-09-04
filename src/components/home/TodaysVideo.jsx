@@ -5,13 +5,21 @@ import { VideoCard } from "./VideoCard";
 
 export const TodaysVideo = () => {
   const { data } = useTodayLetestVideoQuery();
-  console.log(data)
+  console.log("today video data ",data)
+
   const image = `https://${data?.data?.thumbnailUrl}`;
+  console.log("today video image ",image)
+
+  const title = data?.data?.title;
+  console.log("today video title ",title)
+
+
+  console.log(image)
   return (
     <div className="mb-4 px-4 lg:px-0">
       <h2 className="text-xl font-bold mb-2">Today's Video</h2>
       <VideoCard
-        title="Today's Video"
+        title={title}
         imageUrl={image}
         overlayText="Cooling Yoga Flow"
         route={"/today-video"}

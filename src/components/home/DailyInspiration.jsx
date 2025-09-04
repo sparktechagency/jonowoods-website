@@ -4,14 +4,19 @@ import { VideoCard } from "./VideoCard";
 
 export const DailyInspiration = () => {
   const { data } = useInspirationLatestVideoQuery();
-  console.log(data)
+  console.log("daily inspiration data ",data)
+
   const image = `https://${data?.data?.thumbnailUrl}`;
-console.log(image)
+  console.log("today video ",image)
+
+  const title = data?.data?.title;
+  console.log("today video title ",title)
   return (
     <section className="mb-8 px-4 lg:px-0">
       <h2 className="text-xl font-bold mb-4">Daily Inspiration</h2>
       <VideoCard
-        title="Cooling Yoga Flow"
+        title={title}
+
         imageUrl={image}
         route="/inspiration"
       />
