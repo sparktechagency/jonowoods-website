@@ -5,6 +5,7 @@ import { VideoCard } from "./VideoCard";
 
 export const TodaysVideo = () => {
   const { data } = useTodayLetestVideoQuery();
+  console.log(data)
   const image = `https://${data?.data?.thumbnailUrl}`;
   return (
     <div className="mb-4 px-4 lg:px-0">
