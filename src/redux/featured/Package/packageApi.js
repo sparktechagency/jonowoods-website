@@ -41,9 +41,18 @@ const packagesApi = api.injectEndpoints({
             },
             providesTags: ["Package"],
         }),
+        getMyTransactions: builder.query({
+            query: () => {
+                return {
+                  method: "GET",
+                  url: `/subscription/transaction-history`,
+                };
+            },
+            providesTags: ["Package"],
+        }),
 
     }),
 });
 
-export const { useGetWebPackagesQuery, useCheckoutForSubscriptionMutation,useRunningPackageQuery,useGetMyAccessQuery } = packagesApi;
+export const { useGetWebPackagesQuery, useCheckoutForSubscriptionMutation,useRunningPackageQuery,useGetMyAccessQuery,useGetMyTransactionsQuery } = packagesApi;
 

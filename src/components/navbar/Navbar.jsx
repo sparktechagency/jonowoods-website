@@ -15,6 +15,8 @@ import {
   FaTrash,
   FaBars,
   FaTimes,
+  FaMoneyBillWave,
+  FaHandHoldingUsd,
 } from "react-icons/fa";
 import ProfileIcon from "../profileIcon/ProfileIcon";
 import {
@@ -413,6 +415,12 @@ export default function Navbar() {
       icon: FaRss,
       label: "My Feed",
       href: "/my-feed",
+      color: "text-green-600",
+    },
+    {
+      icon: FaHandHoldingUsd,
+      label: "My Transactions",
+      href: "/transaction",
       color: "text-green-600",
     },
   ];

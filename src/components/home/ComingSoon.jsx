@@ -13,23 +13,20 @@ export const ComingSoon = () => {
   console.log(image);
 
   
-  // Handle redirect functionality for "arrived" status
-  const handleArrivedRedirect = () => {
+  // Handle redirect for "it'sHere" status - go to details page
+  const handleItsHereRedirect = () => {
+    window.location.href = "/comingSoon";
+  };
+
+  // Handle redirect for "checkThisOut" status - external link
+  const handleCheckThisOutRedirect = () => {
     if (videoData?.redirectUrl) {
       // Add protocol if not present and redirect to external URL
       const url = videoData.redirectUrl.startsWith('http') 
         ? videoData.redirectUrl 
         : `https://${videoData.redirectUrl}`;
       window.open(url, '_blank');
-    } else {
-      // If no redirectUrl, go to /comingSoon page
-      window.location.href = "/comingSoon";
     }
-  };
-
-  // Handle redirect for "ready" status - always go to /comingSoon
-  const handleReadyRedirect = () => {
-    window.location.href = "/comingSoon";
   };
 
   // Determine content based on isReady status
@@ -48,11 +45,11 @@ export const ComingSoon = () => {
       );
     }
 
-    if (videoData.isReady === "arrived") {
+    if (videoData.isReady === "comingSoon") {
       return (
         <div className="mb-4 px-4 lg:px-0">
           {/* Animated title - only visible on large devices */}
-          <h2 className="  text-xl font-bold mb-2 ">
+          <h2 className="text-xl font-bold mb-2">
             Coming Soon
           </h2>
           <div className="relative">
@@ -61,35 +58,23 @@ export const ComingSoon = () => {
               imageUrl={image}
               overlayText=""
               route={null}
-              onClick={handleArrivedRedirect}
+              onClick={null}
             />
             
-            {/* Lock overlay with animation */}
-            <div className="absolute inset-0  bg-opacity-20 flex items-center justify-center rounded-lg">
-              <div className="text-center text-white">
+            {/* Lock overlay with animation - not clickable */}
+            <div className="absolute inset-0 flex items-center justify-center rounded-lg">
+              <div className="text-center text-white bg-black bg-opacity-60 p-4 rounded-lg">
                 <Lock 
                   size={48} 
-                  className="hidden lg:block mx-auto mb-2 animate-pulse text-yellow-400" 
-
+                  className="mx-auto mb-2 animate-pulse text-primary" 
                 />
-                {/* Animated Coming Soon text - only visible on large devices */}
-                <p className="hidden lg:block  text-lg font-semibold animate-bounce">
-
+                {/* Animated Coming Soon text */}
+                <p className="text-lg font-semibold animate-bounce">
                   Coming Soon
                 </p>
-                <p className="hidden lg:block text-sm opacity-80 mt-1">
-                  Video is arriving...
-                </p>
-                {videoData.redirectUrl && (
-                  <button
-                    onClick={handleArrivedRedirect}
-                    className="mt-3 flex items-center justify-center mx-auto px-4 py-2 bg-primary cursor-pointer hover:bg-red-600 rounded-lg text-sm font-medium transition-colors"
-
-                  >
-                    <ExternalLink size={16} className="mr-1" />
-                    Visit external Site
-                  </button>
-                )}
+                {/* <p className="text-sm opacity-80 mt-1">
+                  Content is locked
+                </p> */}
               </div>
             </div>
           </div>
@@ -97,30 +82,57 @@ export const ComingSoon = () => {
       );
     }
 
-    if (videoData.isReady === "ready") {
+    if (videoData.isReady === "itsHere") {
       return (
         <div className="mb-4 px-4 lg:px-0">
-          <h2 className="text-xl font-bold mb-2">🎉 Ready to Watch!</h2>
+          <h2 className="text-xl font-bold mb-2">🎉 It's Here!</h2>
           <div className="relative">
             <VideoCard
               title={videoData.title || "New Video"}
               imageUrl={image}
               overlayText=""
               route="/comingSoon"
-              onClick={handleReadyRedirect}
+              onClick={handleItsHereRedirect}
             />
             
-            {/* Ready overlay - no external redirect button */}
+            {/* It's Here overlay */}
             <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
-              ✨ READY NOW!
+              ✨ IT'S HERE!
             </div>
             
-            {/* Quick access message - no external redirect */}
-            <div className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-primary to-secondary text-white p-3 rounded-lg">
-              <p className="text-sm font-medium">
-                🚀 Right now it is publishable! Click to watch this amazing content!
-              </p>
+          
+          </div>
+        </div>
+      );
+    }
+
+    if (videoData.isReady === "checkThisOut") {
+      return (
+        <div className="mb-4 px-4 lg:px-0">
+          <h2 className="text-xl font-bold mb-2">🔥 Check This Out!</h2>
+          <div className="relative">
+            <VideoCard
+              title={videoData.title || "External Content"}
+              imageUrl={image}
+              overlayText=""
+              route={null}
+              onClick={handleCheckThisOutRedirect}
+            />
+            
+            {/* Check This Out overlay */}
+            <div className="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+              🔗 EXTERNAL
             </div>
+            
+            {/* External link message */}
+            {/* <div className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-lg cursor-pointer hover:opacity-90 transition-opacity" onClick={handleCheckThisOutRedirect}>
+              <div className="flex items-center justify-center">
+                <ExternalLink size={16} className="mr-2" />
+                <p className="text-sm font-medium">
+                  Click to visit external site directly!
+                </p>
+              </div>
+            </div> */}
           </div>
         </div>
       );
