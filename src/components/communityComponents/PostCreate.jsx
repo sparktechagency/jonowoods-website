@@ -7,7 +7,7 @@ import {
   useCreatePostMutation,
   useUpdatePostMutation,
 } from "@/redux/featured/community/communityApi";
-import { JoditEditor } from "./JoditTextEdito";
+// Removed JoditEditor import - using textarea instead
 import { toast } from "sonner";
 
 const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
@@ -92,10 +92,13 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
           )}
         </div>
 
-        <JoditEditor
+        <textarea
           value={content}
-          onChange={(newContent) => setContent(newContent)}
-          className="mb-4"
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Share your thoughts with the community..."
+          rows={6}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 resize-vertical mb-4"
+          disabled={isLoading}
         />
 
         <div className="flex justify-end space-x-3">

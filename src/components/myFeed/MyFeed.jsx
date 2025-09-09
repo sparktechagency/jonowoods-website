@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import JoditEditor from "jodit-react";
+// Removed JoditEditor import - using textarea instead
 import { FaCommentAlt, FaRegCommentAlt } from "react-icons/fa";
 
 export default function MyFeed({ id, initialContent, onDelete, onUpdate }) {
@@ -71,9 +71,12 @@ export default function MyFeed({ id, initialContent, onDelete, onUpdate }) {
       {/* Edit Modal */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-2xl">
-          <JoditEditor
+          <textarea
             value={editContent}
-            onChange={(newContent) => setEditContent(newContent)}
+            onChange={(e) => setEditContent(e.target.value)}
+            placeholder="Edit your content..."
+            rows={8}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-vertical"
           />
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
