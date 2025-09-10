@@ -88,9 +88,8 @@ const ChallengePage = ({ params }) => {
   
   // Check if a video is accessible
   const isVideoAccessible = (index) => {
-    if (index === 0) return true; // First video always accessible
-    const prevVideo = videos[index - 1];
-    return prevVideo && completedVideos.includes(prevVideo._id);
+    const video = videos[index];
+    return video && video.isEnabled;
   };
 
   if (isLoading) return <Spinner />;
@@ -113,16 +112,16 @@ const ChallengePage = ({ params }) => {
   console.log(currentVideo)
 
   return (
-    <div className=" mx-auto p-4">
-      {/* Fixed Video Player - Sticky on mobile */}
-      <div className="sticky top-0 z-10 bg-white shadow-lg mb-4 pb-4 pt-2">
+    <div className="mx-auto p-4">
+      {/* Fixed Video Player - Sticky on mobile only */}
+      <div className="md:relative md:mb-4 sticky top-0 z-10 bg-white shadow-lg mb-4 pb-4 pt-2">
         {currentVideo && (
           <div className="">
             <h2 className="text-lg md:text-2xl font-bold mb-2">{currentVideo.title}</h2>
             <div className="relative">
               <video
                 controls
-                 controlsList="nodownload"
+                controlsList="nodownload"
                 src={`https://${currentVideo?.videoUrl}`}
                 className="w-full h-48 md:h-64 lg:h-[500px] object-cover border rounded-md"
                 autoPlay
@@ -130,7 +129,7 @@ const ChallengePage = ({ params }) => {
                 onTimeUpdate={(e) => {
                   const video = e.target;
                   const currentProgress = (video.currentTime / video.duration) * 100;
-                  if (currentProgress >= 90) {
+                  if (currentProgress >= 90 && !completionProcessedRef.current.has(currentVideo._id)) {
                     handleVideoComplete(currentVideo._id);
                   }
                 }}

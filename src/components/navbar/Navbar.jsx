@@ -73,7 +73,7 @@ export default function Navbar() {
   const reconnectTimeoutRef = useRef(null);
   const { data: accessData } = useGetMyAccessQuery();
   const access = accessData?.data;
-  console.log(access);
+  // console.log(access);
 
   // Constants
   const NOTIFICATIONS_PER_PAGE = 30;
@@ -95,7 +95,7 @@ export default function Navbar() {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
-  console.log(notificationData);
+  // console.log(notificationData);
 
   const [readOneNotification] = useReadOneNotificationMutation();
   const [readAllNotification] = useReadAllNotificationMutation();
@@ -104,7 +104,7 @@ export default function Navbar() {
 
   // Calculate unread count from API response
   const unreadCount = notificationData?.data?.unreadCount || 0;
-  console.log(unreadCount);
+  // console.log(unreadCount);
 
   // Improved Socket.IO setup with better error handling and reconnection
   useEffect(() => {
@@ -136,7 +136,7 @@ export default function Navbar() {
       });
 
       const handleNewNotification = (data) => {
-        console.log("New notification received:", data);
+        // console.log("New notification received:", data);
         // Force refetch to get latest notifications
         refetch();
         

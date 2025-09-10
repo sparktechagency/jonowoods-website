@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/components/share/imageUrl";
 import { baseUrlApi } from "@/redux/baseUrl/baseUrlApi";
 import { useGetCategoryQuery } from "@/redux/featured/homeApi.jsx/homeApi";
 import Image from "next/image";
@@ -46,7 +47,7 @@ export default function CategoriesPage() {
               <div className="relative w-full h-full">
                 {/* Category Image */}
                 <Image
-                  src={`${baseUrlApi}${category.thumbnail}`}
+                  src={getImageUrl(category.thumbnail)}
                   alt={category.name}
                   layout="fill"
                   objectFit="cover"

@@ -20,7 +20,7 @@ export default function NewClasses() {
 
   const handleSeeMoreClick = () => {
     // Navigate to the challenges page when "See More" is clicked
-    router.push("/challenges");
+    router.push("/challenge");
   };
 
   return (
