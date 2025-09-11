@@ -73,7 +73,7 @@ export default function Navbar() {
   const reconnectTimeoutRef = useRef(null);
   const { data: accessData } = useGetMyAccessQuery();
   const access = accessData?.data;
-  // console.log(access);
+  console.log(access);
 
   // Constants
   const NOTIFICATIONS_PER_PAGE = 30;
@@ -82,6 +82,7 @@ export default function Navbar() {
 
   // Redux queries and mutations
   const { data: userData } = useMyProfileQuery();
+  console.log("userData", userData);
   const {
     data: notificationData,
     isLoading,

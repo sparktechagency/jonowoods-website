@@ -23,17 +23,35 @@ export default function LoginUser() {
   const router = useRouter();
 
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
-  const {data:accessData}=useGetMyAccessQuery()
-  const access=accessData?.data?.hasAccess
+  
+  // Don't call this hook here since user hasn't logged in yet
+  // const {data:accessData}=useGetMyAccessQuery()
+  // const access=accessData?.data?.hasAccess
 
-
-
+  // Function to get user's timezone
+  const getUserTimezone = () => {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch (error) {
+      console.warn("Could not detect timezone, using UTC as fallback");
+      return "UTC";
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     try {
-      const res = await login({ email, password }).unwrap();
+      // Get user's timezone
+      const timezone = getUserTimezone();
+      
+      const res = await login({ 
+        email, 
+        password,
+        timezone // Add timezone to login request
+      }).unwrap();
+      console.log(res);
+      
       const { accessToken, refreshToken } = res.data;
       // Save tokens and dispatch success
       localStorage.setItem("token", accessToken);
@@ -47,18 +65,13 @@ export default function LoginUser() {
         localStorage.removeItem("redirectPath");
         router.push(redirectPath);
       } else {
-        // Default redirect based on access
-        if(access){
-          router.push("/");
-        } else {
-          router.push("/subscription");
-        }
+        // Default redirect to home - let PrivateRoute handle access checking
+        router.push("/");
       }
     } catch (error) {
       console.error("Login failed:", error);
   
       // Show error toast message
-      // const errorMessage = error?.message || "An error occurred while logging in.";
       toast.error(error); 
     }
   };
