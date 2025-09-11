@@ -32,6 +32,15 @@ const ChallengePage = ({ params }) => {
         .filter(video => video.isVideoCompleted)
         .map(video => video._id);
       setCompletedVideos(completed);
+
+      // Find the first enabled video and set it as current
+      const firstEnabledIndex = sortedVideos.findIndex(video => video.isEnabled === true);
+      if (firstEnabledIndex !== -1) {
+        setCurrentVideoIndex(firstEnabledIndex);
+      } else {
+        // If no video is enabled, set to first video as fallback
+        setCurrentVideoIndex(0);
+      }
       
       // Reset completion tracking when data changes
       completionProcessedRef.current.clear();
