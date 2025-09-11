@@ -18,7 +18,10 @@ const ChallengePage = ({ params }) => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [completedVideos, setCompletedVideos] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [nextVideoUnlockTime, setNextVideoUnlockTime] = useState(null);
+  const [countdown, setCountdown] = useState('');
   const completionProcessedRef = useRef(new Set()); // Track processed video completions
+  const countdownIntervalRef = useRef(null);
 
   // Initialize videos and completed videos
   useEffect(() => {
@@ -52,6 +55,47 @@ const ChallengePage = ({ params }) => {
     completionProcessedRef.current.clear();
   }, [currentVideoIndex]);
 
+  // Countdown timer effect
+  useEffect(() => {
+    if (nextVideoUnlockTime) {
+      const updateCountdown = () => {
+        const now = new Date().getTime();
+        const unlockTime = new Date(nextVideoUnlockTime).getTime();
+        const difference = unlockTime - now;
+
+        if (difference > 0) {
+          const hours = Math.floor(difference / (1000 * 60 * 60));
+          const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+          
+          setCountdown(`${hours}h ${minutes}m ${seconds}s remaining`);
+        } else {
+          setCountdown('');
+          setNextVideoUnlockTime(null);
+          // Refetch data to get updated video availability
+          refetch();
+          toast.success('New video unlocked!', {
+            description: 'You can now watch the next video.',
+            duration: 5000,
+          });
+        }
+      };
+
+      // Update immediately
+      updateCountdown();
+      
+      // Set up interval to update every second
+      countdownIntervalRef.current = setInterval(updateCountdown, 1000);
+
+      // Cleanup interval on unmount or when unlock time changes
+      return () => {
+        if (countdownIntervalRef.current) {
+          clearInterval(countdownIntervalRef.current);
+        }
+      };
+    }
+  }, [nextVideoUnlockTime, refetch]);
+
   // Handle video completion
   const handleVideoComplete = async (videoId) => {
     // Prevent duplicate completion processing
@@ -63,26 +107,36 @@ const ChallengePage = ({ params }) => {
     
     try {
       // Mark as completed
-      await markWatchChallengeVideo(videoId).unwrap();
+      const response = await markWatchChallengeVideo(videoId).unwrap();
       
       // Update local state
       setCompletedVideos(prev => [...prev, videoId]);
       
-      // Find next video index
-      const currentIndex = videos.findIndex(v => v._id === videoId);
-      
-      // If there's a next video, show the notification about it
-      if (currentIndex < videos.length - 1) {
-        const nextVideo = videos[currentIndex + 1];
+      // Check if there's unlock time information in the response
+      if (response?.data?.nextVideoInfo?.nextUnlockTime) {
+        setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
         
         toast.success('Video completed!', {
-          description: `You've unlocked "${nextVideo.title}"!`,
+          description: response.data.nextVideoInfo.reason || 'Next video will unlock soon.',
           duration: 5000,
-          action: {
-            label: 'Watch Next',
-            onClick: () => setCurrentVideoIndex(currentIndex + 1)
-          },
         });
+      } else {
+        // Find next video index for immediate unlock
+        const currentIndex = videos.findIndex(v => v._id === videoId);
+        
+        // If there's a next video, show the notification about it
+        if (currentIndex < videos.length - 1) {
+          const nextVideo = videos[currentIndex + 1];
+          
+          toast.success('Video completed!', {
+            description: `You've unlocked "${nextVideo.title}"!`,
+            duration: 5000,
+            action: {
+              label: 'Watch Next',
+              onClick: () => setCurrentVideoIndex(currentIndex + 1)
+            },
+          });
+        }
       }
       
       // Refresh data to get updated completion status
@@ -99,6 +153,21 @@ const ChallengePage = ({ params }) => {
   const isVideoAccessible = (index) => {
     const video = videos[index];
     return video && video.isEnabled;
+  };
+
+  // Check if a video is locked with countdown
+  const isVideoLockedWithCountdown = (index) => {
+    const video = videos[index];
+    const prevVideoIndex = index - 1;
+    
+    // If this is not the first video and previous video is completed but this video is not enabled
+    if (prevVideoIndex >= 0 && 
+        completedVideos.includes(videos[prevVideoIndex]?._id) && 
+        !video?.isEnabled && 
+        nextVideoUnlockTime) {
+      return true;
+    }
+    return false;
   };
 
   if (isLoading) return <Spinner />;
@@ -165,6 +234,27 @@ const ChallengePage = ({ params }) => {
         )}
       </div>
 
+      {/* Countdown Timer Display */}
+      {/* {nextVideoUnlockTime && countdown && (
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 rounded-r-lg">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-yellow-800">
+                Next video unlocks in: <span className="font-bold text-yellow-900">{countdown}</span>
+              </p>
+              <p className="text-xs text-yellow-700 mt-1">
+                Complete the current video and wait for the timer to unlock the next one.
+              </p>
+            </div>
+          </div>
+        </div>
+      )} */}
+
       {/* Video List */}
       <div className="my-8">
         <h2 className="text-xl md:text-2xl font-bold mb-4">All Challenge Videos</h2>
@@ -173,6 +263,7 @@ const ChallengePage = ({ params }) => {
             const isAccessible = isVideoAccessible(index);
             const isCompleted = completedVideos.includes(video._id);
             const isCurrent = currentVideoIndex === index;
+            const isLockedWithCountdown = isVideoLockedWithCountdown(index);
             
             return (
               <div 
@@ -184,6 +275,10 @@ const ChallengePage = ({ params }) => {
                     if (window.innerWidth < 768) {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
+                  } else if (isLockedWithCountdown) {
+                    toast.info('Video locked', {
+                      description: `This video will unlock in ${countdown || 'some time'}.`
+                    });
                   } else {
                     toast.info('Video locked', {
                       description: 'Complete the previous video to unlock this one.'
@@ -225,7 +320,14 @@ const ChallengePage = ({ params }) => {
                             d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
                           />
                         </svg>
-                        <p className="text-sm">Complete previous video</p>
+                        {isLockedWithCountdown ? (
+                          <div>
+                            <p className="text-sm mb-1">Unlocks in</p>
+                            <p className="text-xs font-bold text-yellow-300">{countdown}</p>
+                          </div>
+                        ) : (
+                          <p className="text-sm">Complete previous video</p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -277,6 +379,11 @@ const ChallengePage = ({ params }) => {
                   {isCurrent && (
                     <p className="text-xs text-red-600 font-medium mt-1">▶ Currently Playing</p>
                   )}
+                  {/* {isLockedWithCountdown && (
+                    <p className="text-xs text-yellow-600 font-medium mt-1">
+                      🔒 Unlocks in {countdown}
+                    </p>
+                  )} */}
                 </div>
               </div>
             );
