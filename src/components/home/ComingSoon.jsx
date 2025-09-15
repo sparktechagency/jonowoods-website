@@ -109,7 +109,7 @@ export const ComingSoon = () => {
     if (videoData.isReady === "checkThisOut") {
       return (
         <div className="mb-4 px-4 lg:px-0">
-          <h2 className="text-xl font-bold mb-2">🔥 Check This Out!</h2>
+          <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
           <div className="relative">
             <VideoCard
               title={videoData.title || "External Content"}
@@ -120,9 +120,9 @@ export const ComingSoon = () => {
             />
             
             {/* Check This Out overlay */}
-            <div className="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+            {/* <div className="absolute top-2 right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
               🔗 EXTERNAL
-            </div>
+            </div> */}
             
             {/* External link message */}
             {/* <div className="absolute bottom-2 left-2 right-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-3 rounded-lg cursor-pointer hover:opacity-90 transition-opacity" onClick={handleCheckThisOutRedirect}>

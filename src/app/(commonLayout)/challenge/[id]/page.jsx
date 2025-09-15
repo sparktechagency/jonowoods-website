@@ -51,6 +51,26 @@ const ChallengePage = ({ params }) => {
     }
   };
 
+  // Find the current playable video index
+  const findCurrentPlayableVideoIndex = (videosArray, completedArray) => {
+    // Find the last enabled video that is either incomplete or the last completed one
+    let lastEnabledIndex = -1;
+    
+    for (let i = 0; i < videosArray.length; i++) {
+      const video = videosArray[i];
+      if (video.isEnabled) {
+        lastEnabledIndex = i;
+        // If this video is not completed, this should be current
+        if (!completedArray.includes(video._id)) {
+          return i;
+        }
+      }
+    }
+    
+    // If all enabled videos are completed, return the last enabled one
+    return lastEnabledIndex;
+  };
+
   // Initialize videos and completed videos
   useEffect(() => {
     if (data?.data?.result) {
@@ -62,10 +82,10 @@ const ChallengePage = ({ params }) => {
         .map(video => video._id);
       setCompletedVideos(completed);
 
-      // Find the first enabled video and set it as current
-      const firstEnabledIndex = sortedVideos.findIndex(video => video.isEnabled === true);
-      if (firstEnabledIndex !== -1) {
-        setCurrentVideoIndex(firstEnabledIndex);
+      // Find the current playable video
+      const currentIndex = findCurrentPlayableVideoIndex(sortedVideos, completed);
+      if (currentIndex !== -1) {
+        setCurrentVideoIndex(currentIndex);
       } else {
         setCurrentVideoIndex(0);
       }
@@ -91,7 +111,18 @@ const ChallengePage = ({ params }) => {
 
         if (countdownInfo.isExpired) {
           setNextVideoUnlockTime(null);
-          refetch();
+          refetch().then(() => {
+            // After refetch, find the new current video
+            setTimeout(() => {
+              if (videos.length > 0) {
+                const newCurrentIndex = findCurrentPlayableVideoIndex(videos, completedVideos);
+                if (newCurrentIndex !== -1 && newCurrentIndex > currentVideoIndex) {
+                  setCurrentVideoIndex(newCurrentIndex);
+                }
+              }
+            }, 500);
+          });
+          
           toast.success('New video unlocked!', {
             description: 'You can now watch the next video.',
             duration: 5000,
@@ -108,7 +139,7 @@ const ChallengePage = ({ params }) => {
         }
       };
     }
-  }, [nextVideoUnlockTime, refetch]);
+  }, [nextVideoUnlockTime, refetch, videos, completedVideos, currentVideoIndex]);
 
   // Reset completion tracking when current video changes
   useEffect(() => {
@@ -129,27 +160,45 @@ const ChallengePage = ({ params }) => {
       setCompletedVideos(prev => [...prev, videoId]);
       
       if (response?.data?.nextVideoInfo?.nextUnlockTime) {
+        // Video completed but next video has timer - stay on current video
         setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
         
         const countdownInfo = calculateCountdown(response.data.nextVideoInfo.nextUnlockTime);
         
         toast.success('Video completed!', {
-          description: `Next video will unlock in ${countdownInfo.formatted}`,
+          description: `Next video will unlock in ${countdownInfo.formatted}. Continue watching current video until then.`,
           duration: 5000,
         });
+        
+        // Don't change current video index here - stay on the same video
       } else {
+        // Video completed and next video is immediately available
         const currentIndex = videos.findIndex(v => v._id === videoId);
         
         if (currentIndex < videos.length - 1) {
-          const nextVideo = videos[currentIndex + 1];
+          const nextVideoIndex = currentIndex + 1;
+          const nextVideo = videos[nextVideoIndex];
           
-          toast.success('Video completed!', {
-            description: `You've unlocked "${nextVideo.title}"!`,
+          // Check if next video is enabled
+          if (nextVideo && nextVideo.isEnabled) {
+            setCurrentVideoIndex(nextVideoIndex);
+            
+            toast.success('Video completed!', {
+              description: `You've unlocked "${nextVideo.title}"! Now playing next video.`,
+              duration: 5000,
+            });
+          } else {
+            // Next video is not enabled yet, stay on current
+            toast.success('Video completed!', {
+              description: 'Please wait for the next video to unlock.',
+              duration: 5000,
+            });
+          }
+        } else {
+          // This was the last video
+          toast.success('Congratulations!', {
+            description: 'You have completed all challenge videos!',
             duration: 5000,
-            action: {
-              label: 'Watch Next',
-              onClick: () => setCurrentVideoIndex(currentIndex + 1)
-            },
           });
         }
       }
@@ -208,31 +257,23 @@ const ChallengePage = ({ params }) => {
   }
 
   const currentVideo = videos[currentVideoIndex];
+  const isCurrentVideoCompleted = currentVideo && completedVideos.includes(currentVideo._id);
   console.log(currentVideo)
 
   return (
     <div className="mx-auto">
-      {/* Global Countdown Banner */}
-      {/* {nextVideoUnlockTime && globalCountdown && globalCountdown !== 'Unlocked' && (
-        <div className="mb-4 p-4 bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-yellow-500 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-yellow-800">Next Video Unlocks In</h3>
-              <p className="text-yellow-700">Complete the current video and wait for the timer</p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-yellow-800">{globalCountdown}</div>
-              <p className="text-sm text-yellow-600">remaining</p>
-            </div>
-          </div>
-        </div>
-      )} */}
-
       {/* Fixed Video Player - Sticky on mobile only */}
       <div className="md:relative md:mb-4 sticky top-0 z-10 bg-white shadow-lg mb-4 ">
         {currentVideo && currentVideo?.isEnabled && (
           <div className="">
-            <h2 className="text-lg md:text-2xl font-bold mb-2">{currentVideo.title}</h2>
+            <h2 className="text-lg md:text-2xl font-bold mb-2">
+              {currentVideo.title}
+              {isCurrentVideoCompleted && nextVideoUnlockTime && (
+                <span className="ml-2 text-sm bg-green-100 text-green-700 px-2 py-1 rounded">
+                  ✓ Completed - Next unlocks in {countdown}
+                </span>
+              )}
+            </h2>
             <div className="relative">
               <video
                 controls
@@ -255,6 +296,9 @@ const ChallengePage = ({ params }) => {
               {/* Current video indicator */}
               <div className="absolute top-0 left-0 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
                 Now Playing: Video {currentVideoIndex + 1}
+                {isCurrentVideoCompleted && (
+                  <span className="ml-1">✓</span>
+                )}
               </div>
             </div>
             
@@ -266,6 +310,18 @@ const ChallengePage = ({ params }) => {
               <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                 {currentVideo?.description}
               </p>
+              
+              {/* Show completion status and next unlock info */}
+              {isCurrentVideoCompleted && nextVideoUnlockTime && (
+                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-sm text-yellow-800">
+                    🎉 Video completed! Next video unlocks in <strong>{countdown}</strong>
+                  </p>
+                  <p className="text-xs text-yellow-600 mt-1">
+                    You can continue watching this video or wait for the next one to unlock.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -384,7 +440,7 @@ const ChallengePage = ({ params }) => {
                     <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center">
                       <div className="text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                         <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                        NOW PLAYING
+                        {isCompleted && nextVideoUnlockTime ? 'COMPLETED - WAITING' : 'NOW PLAYING'}
                       </div>
                     </div>
                   )}
@@ -402,7 +458,9 @@ const ChallengePage = ({ params }) => {
                   }`}>{video.duration}</p>
                   
                   {isCurrent && (
-                    <p className="text-xs text-red-600 font-medium mt-1">▶ Currently Playing</p>
+                    <p className="text-xs text-red-600 font-medium mt-1">
+                      {isCompleted ? '✓ Completed' : !isAccessible ? '🔒 Next - Locked' : '▶ Currently Playing'}
+                    </p>
                   )}
                   
                   {/* Show unlock countdown for locked videos */}

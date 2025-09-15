@@ -22,21 +22,33 @@ const CourseVideoPage = ({ params }) => {
   const [videos, setVideos] = useState([]);
   const completionProcessedRef = useRef(new Set()); // Track processed video completions
 
+  // Function to find the current video index (first incomplete enabled video)
+  const findCurrentVideoIndex = (videoArray) => {
+    const currentIndex = videoArray.findIndex(video => 
+      video.isEnabled && !video.isVideoCompleted
+    );
+    return currentIndex !== -1 ? currentIndex : 0;
+  };
+
   // Initialize videos and completed videos
   useEffect(() => {
     if (videoData?.data.result) {
       // If videoData.data is an array, use it directly; if single video, wrap in array
       const courseVideos = Array.isArray(videoData.data.result) ? videoData.data.result : [videoData.data.result];
       
-      // Sort videos by their order if needed
-      const sortedVideos = [...courseVideos];
+      // Sort videos by their serial number or order if needed
+      const sortedVideos = [...courseVideos].sort((a, b) => (a.serial || 0) - (b.serial || 0));
       setVideos(sortedVideos);
 
-      // Find completed videos
+      // Find completed videos (enabled and completed)
       const completed = sortedVideos
-        .filter(video => video.isVideoCompleted)
+        .filter(video => video.isEnabled && video.isVideoCompleted)
         .map(video => video._id);
       setCompletedVideos(completed);
+      
+      // Set current video index to the first incomplete enabled video
+      const currentIndex = findCurrentVideoIndex(sortedVideos);
+      setCurrentVideoIndex(currentIndex);
       
       // Reset completion tracking when data changes
       completionProcessedRef.current.clear();
@@ -64,25 +76,36 @@ const CourseVideoPage = ({ params }) => {
       // Update local state
       setCompletedVideos(prev => [...prev, videoId]);
       
-      // Find next video index
+      // Find current video index
       const currentIndex = videos.findIndex(v => v._id === videoId);
       
-      // If there's a next video, show the notification about it
-      if (currentIndex < videos.length - 1) {
-        const nextVideo = videos[currentIndex + 1];
+      // Find next available video (enabled and not completed)
+      const nextAvailableIndex = videos.findIndex((video, index) => 
+        index > currentIndex && video.isEnabled && !video.isVideoCompleted
+      );
+      
+      // If there's a next available video, auto-play it
+      if (nextAvailableIndex !== -1) {
+        const nextVideo = videos[nextAvailableIndex];
         
         toast.success('Video completed!', {
-          description: `You've unlocked "${nextVideo.title}"!`,
-          duration: 5000,
-          action: {
-            label: 'Watch Next',
-            onClick: () => setCurrentVideoIndex(currentIndex + 1)
-          },
+          description: `Auto-playing next video: "${nextVideo.title}"`,
+          duration: 3000,
         });
+        
+        // Auto-play next video after a short delay
+        setTimeout(() => {
+          setCurrentVideoIndex(nextAvailableIndex);
+          // Smooth scroll to top on mobile to show the video player
+          if (window.innerWidth < 768) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 1000);
+        
       } else {
-        // Last video completed
-        toast.success('Course completed!', {
-          description: 'Congratulations! You have completed all videos in this course.',
+        // No more videos available or all completed
+        toast.success('Course section completed!', {
+          description: 'Congratulations! You have completed all available videos.',
           duration: 5000,
         });
       }
@@ -104,6 +127,17 @@ const CourseVideoPage = ({ params }) => {
     return video && video.isEnabled;
   };
 
+  // Get video status for display
+  const getVideoStatus = (video, index) => {
+    if (!video.isEnabled) {
+      return 'locked';
+    } else if (video.isVideoCompleted) {
+      return 'completed';
+    } else {
+      return 'available';
+    }
+  };
+
   if (videoLoading) return <Spinner />;
 
   if (!videoData?.data?.result || (Array.isArray(videoData.data.result) && videoData.data.result.length === 0)) {
@@ -121,7 +155,8 @@ const CourseVideoPage = ({ params }) => {
   }
 
   const currentVideo = videos[currentVideoIndex];
-  console.log(currentVideo)
+  console.log('Current Video:', currentVideo);
+  console.log('Current Video Index:', currentVideoIndex);
 
   return (
     <div className="mx-auto p-4">
@@ -132,8 +167,9 @@ const CourseVideoPage = ({ params }) => {
             <h2 className="text-lg md:text-2xl font-bold mb-2">{currentVideo.title}</h2>
             <div className="relative">
               <video
+                key={currentVideo._id} // Add key to force re-render when video changes
                 controls
-                 controlsList="nodownload"
+                controlsList="nodownload"
                 src={`https://${currentVideo?.videoUrl}`}
                 className="w-full h-48 md:h-64 lg:h-[500px] object-cover border rounded-md"
                 autoPlay
@@ -158,22 +194,42 @@ const CourseVideoPage = ({ params }) => {
             {/* Video details */}
             <div className="mt-2">
               <p className="text-sm text-gray-600">
-                Duration: {currentVideo?.duration} Min
+                Duration: {currentVideo?.duration}
               </p>
               <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                 {currentVideo?.description}
               </p>
+              
+              {/* Video status indicator */}
+              <div className="mt-2">
+                {getVideoStatus(currentVideo, currentVideoIndex) === 'completed' && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Completed
+                  </span>
+                )}
+                {getVideoStatus(currentVideo, currentVideoIndex) === 'available' && (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    </svg>
+                    In Progress
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Equipment Needed - Moved to sticky section */}
-      {currentVideo?.equipmentNeeded && currentVideo.equipmentNeeded.length > 0 && (
+      {/* Equipment Needed - Show equipment from current video */}
+      {currentVideo?.equipment && currentVideo.equipment.length > 0 && (
         <div className="mb-6 bg-gray-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-2">Equipment Needed</h3>
           <ul className="list-disc list-inside space-y-1">
-            {currentVideo.equipmentNeeded.map((equipment, index) => (
+            {currentVideo.equipment.map((equipment, index) => (
               <li key={index} className="text-gray-700 text-sm">{equipment}</li>
             ))}
           </ul>
@@ -187,7 +243,7 @@ const CourseVideoPage = ({ params }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {videos.map((video, index) => {
               const isAccessible = isVideoAccessible(index);
-              const isCompleted = completedVideos.includes(video._id);
+              const videoStatus = getVideoStatus(video, index);
               const isCurrent = currentVideoIndex === index;
               
               return (
@@ -202,14 +258,15 @@ const CourseVideoPage = ({ params }) => {
                       }
                     } else {
                       toast.info('Video locked', {
-                        description: 'Complete the previous video to unlock this one.'
+                        description: 'This video is not available yet.'
                       });
                     }
                   }}
                   className={`
                     relative rounded-lg overflow-hidden cursor-pointer border
-                    ${isAccessible ? 'hover:shadow-lg hover:scale-105' : 'opacity-70 cursor-not-allowed'}
+                    ${isAccessible ? 'hover:shadow-lg hover:scale-105' : ' cursor-not-allowed'}
                     ${isCurrent ? 'ring-4 ring-red-500 bg-red-50 shadow-xl scale-95' : ''}
+                    ${videoStatus === 'completed' ? 'ring-2 ring-green-300 bg-green-50' : ''}
                     transition-all duration-300
                   `}
                 >
@@ -225,7 +282,7 @@ const CourseVideoPage = ({ params }) => {
                     
                     {/* Lock overlay for inaccessible videos */}
                     {!isAccessible && (
-                      <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+                      <div className="absolute inset-0  flex items-center justify-center">
                         <div className="text-center text-white">
                           <svg 
                             xmlns="http://www.w3.org/2000/svg" 
@@ -241,13 +298,13 @@ const CourseVideoPage = ({ params }) => {
                               d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
                             />
                           </svg>
-                          <p className="text-sm">Complete previous video</p>
+                          <p className="text-sm">Not Available</p>
                         </div>
                       </div>
                     )}
                     
                     {/* Completion indicator */}
-                    {isCompleted && (
+                    {videoStatus === 'completed' && (
                       <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
                         <svg 
                           xmlns="http://www.w3.org/2000/svg" 
@@ -265,14 +322,14 @@ const CourseVideoPage = ({ params }) => {
                     )}
                     
                     {/* Video number */}
-                    <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
+                    <div className="absolute top-2 left-2 bg-white  text-xs font-medium px-2 py-1 rounded">
                       Video {index + 1}
                     </div>
                     
                     {/* Currently playing indicator */}
                     {isCurrent && (
-                      <div className="absolute inset-0 bg-opacity-20 flex items-center justify-center">
-                        <div className="text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                      <div className="absolute   flex items-center justify-center">
+                        <div className=" text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                           <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                           NOW PLAYING
                         </div>
@@ -282,16 +339,27 @@ const CourseVideoPage = ({ params }) => {
                   
                   {/* Video details */}
                   <div className={`p-3 transition-colors duration-300 ${
-                    isCurrent ? 'bg-red-50' : 'bg-white'
+                    isCurrent ? 'bg-red-50' : 
+                    videoStatus === 'completed' ? 'bg-green-50' : 'bg-white'
                   }`}>
                     <h3 className={`font-medium text-sm line-clamp-2 transition-colors duration-300 ${
-                      isCurrent ? 'text-red-700' : 'text-gray-900'
+                      isCurrent ? 'text-red-700' : 
+                      videoStatus === 'completed' ? 'text-green-700' : 'text-gray-900'
                     }`}>{video.title}</h3>
                     <p className={`text-xs mt-1 transition-colors duration-300 ${
-                      isCurrent ? 'text-red-600' : 'text-gray-500'
-                    }`}>{video.duration} min</p>
+                      isCurrent ? 'text-red-600' : 
+                      videoStatus === 'completed' ? 'text-green-600' : 'text-gray-500'
+                    }`}>{video.duration}</p>
+                    
+                    {/* Status indicators */}
                     {isCurrent && (
                       <p className="text-xs text-red-600 font-medium mt-1">▶ Currently Playing</p>
+                    )}
+                    {videoStatus === 'completed' && !isCurrent && (
+                      <p className="text-xs text-green-600 font-medium mt-1">✓ Completed</p>
+                    )}
+                    {!isAccessible && (
+                      <p className="text-xs text-gray-400 font-medium mt-1">🔒 Locked</p>
                     )}
                   </div>
                 </div>
