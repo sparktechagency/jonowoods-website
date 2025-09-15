@@ -25,6 +25,7 @@ const PostDisplay = ({
   const [deletePost] = useDeletePostMutation();
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(null);
+  const [expandedPosts, setExpandedPosts] = useState({}); // Track expanded state for each post
 
   const handleLike = async (postId) => {
     try {
@@ -71,7 +72,7 @@ const PostDisplay = ({
 
   const handleDelete = async (postId) => {
     try {
-      const response = await deletePost(postId).unwrap(); // unwrap() করলে সরাসরি ডাটা পাওয়া যায়
+      const response = await deletePost(postId).unwrap(); 
       console.log(response);
 
       if (response?.success) {
@@ -89,9 +90,49 @@ const PostDisplay = ({
     }
   };
   
-
   const toggleDropdown = (postId) => {
     setDropdownOpen(dropdownOpen === postId ? null : postId);
+  };
+
+  // Toggle expanded state for a specific post
+  const toggleExpanded = (postId) => {
+    setExpandedPosts(prev => ({
+      ...prev,
+      [postId]: prev[postId] === 'full' ? 'collapsed' : 
+                prev[postId] === 'medium' ? 'full' : 'medium'
+    }));
+  };
+
+  // Get display content based on expansion state
+  const getDisplayContent = (content, postId) => {
+    const plainText = content.replace(/<[^>]*>/g, ''); // Strip HTML tags for character counting
+    const expandState = expandedPosts[postId] || 'collapsed';
+    
+    if (plainText.length <= 300) {
+      return { content, showButton: false, buttonText: '' };
+    }
+    
+    if (expandState === 'collapsed') {
+      const truncated = plainText.substring(0, 300);
+      const htmlTruncated = content.substring(0, content.indexOf(plainText.substring(300)) || 300);
+      return { 
+        content: htmlTruncated + '...', 
+        showButton: true, 
+        buttonText: 'See More' 
+      };
+    }
+    
+    if (expandState === 'medium' && plainText.length > 1500) {
+      const truncated = plainText.substring(0, 1500);
+      const htmlTruncated = content.substring(0, content.indexOf(plainText.substring(1500)) || 1500);
+      return { 
+        content: htmlTruncated + '...', 
+        showButton: true, 
+        buttonText: 'See More' 
+      };
+    }
+    
+    return { content, showButton: false, buttonText: '' };
   };
 
   // Format the timestamp to a relative time (e.g., "2 hours ago")
@@ -106,93 +147,109 @@ const PostDisplay = ({
 
   return (
     <div className="mb-8 mt-16 w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {posts?.map((post) => (
-          <Card key={post?._id} className="p-4 relative">
-            <div className="flex items-center mb-3 justify-between">
-              <div className="flex items-center">
-                <Avatar className="h-12 w-12 mr-2">
-                  <ProfileIcon 
-                    image={post?.userId?.image}
-                    size={48}
-                    className="h-full w-full"
-                  />
-                </Avatar>
-                <div className="flex flex-col gap-1">
-                  <span className="font-bold">
-                    {post?.userId?.name || "Unknown User"}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatTimeAgo(post?.createdAt)}
-                  </span>
-                </div>
-              </div>
+      {/* Masonry Layout using CSS columns */}
+      <div className="columns-1 md:columns-2 gap-6 space-y-6">
+        {posts?.map((post) => {
+          const { content: displayContent, showButton, buttonText } = getDisplayContent(post.content, post._id);
+          
+          return (
+            <div key={post?._id} className="break-inside-avoid mb-6">
+              <Card className="p-4 relative w-full">
+                <div className="flex items-center mb-3 justify-between">
+                  <div className="flex items-center">
+                    <Avatar className="h-12 w-12 mr-2">
+                      <ProfileIcon 
+                        image={post?.userId?.image}
+                        size={48}
+                        className="h-full w-full"
+                      />
+                    </Avatar>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-bold">
+                        {post?.userId?.name || "Unknown User"}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatTimeAgo(post?.createdAt)}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Three dots menu for current user's posts */}
-              {post?.userId?._id === currentUserId && (
-                <div className="relative">
-                  <button
-                    onClick={() => toggleDropdown(post._id)}
-                    className="p-2 hover:bg-gray-100 rounded-full"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
+                  {/* Three dots menu for current user's posts */}
+                  {post?.userId?._id === currentUserId && (
+                    <div className="relative">
+                      <button
+                        onClick={() => toggleDropdown(post._id)}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
 
-                  {dropdownOpen === post._id && (
-                    <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
-                      <button
-                        onClick={() => handleEdit(post)}
-                        className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteConfirm(post._id)}
-                        className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </button>
+                      {dropdownOpen === post._id && (
+                        <div className="absolute right-0 top-full mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+                          <button
+                            onClick={() => handleEdit(post)}
+                            className="flex items-center w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteConfirm(post._id)}
+                            className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-gray-100"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+
+                <div className="mb-3 max-w-2xl">
+                  <div
+                    dangerouslySetInnerHTML={{ __html: displayContent }}
+                  />
+                  {showButton && (
+                    <button
+                      onClick={() => toggleExpanded(post._id)}
+                      className="text-blue-500 hover:text-blue-700 font-medium text-sm mt-2 cursor-pointer"
+                    >
+                      {buttonText}
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-10">
+                  <button
+                    className="flex items-center text-xl"
+                    onClick={() => handleLike(post._id)}
+                  >
+                    <HeartIcon
+                      className={`h-8 w-8 mr-1 ${
+                        (post.likedBy || []).includes(currentUserId)
+                          ? "text-white fill-red-500"
+                          : "text-red-500"
+                      }`}
+                    />
+                    {post.likes || 0}
+                  </button>
+
+                  <CommentsContainer
+                    postId={post._id}
+                    currentUserId={currentUserId}
+                    commentsCount={(post.comments || []).length}
+                  />
+                </div>
+              </Card>
             </div>
-
-            <div
-              className="mb-3 max-w-2xl"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-
-            <div className="flex items-center space-x-10">
-              <button
-                className="flex items-center text-xl"
-                onClick={() => handleLike(post._id)}
-              >
-                <HeartIcon
-                  className={`h-8 w-8 mr-1 ${
-                    (post.likedBy || []).includes(currentUserId)
-                      ? "text-white fill-red-500"
-                      : "text-red-500"
-                  }`}
-                />
-                {post.likes || 0}
-              </button>
-
-              <CommentsContainer
-                postId={post._id}
-                currentUserId={currentUserId}
-                commentsCount={(post.comments || []).length}
-              />
-            </div>
-          </Card>
-        ))}
+          );
+        })}
       </div>
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmOpen && (
-        <div className="fixed inset-0  backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
           <div
             className="bg-white p-6 rounded-lg max-w-md w-full mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
