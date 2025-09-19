@@ -12,7 +12,7 @@ export const DailyInspiration = () => {
   const title = data?.data?.title;
   console.log("today video title ",title)
   return (
-    <section className="mb-8 px-4 lg:px-0">
+    <section className="mb-8 px-4 md:px-8 lg:px-12">
       <h2 className="text-xl font-bold mb-4">Daily Inspiration</h2>
       <VideoCard
         title={title}

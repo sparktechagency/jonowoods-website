@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 
 export default function Footer() {
   return (
-    <div className="flex flex-col border-t mt-12 md:mt-20">
+    <div className="flex flex-col border-t mt-12 md:mt-20 px-6 md:px-12 lg:px-20">
       {/* Header */}
       <header className="container mx-auto py-10 px-4 rounded-md">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -144,7 +144,7 @@ export default function Footer() {
           </div>
 
           {/* Email Signup Form - Full width on mobile, fixed width on larger screens */}
-          <div className="w-full lg:w-96">
+          {/* <div className="w-full lg:w-96">
             <h3 className="text-xl lg:text-2xl font-medium mb-4 text-center lg:text-left">
               Join Our Yoga Community
             </h3>
@@ -158,7 +158,7 @@ export default function Footer() {
                 Sign Up
               </Button>
             </div>
-          </div>
+          </div> */}
         </div>
       </header>
 

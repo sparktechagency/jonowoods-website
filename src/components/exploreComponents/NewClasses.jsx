@@ -24,11 +24,11 @@ export default function NewClasses() {
   };
 
   return (
-    <section className="my-10 mx-3">
+    <section className="my-10 px-4 md:px-8 lg:px-12">
       <div className="flex mb-4">
         <h2 className="text-xl font-semibold">Join a Challenge</h2>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-5">
         {classesToShow?.map((yogaClass) => (
           <div
             key={yogaClass._id}

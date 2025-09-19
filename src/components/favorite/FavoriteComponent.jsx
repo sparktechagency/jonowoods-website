@@ -139,9 +139,9 @@ export default function FavoriteComponents() {
 
                     {/* Description */}
                     <div className="border rounded-xl p-4 mb-4">
-                      <h3 className="text-sm text-red-500 font-medium mb-1">
+                      {/* <h3 className="text-sm text-red-500 font-medium mb-1">
                         About this Class
-                      </h3>
+                      </h3> */}
                       {favorite.videoId.description ? (
                         <p className="text-xs text-gray-700">
                           {favorite.videoId.description}
@@ -177,13 +177,13 @@ export default function FavoriteComponents() {
                         </button> */}
                       </div>
                       <div className="flex space-x-2">
-                        {favorite.videoId._id && (
+                        {/* {favorite.videoId._id && (
                           <Link href={`/categories/class/${favorite.videoId._id}`}>
                             <button className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600">
                               Details
                             </button>
                           </Link>
-                        )}
+                        )} */}
                         <button
                           onClick={() => router.push(`/categories/class/${favorite.videoId._id}`)}
                           className="px-3 py-2 bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"
@@ -221,7 +221,7 @@ export default function FavoriteComponents() {
                     </div>
 
                     <div className="flex flex-col gap-4 w-28">
-                      {favorite.videoId._id && (
+                      {/* {favorite.videoId._id && (
                         <Link
                           href={`/categories/class/${favorite.videoId._id}`}
                           className="w-full"
@@ -230,7 +230,7 @@ export default function FavoriteComponents() {
                             Details
                           </button>
                         </Link>
-                      )}
+                      )} */}
                       <button
                         onClick={() => router.push(`/categories/class/${favorite.videoId._id}`)}
                         className="px-4 py-3 w-full cursor-pointer bg-red-500 text-white rounded text-xs font-medium hover:bg-red-600"

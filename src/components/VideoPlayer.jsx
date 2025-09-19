@@ -83,7 +83,7 @@ const VideoPlayer = ({ data, onComplete }) => {
               Title: {data?.title}
             </h1>
             <p className="text-sm text-gray-600 mb-1">
-              Duration: {data?.duration} Min
+              Duration: {data?.duration} min
             </p>
             <p className="text-xs text-gray-600 leading-relaxed mb-4">
               Description: {data?.description}

@@ -170,9 +170,9 @@ const SubscriptionBeforeLogin = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-[#ca3939]/5 to-[#7a141a]/5"></div>
-        <div className="relative container mx-auto px-4 py-4 md:py-6 lg:py-10">
+        <div className="relative container mx-auto px-4 md:px-8 lg:px-12 py-4 md:py-6 lg:py-10">
           <div className="text-center mx-auto">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-4xl xl:text-7xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight">
               Choose Your Perfect
               <span className="bg-gradient-to-r from-[#ca3939] to-[#7a141a] bg-clip-text text-transparent">
                 {" "}
@@ -222,7 +222,7 @@ const SubscriptionBeforeLogin = () => {
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-12 md:mt-24 text-center">
+        <div className="mt-8 md:mt-12 lg:mt- text-center">
           <p className="text-slate-500 mb-8 md:mb-12 text-sm md:text-base lg:text-lg">
             Trusted by thousands of users worldwide
           </p>

@@ -47,7 +47,7 @@ export const ComingSoon = () => {
 
     if (videoData.isReady === "comingSoon") {
       return (
-        <div className="mb-4 px-4 lg:px-0">
+        <div className="mb-4 px-4 md:px-8 lg:px-12">
           {/* Animated title - only visible on large devices */}
           <h2 className="text-xl font-bold mb-2">
             Coming Soon
