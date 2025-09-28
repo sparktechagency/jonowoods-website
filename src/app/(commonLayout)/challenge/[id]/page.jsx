@@ -1,30 +1,44 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { useMarkWatchChallengeVideoMutation, useSingleChallengeVideoQuery } from '@/redux/featured/CommingSoon/commingSoonApi';
-import Spinner from '../../Spinner';
-import VideoPlayer from '@/components/VideoPlayer';
-import Image from 'next/image';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useSingleChallengeVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
+import Spinner from "../../Spinner";
+import Image from "next/image";
+import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
 
 const ChallengePage = ({ params }) => {
   const { id } = React.use(params);
   const router = useRouter();
-  const { data, isLoading, refetch } = useSingleChallengeVideoQuery(id, { skip: !id });
-  const [markWatchChallengeVideo] = useMarkWatchChallengeVideoMutation();
-  console.log(data?.data?.result) 
-  
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [completedVideos, setCompletedVideos] = useState([]);
-  const [videos, setVideos] = useState([]);
-  const [nextVideoUnlockTime, setNextVideoUnlockTime] = useState(null);
-  const [countdown, setCountdown] = useState('');
-  const [globalCountdown, setGlobalCountdown] = useState(''); // For global unlock countdown
-  const completionProcessedRef = useRef(new Set());
-  const countdownIntervalRef = useRef(null);
+  const { data, isLoading } = useSingleChallengeVideoQuery(id, { skip: !id });
+  const challengeInfo = data?.data?.categoryInfo;
+  console.log(challengeInfo);
+  console.log(data);
 
-  // Function to calculate countdown
+  const [videos, setVideos] = useState([]);
+  const [completedVideos, setCompletedVideos] = useState([]);
+
+  // Initialize videos and completed videos
+  useEffect(() => {
+    if (data?.data?.result) {
+      const sortedVideos = [...data.data.result];
+      setVideos(sortedVideos);
+
+      const completed = sortedVideos
+        .filter((video) => video.isVideoCompleted)
+        .map((video) => video._id);
+      setCompletedVideos(completed);
+    }
+  }, [data]);
+
+  // Check if a video is accessible
+  const isVideoAccessible = (index) => {
+    const video = videos[index];
+    return video && video.isEnabled;
+  };
+
+  // Calculate countdown for locked videos
   const calculateCountdown = (unlockTime) => {
     const now = new Date().getTime();
     const unlockTimestamp = new Date(unlockTime).getTime();
@@ -34,199 +48,14 @@ const ChallengePage = ({ params }) => {
       const hours = Math.floor(difference / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      
-      return {
-        formatted: `${hours}h ${minutes}m ${seconds}s`,
-        totalHours: Math.floor(difference / (1000 * 60 * 60)),
-        totalMinutes: Math.floor(difference / (1000 * 60)),
-        isExpired: false
-      };
+
+      return `${hours}h ${minutes}m ${seconds}s`;
     } else {
-      return {
-        formatted: 'Unlocked',
-        totalHours: 0,
-        totalMinutes: 0,
-        isExpired: true
-      };
+      return "Unlocked";
     }
   };
 
-  // Find the current playable video index - Fixed logic
-  const findCurrentPlayableVideoIndex = (videosArray, completedArray) => {
-    // Find the first incomplete but enabled video
-    for (let i = 0; i < videosArray.length; i++) {
-      const video = videosArray[i];
-      if (video.isEnabled && !completedArray.includes(video._id)) {
-        return i;
-      }
-    }
-    
-    // If all videos are completed, return the last video
-    if (completedArray.length > 0) {
-      for (let i = videosArray.length - 1; i >= 0; i--) {
-        if (completedArray.includes(videosArray[i]._id)) {
-          return i;
-        }
-      }
-    }
-    
-    // Otherwise return the first enabled video
-    for (let i = 0; i < videosArray.length; i++) {
-      if (videosArray[i].isEnabled) {
-        return i;
-      }
-    }
-    
-    return 0;
-  };
-
-  // Initialize videos and completed videos
-  useEffect(() => {
-    if (data?.data?.result) {
-      const sortedVideos = [...data.data.result];
-      setVideos(sortedVideos);
-
-      const completed = sortedVideos
-        .filter(video => video.isVideoCompleted)
-        .map(video => video._id);
-      setCompletedVideos(completed);
-
-      // Find the current playable video
-      const currentIndex = findCurrentPlayableVideoIndex(sortedVideos, completed);
-      setCurrentVideoIndex(currentIndex);
-      
-      // Set global unlock time from the first locked video
-      const lockedVideo = sortedVideos.find(video => !video.isEnabled && video.nextUnlockTime);
-      if (lockedVideo) {
-        setNextVideoUnlockTime(lockedVideo.nextUnlockTime);
-      }
-      
-      completionProcessedRef.current.clear();
-    }
-  }, [data]);
-
-  // Global countdown timer effect
-  useEffect(() => {
-    if (nextVideoUnlockTime) {
-      const updateCountdown = () => {
-        const countdownInfo = calculateCountdown(nextVideoUnlockTime);
-        
-        setCountdown(countdownInfo.formatted);
-        setGlobalCountdown(countdownInfo.formatted);
-
-        if (countdownInfo.isExpired) {
-          setNextVideoUnlockTime(null);
-          refetch().then(() => {
-            // After refetch, find the new current video
-            setTimeout(() => {
-              if (videos.length > 0) {
-                const newCurrentIndex = findCurrentPlayableVideoIndex(videos, completedVideos);
-                if (newCurrentIndex !== -1 && newCurrentIndex > currentVideoIndex) {
-                  setCurrentVideoIndex(newCurrentIndex);
-                }
-              }
-            }, 500);
-          });
-          
-          toast.success('New video unlocked!', {
-            description: 'You can now watch the next video.',
-            duration: 5000,
-          });
-        }
-      };
-
-      updateCountdown();
-      countdownIntervalRef.current = setInterval(updateCountdown, 1000);
-
-      return () => {
-        if (countdownIntervalRef.current) {
-          clearInterval(countdownIntervalRef.current);
-        }
-      };
-    }
-  }, [nextVideoUnlockTime, refetch, videos, completedVideos, currentVideoIndex]);
-
-  // Reset completion tracking when current video changes
-  useEffect(() => {
-    completionProcessedRef.current.clear();
-  }, [currentVideoIndex]);
-
-  // Handle video completion - Fixed logic
-  const handleVideoComplete = async (videoId) => {
-    if (completionProcessedRef.current.has(videoId)) {
-      return;
-    }
-    
-    completionProcessedRef.current.add(videoId);
-    
-    try {
-      const response = await markWatchChallengeVideo(videoId).unwrap();
-      
-      setCompletedVideos(prev => [...prev, videoId]);
-      
-      if (response?.data?.nextVideoInfo?.nextUnlockTime) {
-        // Video completed but next video has timer
-        setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
-        
-        const countdownInfo = calculateCountdown(response.data.nextVideoInfo.nextUnlockTime);
-        
-        toast.success('Video completed!', {
-          description: `Next video will unlock in ${countdownInfo.formatted}.`,
-          duration: 5000,
-        });
-        
-        // Don't change current video index - stay on completed video
-      } else {
-        // Video completed and next video is immediately available
-        const currentIndex = videos.findIndex(v => v._id === videoId);
-        
-        if (currentIndex < videos.length - 1) {
-          const nextVideoIndex = currentIndex + 1;
-          const nextVideo = videos[nextVideoIndex];
-          
-          // Check if next video is enabled
-          if (nextVideo && nextVideo.isEnabled) {
-            // Wait a moment before switching to let the video finish properly
-            setTimeout(() => {
-              setCurrentVideoIndex(nextVideoIndex);
-              
-              toast.success('Video completed!', {
-                description: `You've unlocked "${nextVideo.title}"! Now playing next video.`,
-                duration: 5000,
-              });
-            }, 1000);
-          } else {
-            // Next video is not enabled yet
-            toast.success('Video completed!', {
-              description: 'Please wait for the next video to unlock.',
-              duration: 5000,
-            });
-          }
-        } else {
-          // This was the last video
-          toast.success('Congratulations!', {
-            description: 'You have completed all challenge videos!',
-            duration: 5000,
-          });
-        }
-      }
-      
-      refetch();
-    } catch (error) {
-      console.error('Error marking video as completed:', error);
-      toast.error('Failed to mark video as completed', {
-        description: 'Please try again later.'
-      });
-    }
-  };
-  
-  // Check if a video is accessible
-  const isVideoAccessible = (index) => {
-    const video = videos[index];
-    return video && video.isEnabled;
-  };
-
-  // Get countdown for specific video
+  // Get video countdown
   const getVideoCountdown = (video) => {
     if (video.nextUnlockTime) {
       return calculateCountdown(video.nextUnlockTime);
@@ -234,28 +63,33 @@ const ChallengePage = ({ params }) => {
     return null;
   };
 
-  // Check if a video is locked with countdown
-  const isVideoLockedWithCountdown = (index) => {
-    const video = videos[index];
-    const prevVideoIndex = index - 1;
-    
-    if (prevVideoIndex >= 0 && 
-        completedVideos.includes(videos[prevVideoIndex]?._id) && 
-        !video?.isEnabled && 
-        video?.nextUnlockTime) {
-      return true;
+  // Handle video click
+  const handleVideoClick = (video, index) => {
+    if (isVideoAccessible(index)) {
+      // Navigate to individual video page
+      router.push(`/challenge/${id}/video/${video._id}`);
+    } else {
+      const countdownText = getVideoCountdown(video);
+      if (countdownText && countdownText !== "Unlocked") {
+        toast.info("Video locked", {
+          description: `This video will unlock in ${countdownText}.`,
+        });
+      } else {
+        toast.info("Video locked", {
+          description: "Complete the previous video to unlock this one.",
+        });
+      }
     }
-    return false;
   };
 
   if (isLoading) return <Spinner />;
-  
+
   if (!data?.data?.result || data.data.result.length === 0) {
     return (
       <div className="container mx-auto p-8 text-center">
         <h2 className="text-2xl font-bold mb-4">No challenge videos found</h2>
-        <button 
-          onClick={() => router.push('/challenge')}
+        <button
+          onClick={() => router.push("/challenge")}
           className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
         >
           Back to Challenges
@@ -264,213 +98,248 @@ const ChallengePage = ({ params }) => {
     );
   }
 
-  const currentVideo = videos[currentVideoIndex];
-  const isCurrentVideoCompleted = currentVideo && completedVideos.includes(currentVideo._id);
-  console.log(currentVideo)
+  // Get challenge details from first video (assuming all videos belong to same challenge)
+  const challengeData = data?.data?.challengeInfo || videos[0];
+  console.log(challengeData);
 
   return (
-    <div className="mx-auto">
-      {/* Fixed Video Player - Show only if current video is enabled */}
-      {currentVideo && currentVideo?.isEnabled && (
-        <div className="md:relative md:mb-4 sticky top-0 z-10 bg-white shadow-lg mb-4">
-          <div className="">
-            <h2 className="text-lg md:text-2xl font-bold mb-2">
-              {currentVideo.title}
-              {isCurrentVideoCompleted && nextVideoUnlockTime && (
-                <span className="ml-2 text-sm bg-green-100 text-green-700 px-2 py-1 rounded">
-                  ✓ Completed - Next unlocks in {countdown}
-                </span>
-              )}
-            </h2>
-            <div className="relative">
-              <video
-                key={currentVideo._id} // Force re-render when video changes
-                controls
-                controlsList="nodownload"
-                src={`https://${currentVideo?.videoUrl}`}
-                className="w-full h-48 md:h-64 lg:h-[500px] object-cover border rounded-md"
-                autoPlay
-                onEnded={() => handleVideoComplete(currentVideo._id)}
-                onTimeUpdate={(e) => {
-                  const video = e.target;
-                  // Only trigger completion at 95% to ensure video actually finishes
-                  const currentProgress = (video.currentTime / video.duration) * 100;
-                  if (currentProgress >= 95 && !completionProcessedRef.current.has(currentVideo._id)) {
-                    // Don't auto-complete, let onEnded handle it
-                    // handleVideoComplete(currentVideo._id);
+    <div className="container mx-auto px-4 py-6">
+      {/* Challenge Details Header */}
+      <div className="mb-8">
+        {/* Back button */}
+        <button
+          onClick={() => router.push("/challenge")}
+          className="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back to Challenges
+        </button>
+
+        {/* Challenge header */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="md:flex">
+            {/* Challenge thumbnail */}
+            <div className="md:w-1/3 lg:w-1/4">
+              <div className="relative h-64 md:h-full">
+                <Image
+                  src={getImageUrl(challengeInfo?.image)}
+                  alt={
+                    challengeData?.name || challengeData?.title || "Challenge"
                   }
-                }}
-              >
-                Your browser does not support the video tag.
-              </video>
-              
-              {/* Current video indicator */}
-              <div className="absolute top-0 left-0 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
-                Now Playing: Video {currentVideoIndex + 1}
-                {isCurrentVideoCompleted && (
-                  <span className="ml-1">✓</span>
-                )}
+                  fill
+                  className="object-cover"
+                />
               </div>
             </div>
-            
-            {/* Video details */}
-            <div className="mt-2">
-              <p className="text-sm text-gray-600">
-                Duration: {currentVideo?.duration}
-              </p>
-              <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                {currentVideo?.description}
-              </p>
-              
-              {/* Show completion status and next unlock info */}
-              {isCurrentVideoCompleted && nextVideoUnlockTime && (
-                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                  <p className="text-sm text-yellow-800">
-                    🎉 Video completed! Next video unlocks in <strong>{countdown}</strong>
-                  </p>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    You can continue watching this video or wait for the next one to unlock.
-                  </p>
-                </div>
+
+            {/* Challenge details */}
+            <div className="p-6 md:w-2/3 lg:w-3/4">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                {challengeInfo?.name}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600"></div>
+
+              {challengeInfo?.description && (
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  {challengeInfo?.description}
+                </p>
               )}
+
+              <p className="text-sm text-gray-600">
+                Progress: {completedVideos.length} of {videos.length} videos
+                completed
+              </p>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Video List */}
-      <div className="my-8">
-        <h2 className="text-xl md:text-2xl font-bold mb-4">All Challenge Videos</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {/* Videos Grid */}
+      <div className="mb-8">
+        <h2 className="text-xl md:text-2xl font-bold mb-6">Challenge Videos</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {videos.map((video, index) => {
             const isAccessible = isVideoAccessible(index);
             const isCompleted = completedVideos.includes(video._id);
-            // Fixed isCurrent logic - current should be the first incomplete enabled video
-            const isCurrent = currentVideoIndex === index;
-            const isLockedWithCountdown = isVideoLockedWithCountdown(index);
             const videoCountdown = getVideoCountdown(video);
-            
+
             return (
-              <div 
+              <div
                 key={video._id}
-                onClick={() => {
-                  if (isAccessible) {
-                    setCurrentVideoIndex(index);
-                    if (window.innerWidth < 768) {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                  } else if (isLockedWithCountdown || video.nextUnlockTime) {
-                    const countdownText = videoCountdown ? videoCountdown.formatted : countdown;
-                    toast.info('Video locked', {
-                      description: `This video will unlock in ${countdownText}.`
-                    });
-                  } else {
-                    toast.info('Video locked', {
-                      description: 'Complete the previous video to unlock this one.'
-                    });
-                  }
-                }}
+                onClick={() => handleVideoClick(video, index)}
                 className={`
-                  relative rounded-lg overflow-hidden cursor-pointer border
-                  ${isAccessible ? 'hover:shadow-lg hover:scale-105' : 'opacity-70 cursor-not-allowed'}
-                  ${isCurrent ? 'ring-4 ring-red-500 bg-red-50 shadow-xl scale-95' : ''}
-                  transition-all duration-300
+                  relative rounded-lg overflow-hidden cursor-pointer border transition-all duration-300
+                  ${
+                    isAccessible
+                      ? "hover:shadow-lg hover:scale-105 border-gray-200"
+                      : "opacity-70 cursor-not-allowed border-gray-300"
+                  }
+                  ${isCompleted ? "ring-2 ring-green-500" : ""}
                 `}
               >
-                {/* Thumbnail */}
-                <div className="relative h-40">
+                {/* Video thumbnail */}
+                <div className="relative h-48">
                   <Image
-                    src={`https://${video.thumbnailUrl || video.image}`}
+                    src={getVideoAndThumbnail(
+                      video.thumbnailUrl || video.image
+                    )}
                     alt={video.title}
-                    width={100}
-                    height={100}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
-                  
+
                   {/* Lock overlay for inaccessible videos */}
                   {!isAccessible && (
-                    <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <svg 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          className="h-8 w-8 mx-auto mb-2" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
+                    <div className="absolute inset-0   flex items-center justify-center">
+                      <div className="text-center bg-red-600 text-white px-5 py-3 opacity-80 rounded-lg">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-8 w-8 mx-auto mb-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
                           stroke="currentColor"
                         >
-                          <path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
-                            strokeWidth={2} 
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                           />
                         </svg>
                         {video.nextUnlockTime ? (
                           <div>
                             <p className="text-sm mb-1">Unlocks in</p>
                             <p className="text-xs font-bold text-yellow-300">
-                              {videoCountdown ? videoCountdown.formatted : 'Calculating...'}
+                              {videoCountdown || "Calculating..."}
                             </p>
                           </div>
-                        ) : isLockedWithCountdown ? (
-                          <div>
-                            <p className="text-sm mb-1">Unlocks in</p>
-                            <p className="text-xs font-bold text-yellow-300">{countdown}</p>
-                          </div>
                         ) : (
-                          <p className="text-sm">{video?.lockReason}</p>
+                          <p className="text-sm">Locked</p>
                         )}
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Completion indicator */}
                   {isCompleted && (
                     <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        className="h-4 w-4 text-white" 
-                        viewBox="0 0 20 20" 
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-white"
+                        viewBox="0 0 20 20"
                         fill="currentColor"
                       >
-                        <path 
-                          fillRule="evenodd" 
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                          clipRule="evenodd" 
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
                         />
                       </svg>
                     </div>
                   )}
-                  
+
                   {/* Video number */}
                   <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
                     Video {index + 1}
                   </div>
+
+                  {/* Play button overlay */}
+                  {isAccessible && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg- bg-opacity-30">
+                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-8 w-8 text-red-600 ml-1"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                
+
                 {/* Video details */}
-                <div className={`p-3 transition-colors duration-300 ${
-                  isCurrent ? 'bg-red-50' : 'bg-white'
-                }`}>
-                  <h3 className={`font-medium text-sm line-clamp-2 transition-colors duration-300 ${
-                    isCurrent ? 'text-red-700' : 'text-gray-900'
-                  }`}>{video.title}</h3>
-                  <p className={`text-xs mt-1 transition-colors duration-300 ${
-                    isCurrent ? 'text-red-600' : 'text-gray-500'
-                  }`}>{video.duration}</p>
-                  
-                  {isCurrent && (
-                    <p className="text-xs text-red-600 font-medium mt-1">
-                      {isCompleted ? '✓ Completed - Current' : !isAccessible ? '🔒 Next - Locked' : '▶ Currently Playing'}
-                    </p>
-                  )}
-                  
-                  {/* Show unlock countdown for locked videos */}
-                  {!isAccessible && video.nextUnlockTime && videoCountdown && (
-                    <p className="text-xs text-yellow-600 font-medium mt-1">
-                      🔒 Unlocks in {videoCountdown.formatted}
-                    </p>
-                  )}
+                <div className="p-4 bg-white">
+                  <h3 className="font-medium text-sm line-clamp-2 text-gray-900 mb-1">
+                    {video.title}
+                  </h3>
+                  <p className="text-xs text-gray-500 mb-2">{video.duration}</p>
+
+                  {/* Status indicator */}
+                  <div className="flex items-center justify-between">
+                    {isCompleted ? (
+                      <span className="text-xs text-green-600 font-medium flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Completed
+                      </span>
+                    ) : isAccessible ? (
+                      <span className="text-xs text-blue-600 font-medium flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Available
+                      </span>
+                    ) : video.nextUnlockTime && videoCountdown ? (
+                      <p className="text-xs text-yellow-600 font-medium flex items-center">
+                        ⏳ Unlocks in {videoCountdown}
+                      </p>
+                    ) : (
+                      <span className="text-xs text-gray-400 font-medium flex items-center">
+                        <svg
+                          className="h-3 w-3 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {video?.lockReason}
+                      </span>
+                    )}
+                  </div>
+
+                  <p>
+                    {video?.description.length > 200
+                      ? video?.description.slice(0, 120) + "..."
+                      : video?.description}
+                  </p>
                 </div>
               </div>
             );

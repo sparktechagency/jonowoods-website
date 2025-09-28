@@ -64,6 +64,15 @@ const commentSlice = api.injectEndpoints({
       },
       invalidatesTags: ['Comment']
     }),
+    videoDeleteComment: builder.mutation({
+      query: (id) => {
+        return {
+          method: "DELETE",
+          url: `/videos/comments/delete/${id}`,
+        };
+      },
+      invalidatesTags: ['Comment']
+    }),
   }),
 });
 
@@ -73,5 +82,6 @@ export const {
   useGetCommentQuery,
   useReplyCommentMutation,
   useLikeReplyMutation,
-  useDeleteCommentMutation
+  useDeleteCommentMutation,
+  useVideoDeleteCommentMutation
 } = commentSlice;

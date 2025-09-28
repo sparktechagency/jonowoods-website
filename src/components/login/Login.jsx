@@ -72,7 +72,7 @@ export default function LoginUser() {
       console.error("Login failed:", error);
   
       // Show error toast message
-      toast.error(error); 
+      toast.error(error?.data?.message || "Login failed. Please try again."); 
     }
   };
 

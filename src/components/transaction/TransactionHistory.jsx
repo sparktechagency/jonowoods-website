@@ -135,7 +135,7 @@ const TransactionHistory = () => {
                     </td>
                     <td className="p-3">{formatDate(transaction.createdAt)}</td>
                     <td className="p-3 text-right text-xs text-gray-500 font-mono">
-                      {transaction.transactionId}
+                      {transaction.transactionId || "After add free trail"}
                     </td>
                   </tr>
                 ))}

@@ -6,11 +6,12 @@ import { Heart, MoreHorizontal, Send } from 'lucide-react';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import commectIcon from '../../../../../../public/assests/comment.png';
-import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation } from '../../../../../redux/featured/commentApi/commentApi';
+import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation, useVideoDeleteCommentMutation } from '../../../../../redux/featured/commentApi/commentApi';
 import Spinner from '../../../Spinner';
 import { useSingleVidoeQuery } from '@/redux/featured/homeApi.jsx/homeApi';
 import { useVideoFavoriteMutation } from '@/redux/featured/favoriteApi/favoriteApi';
 import { getImageUrl } from '@/components/share/imageUrl';
+import { toast } from 'sonner';
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -27,7 +28,7 @@ export default function FitnessVideoPage({ params }) {
   const { data: commentData, isLoading: commentDataLoading, refetch: refetchComments } = useGetCommentQuery(id, { skip: !id });
   const [createComment, { isLoading: commentLoading }] = useCreateCommentMutation();
   const [editComment, { isLoading: editLoading }] = useEditCommentMutation();
-  const [deleteComment, { isLoading: deleteLoading }] = useDeleteCommentMutation();
+  const [videoDeleteComment, { isLoading: deleteLoading }] = useVideoDeleteCommentMutation();
   const [replyComment, { isLoading: replyLoading }] = useReplyCommentMutation();
   const [likeReply, { isLoading: likeLoading }] = useLikeReplyMutation();
   const [favorite, { isLoading: favLoading }] = useVideoFavoriteMutation();
@@ -113,14 +114,19 @@ export default function FitnessVideoPage({ params }) {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
+    console.log(commentId)
+
       try {
-        await deleteComment(commentId).unwrap();
+        const res=await videoDeleteComment(commentId).unwrap();
+        
         refetchComments();
+        if(res?.success) {
+          toast.success('Comment deleted successfully');
+        }
       } catch (error) {
         console.error('Error deleting comment:', error);
       }
-    }
+  
   };
 
   const handleLikeComment = async (commentId) => {

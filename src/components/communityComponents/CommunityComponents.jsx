@@ -115,7 +115,7 @@ export default function CommunityComponents() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center mt-6 mx-3">
+    <main className="flex min-h-screen flex-col items-center mt-6 px-4 md:px-8 lg:px-12">
       <div className="w-full">
         <PostCreate
           editPost={editingPost}

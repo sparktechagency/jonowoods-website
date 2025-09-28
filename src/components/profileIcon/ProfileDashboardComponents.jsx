@@ -33,6 +33,7 @@ import { isValidPhoneNumber } from 'react-phone-number-input';
 
 // Subscription Card Component
 const SubscriptionCard = ({ packageData, userData }) => {
+  console.log(packageData)
   const calculateDaysRemaining = () => {
     if (!packageData?.currentPeriodEnd) return 0;
 
@@ -96,14 +97,14 @@ const SubscriptionCard = ({ packageData, userData }) => {
           <div className="flex items-center gap-2">
             <CheckCircle
               size={20}
-              className={`${isActive ? "text-green-500" : "text-gray-400"}`}
+              className={`${userData?.isSubscribed  ? "text-green-500" : "text-gray-400"}`}
             />
             <span
               className={`text-sm font-medium ${
-                isActive ? "text-green-600" : "text-gray-500"
+                userData?.isSubscribed  ? "text-green-600" : "text-gray-500"
               }`}
             >
-              {isActive ? "Active" : "Inactive"}
+              {userData?.isSubscribed ? "Active" : "Inactive"}
             </span>
           </div>
         </div>
@@ -114,7 +115,7 @@ const SubscriptionCard = ({ packageData, userData }) => {
               {calculateDaysRemaining()}
             </p>
             <p className="text-lg font-medium text-gray-700 mb-4">
-              Days Remaining
+              Days Remaining in {packageData?.status}
             </p>
             <div className="flex items-center gap-2 text-gray-600">
               <Calendar size={18} />
@@ -141,7 +142,7 @@ const SubscriptionCard = ({ packageData, userData }) => {
 
             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
               <span className="text-sm font-medium text-gray-600">
-                Customer ID
+               Stripe Customer ID
               </span>
               <span className="text-sm text-gray-700 font-mono">
                 {packageData?.customerId?.slice(-8) || "N/A"}
