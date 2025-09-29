@@ -36,13 +36,14 @@ const PrivateRoute = ({ children }) => {
     // Now we have the access data and can make decisions
     if (accessData) {
       const hasAccess = accessData?.data?.hasAccess;
+      const subscribed=accessData?.data?.isSubscribed;
       
       console.log("Access check:", { hasAccess, accessData });
       
-      if (hasAccess === false) { // Explicitly check for false
+      if (subscribed === false) { // Explicitly check for false
         // If user doesn't have access, redirect to subscription page
         router.push("/subscription");
-      } else if (hasAccess === true) {
+      } else if (hasAccess === true && subscribed === true) {
         // User has access, show the protected content
         setLoading(false);
       }

@@ -95,7 +95,7 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Share your thoughts with the community..."
+          placeholder="Share your thoughts with the community...Please min 10 characters"
           rows={6}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 resize-vertical mb-4"
           disabled={isLoading}

@@ -1,6 +1,11 @@
 "use client";
 
-const Leaderboard = ({ leaderboardData }) => {
+import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communityLeaderBoard";
+
+const Leaderboard = () => {
+  const { data: leaderboard } = useCommunityLeaderBoardQuery();
+  const leaderboardData = leaderboard?.data;
+  console.log("leaderboardData", leaderboardData);
   // Defensive fallback to empty arrays
   const matTimeData = leaderboardData?.topByMatTime || [];
   const loginCountData = leaderboardData?.topByLoginCount || [];
@@ -15,7 +20,7 @@ const Leaderboard = ({ leaderboardData }) => {
     }));
 
   return (
-    <div className="w-full my-10">
+    <div className="w-full my-10 px-4 md:px-8 lg:px-12">
       <h2 className="text-lg font-medium text-red-500 mb-4">Leaderboard</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10">

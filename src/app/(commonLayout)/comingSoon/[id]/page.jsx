@@ -33,7 +33,7 @@ const SingleVideoPage = ({ params }) => {
   const video = data.data;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10 px-4 md:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-10 px-4 md:px-8 lg:px-12">
 
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden transition-all duration-300 transform hover:shadow-3xl">
         <button

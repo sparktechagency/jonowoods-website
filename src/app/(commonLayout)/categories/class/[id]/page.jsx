@@ -340,10 +340,10 @@ export default function FitnessVideoPage({ params }) {
         {/* Title and Details */}
         <div className="mb-4">
           <h1 className="text-xl font-semibold text-gray-900 mb-2">{videoData.title}</h1>
-          <p className="text-sm text-gray-600 mb-1">{videoData.duration} Min</p>
-          <p className="text-xs text-gray-500 mb-3">About this {videoData.type}</p>
+          <p className="text-sm text-gray-600 mb-1">{videoData.duration} </p>
+          <p className="text-xs text-gray-500 mb-3"> <span className="font-medium">Description : </span>  {videoData.description} </p>
           <p className="text-xs text-gray-600 leading-relaxed">
-            {videoData.description}
+           
           </p>
         </div>
 

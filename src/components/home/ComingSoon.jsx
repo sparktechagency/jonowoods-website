@@ -84,7 +84,7 @@ export const ComingSoon = () => {
 
     if (videoData.isReady === "itsHere") {
       return (
-        <div className="mb-4 px-4 lg:px-0">
+        <div className="mb-4 px-4 md:px-8 lg:px-12">
           <h2 className="text-xl font-bold mb-2">🎉 It's Here!</h2>
           <div className="relative">
             <VideoCard
