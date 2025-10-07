@@ -5,9 +5,6 @@ const Subscription = () => {
   return (
     <div>
       <SubscriptionBeforeLogin />
-
-
-
     </div>
   )
 }

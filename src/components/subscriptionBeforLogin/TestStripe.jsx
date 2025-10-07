@@ -1,4 +1,4 @@
-"use client"; // Next.js 13+ App Router এর জন্য
+"use client";
 
 import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -6,29 +6,28 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { useSearchParams } from "next/navigation";
-import { useGetWebPackagesQuery } from "@/redux/featured/Package/packageApi";
 
-// Stripe publishable key - .env.local এ রাখুন
 const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
   "pk_test_51OHIrVB5u2A30G2QtLI2flRDD3KmQRlRafCke1GGcAl43X9IXi4Ymislp3NW7bg4NYYVcBrebbPcN17g2EyUqOH2009gKcWQo6"
 );
 
-export default function CheckoutPage() {
+export default function CheckoutPage({ packageId }) {
   const [clientSecret, setClientSecret] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const searchParams = useSearchParams();
-  const packageId = "68ccef8b6e26dbd250723ba2";
-//      const {data:packages}=useGetWebPackagesQuery();
-//    console.log("packages",packages)
 
   useEffect(() => {
+    // যদি packageId না থাকে তাহলে return করুন
     if (!packageId) {
-      setError("Package ID is required");
       setLoading(false);
       return;
     }
+
+    setLoading(true);
+    setError("");
+
+    const token = localStorage.getItem("token");
 
     // Backend API call করুন
     fetch(
@@ -37,9 +36,9 @@ export default function CheckoutPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // অথবা আপনার auth method
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ packageId }),
+        body: JSON.stringify({ packageId: packageId }),
       }
     )
       .then((res) => {
@@ -47,7 +46,7 @@ export default function CheckoutPage() {
         return res.json();
       })
       .then((data) => {
-        if (data.success) {
+        if (data.success && data.data.clientSecret) {
           setClientSecret(data.data.clientSecret);
         } else {
           setError(data.message || "Something went wrong");
@@ -60,46 +59,60 @@ export default function CheckoutPage() {
       });
   }, [packageId]);
 
+  // যদি packageId না থাকে
+  if (!packageId) {
+    return null;
+  }
+
+  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading checkout...</p>
         </div>
       </div>
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <h2 className="text-red-600 font-semibold text-lg mb-2">Error</h2>
-          <p className="text-red-700">{error}</p>
-        </div>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 my-4">
+        <h2 className="text-red-600 font-semibold text-lg mb-2">Error</h2>
+        <p className="text-red-700">{error}</p>
       </div>
     );
   }
 
+  // যদি clientSecret না থাকে
   if (!clientSecret) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-2xl font-bold text-center mb-8">
-          Complete Your Subscription
-        </h1>
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <EmbeddedCheckoutProvider
-            stripe={stripePromise}
-            options={{ clientSecret }}
-          >
-            <EmbeddedCheckout />
-          </EmbeddedCheckoutProvider>
-        </div>
+    <div className="mt-8">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">
+        2. Complete Payment
+      </h2>
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <EmbeddedCheckoutProvider
+          stripe={stripePromise}
+          options={{ clientSecret }}
+          appearance={{
+            theme: "stripe",
+            variables: {
+              colorPrimary: "#ec4899",
+              colorBackground: "#ffffff",
+              colorText: "#1f2937",
+              fontFamily: "system-ui, sans-serif",
+              borderRadius: "8px",
+            },
+          }}
+        >
+          <EmbeddedCheckout />
+        </EmbeddedCheckoutProvider>
       </div>
     </div>
   );

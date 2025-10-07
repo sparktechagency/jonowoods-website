@@ -45,6 +45,7 @@
     "react-phone-number-input": "^3.4.12",
     "react-redux": "^9.2.0",
     "react-slideshow-image": "^4.3.2",
+    "react-stripe-js": "^1.1.5",
     "socket.io-client": "^4.8.1",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
