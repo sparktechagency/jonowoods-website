@@ -35,24 +35,23 @@ const PrivateRoute = ({ children }) => {
     
     // Now we have the access data and can make decisions
     if (accessData) {
-      const hasAccess = accessData?.data?.hasAccess;
+      // const hasAccess = accessData?.data?.hasAccess;
       const subscribed=accessData?.data?.isSubscribed;
       
-      console.log("Access check:", { hasAccess, accessData });
+      // console.log("Access check:", { hasAccess, accessData });
       
       if (subscribed === false) { // Explicitly check for false
         // If user doesn't have access, redirect to subscription page
         router.push("/subscription");
-      } else if (hasAccess === true && subscribed === true) {
-        // User has access, show the protected content
-        setLoading(false);
+      } else if ( subscribed === true) {
+        router.push("/");
       }
       // If hasAccess is undefined, keep loading until we get a definitive answer
     }
   }, [router, accessData, accessLoading, error]);
   
   // Show loading while checking token, access, or if access data is still undefined
-  if (loading || accessLoading || (accessData && accessData?.data?.hasAccess === undefined)) {
+  if (accessLoading) {
     return <Spinner />;
   }
   

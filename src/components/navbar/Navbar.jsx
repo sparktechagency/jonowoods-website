@@ -74,7 +74,7 @@ export default function Navbar() {
   const reconnectTimeoutRef = useRef(null);
   const { data: accessData } = useGetMyAccessQuery();
   const access = accessData?.data;
-  console.log(access);
+  // console.log(access);
 
   // Constants
   const NOTIFICATIONS_PER_PAGE = 30;
@@ -83,7 +83,7 @@ export default function Navbar() {
 
   // Redux queries and mutations
   const { data: userData } = useMyProfileQuery();
-  console.log("userData", userData);
+  // console.log("userData", userData);
   const {
     data: notificationData,
     isLoading,
@@ -150,7 +150,7 @@ export default function Navbar() {
 
       // Connection event handlers
       socketRef.current.on("connect", () => {
-        console.log("Socket connected successfully with ID:", socketRef.current.id);
+        // console.log("Socket connected successfully with ID:", socketRef.current.id);
         setIsSocketConnected(true);
         setConnectionAttempts(0);
 
@@ -162,7 +162,7 @@ export default function Navbar() {
         // Also emit join-room event as fallback
         socketRef.current.emit("join-room", userData._id);
         
-        console.log(`User ${userData._id} joined notification room`);
+        // console.log(`User ${userData._id} joined notification room`);
       });
 
       socketRef.current.on("disconnect", (reason) => {
