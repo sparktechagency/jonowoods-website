@@ -154,11 +154,11 @@ const SubscriptionBeforeLogin = () => {
                     </div>
                     <div className="text-right">
                       <div className="font-bold text-gray-900">
-                        BDT{pkg.price}
+                        $ {pkg.price}
                       </div>
                       {pkg.originalPrice > pkg.price && (
                         <div className="text-xs text-gray-500 line-through">
-                          BDT{pkg.originalPrice}
+                          $ {pkg.originalPrice}
                         </div>
                       )}
                       <div className="text-xs text-pink-600 font-medium">
