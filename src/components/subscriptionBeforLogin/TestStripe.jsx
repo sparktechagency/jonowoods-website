@@ -7,11 +7,14 @@ import {
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import Spinner from "@/app/(commonLayout)/Spinner";
+import { baseUrlApi } from "@/redux/baseUrl/baseUrlApi";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
   "pk_test_51OHIrVB5u2A30G2QtLI2flRDD3KmQRlRafCke1GGcAl43X9IXi4Ymislp3NW7bg4NYYVcBrebbPcN17g2EyUqOH2009gKcWQo6"
 );
+
+// const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://10.10.7.62:7000/api/v1";
 
 export default function CheckoutPage({ packageId }) {
   const [clientSecret, setClientSecret] = useState("");
@@ -32,7 +35,7 @@ export default function CheckoutPage({ packageId }) {
 
  
     fetch(
-      `http://10.10.7.62:7000/api/v1/subscription/create-checkout-session`,
+      `${baseUrlApi}/subscription/create-checkout-session`,
       {
         method: "POST",
         headers: {

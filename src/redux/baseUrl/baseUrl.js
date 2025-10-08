@@ -1,10 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseUrlApi } from "./baseUrlApi";
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     // baseUrl: "http://10.10.7.62:7000/api/v1",
-    baseUrl: "https://api.yogawithjen.life/api/v1",
+    baseUrl: baseUrlApi,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {
