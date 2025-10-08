@@ -6,6 +6,7 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
+import Spinner from "@/app/(commonLayout)/Spinner";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
@@ -18,7 +19,7 @@ export default function CheckoutPage({ packageId }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // যদি packageId না থাকে তাহলে return করুন
+
     if (!packageId) {
       setLoading(false);
       return;
@@ -29,7 +30,7 @@ export default function CheckoutPage({ packageId }) {
 
     const token = localStorage.getItem("token");
 
-    // Backend API call করুন
+ 
     fetch(
       `http://10.10.7.62:7000/api/v1/subscription/create-checkout-session`,
       {
@@ -59,7 +60,7 @@ export default function CheckoutPage({ packageId }) {
       });
   }, [packageId]);
 
-  // যদি packageId না থাকে
+
   if (!packageId) {
     return null;
   }
@@ -67,12 +68,7 @@ export default function CheckoutPage({ packageId }) {
   // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading checkout...</p>
-        </div>
-      </div>
+     <Spinner />
     );
   }
 
@@ -86,17 +82,17 @@ export default function CheckoutPage({ packageId }) {
     );
   }
 
-  // যদি clientSecret না থাকে
+
   if (!clientSecret) {
     return null;
   }
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 border p-6 rounded-lg">
       <h2 className="text-xl font-bold text-gray-900 mb-4">
         2. Complete Payment
       </h2>
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white rounded-lg ">
         <EmbeddedCheckoutProvider
           stripe={stripePromise}
           options={{ clientSecret }}
@@ -107,7 +103,8 @@ export default function CheckoutPage({ packageId }) {
               colorBackground: "#ffffff",
               colorText: "#1f2937",
               fontFamily: "system-ui, sans-serif",
-              borderRadius: "8px",
+              border: "none",
+            //   borderRadius: "8px",
             },
           }}
         >
