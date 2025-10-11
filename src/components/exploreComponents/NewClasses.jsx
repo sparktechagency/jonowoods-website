@@ -30,7 +30,7 @@ export default function NewClasses() {
         {classesToShow?.map((yogaClass) => (
           <div key={yogaClass._id} className="cursor-pointer group">
             <Link href={`challenge/${yogaClass._id}`}>
-              <div className="relative h-64 lg:h-80 rounded-lg overflow-hidden">
+              <div className="relative h-52 lg:h-80 rounded-lg overflow-hidden">
                 <Image
                   src={getImageUrl(yogaClass.image)}
                   alt={yogaClass.title}
