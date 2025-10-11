@@ -30,7 +30,7 @@ export default function NewClasses() {
         {classesToShow?.map((yogaClass) => (
           <div key={yogaClass._id} className="cursor-pointer group">
             <Link href={`challenge/${yogaClass._id}`}>
-              <div className="relative h-42 lg:h-80 rounded-lg overflow-hidden">
+              <div className="relative h-44 lg:h-80 rounded-lg overflow-hidden">
                 <Image
                   src={getImageUrl(yogaClass.image)}
                   alt={yogaClass.title}
@@ -60,7 +60,7 @@ export default function NewClasses() {
               </div>
             </Link>
             {/* Title shown below image for mobile & tablet */}
-            <h3 className="block text-[12px] lg:hidden text-black font-semibold mt-2">
+            <h3 className="block text-[14px] lg:hidden text-black font-semibold mt-2">
               {yogaClass.name}
             </h3>
           </div>
