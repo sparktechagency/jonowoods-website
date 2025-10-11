@@ -60,7 +60,7 @@ export default function NewClasses() {
               </div>
             </Link>
             {/* Title shown below image for mobile & tablet */}
-            <h3 className="block lg:hidden text-black font-semibold mt-2">
+            <h3 className="block text-[12px] lg:hidden text-black font-semibold mt-2">
               {yogaClass.name}
             </h3>
           </div>
