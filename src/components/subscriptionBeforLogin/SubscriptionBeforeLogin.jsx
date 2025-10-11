@@ -18,14 +18,15 @@ const SubscriptionBeforeLogin = () => {
   const webPackages = packages?.data?.filter(
   (pkg) => pkg.subscriptionType === "web"
 );
+console.log("webPackages",webPackages)
   const router = useRouter();
 
   // Set first package as default when packages are loaded
   useEffect(() => {
-    if (packages?.data && packages.data.length > 0 && !selectedPackage) {
-      setSelectedPackage(packages.data[0]);
+    if (webPackages && webPackages?.length > 0 && !selectedPackage) {
+      setSelectedPackage(webPackages[0]);
     }
-  }, [packages, selectedPackage]);
+  }, [webPackages, selectedPackage]);
 
   const handleSelectPackage = (pkg) => {
     setSelectedPackage(pkg);
