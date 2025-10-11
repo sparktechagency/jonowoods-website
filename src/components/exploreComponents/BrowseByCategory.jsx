@@ -29,7 +29,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
         {categoriesToShow?.map((yogaClass) => (
           <div key={yogaClass._id} className="cursor-pointer group">
             <Link href={`/categories/${yogaClass._id}`}>
-              <div className="relative h-52 lg:h-80 rounded-lg overflow-hidden">
+              <div className="relative h-42 lg:h-80 rounded-lg overflow-hidden">
                 {/* Image */}
                 <Image
                   src={getImageUrl(yogaClass?.thumbnail)}
