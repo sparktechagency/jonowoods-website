@@ -347,7 +347,7 @@ export default function ProfileDashboardComponents() {
                   name="image"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="hidden"
+                  className="hidden "
                 />
                 <p className="text-xs text-gray-500 mt-2">
                   Click to upload profile picture

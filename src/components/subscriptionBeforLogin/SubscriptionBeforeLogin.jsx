@@ -2,15 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
-import { useGetWebPackagesQuery } from "@/redux/featured/Package/packageApi";
+import { useGetMyAccessQuery, useGetWebPackagesQuery } from "@/redux/featured/Package/packageApi";
 import CheckoutPage from "./TestStripe";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const SubscriptionBeforeLogin = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const {data:userData}=useGetMyAccessQuery()
+  // console.log("userData",userData)
   const { data: packages, isLoading } = useGetWebPackagesQuery();
+  console.log(packages);
  
+
+  const webPackages = packages?.data?.filter(
+  (pkg) => pkg.subscriptionType === "web"
+);
   const router = useRouter();
 
   // Set first package as default when packages are loaded
@@ -132,7 +139,7 @@ const SubscriptionBeforeLogin = () => {
               </div>
             ) : (
               <div className="space-y-3 mb-6">
-                {packages?.data?.map((pkg) => (
+                {webPackages?.map((pkg) => (
                   <button
                     key={pkg._id}
                     onClick={() => handleSelectPackage(pkg)}
