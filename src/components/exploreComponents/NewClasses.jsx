@@ -36,7 +36,7 @@ export default function NewClasses() {
                   alt={yogaClass.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover"
+                  className="lg:object-cover object-fill"
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div

@@ -22,7 +22,7 @@ export const VideoCard = ({
     <section className="w-full overflow-hidden rounded-lg mb-8">
       <div
         onClick={handleClick}
-        className="relative h-[25vh] lg:h-[55vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
+        className="relative h-[25vh] lg:h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
       >
         {/* Background Image */}
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat">
@@ -31,7 +31,7 @@ export const VideoCard = ({
               src={imageUrl}
               alt={title || "Thumbnail"}
               fill
-              className="object-cover"
+              className="lg:object-cover object-fill"
               unoptimized
               loading="lazy"
             />

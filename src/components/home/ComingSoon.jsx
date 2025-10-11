@@ -85,7 +85,7 @@ export const ComingSoon = () => {
     if (videoData.isReady === "itsHere") {
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          <h2 className="text-xl font-bold mb-2">🎉 It's Here!</h2>
+          <h2 className="text-xl font-bold mb-2">It's Here!</h2>
           <div className="relative">
             <VideoCard
               title={videoData.title || "New Video"}
@@ -96,9 +96,9 @@ export const ComingSoon = () => {
             />
             
             {/* It's Here overlay */}
-            <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+            {/* <div className="absolute top-2 right-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
               ✨ IT'S HERE!
-            </div>
+            </div> */}
             
           
           </div>

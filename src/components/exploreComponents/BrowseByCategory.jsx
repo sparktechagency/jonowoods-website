@@ -35,8 +35,8 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
                   src={getImageUrl(yogaClass?.thumbnail)}
                   alt={yogaClass.name}
                   layout="fill"
-                  objectFit="cover"
-                  className="absolute inset-0 w-full h-full"
+                  // objectFit="cover"
+                  className="absolute lg:object-cover object-fill inset-0 w-full h-full"
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div
