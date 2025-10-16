@@ -41,7 +41,7 @@ export const VideoCard = ({
         </div>
 
         {/* Gradient Overlay (only for large screens) */}
-        <div className="hidden lg:block absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
+        <div className="hidden  absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
 
         {/* Title - shown inside image on large screens */}
         <div className="hidden lg:flex absolute inset-0 flex-col justify-end lg:justify-center items-center text-center px-4">

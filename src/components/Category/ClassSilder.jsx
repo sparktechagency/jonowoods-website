@@ -1,16 +1,15 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 
 const ClassSilder = ({ data }) => {
   const router = useRouter();
-  console.log(data)
+  console.log(data);
   const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef(null);
-
 
   const getVisibleCards = () => {
     const container = containerRef.current;
@@ -33,7 +32,7 @@ const ClassSilder = ({ data }) => {
       const clampedIndex = Math.min(index, getMaxSlideIndex());
       container.scrollTo({
         left: slideWidth * clampedIndex,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
       setCurrentSlide(clampedIndex);
     }
@@ -81,20 +80,22 @@ const ClassSilder = ({ data }) => {
           <button
             onClick={prevSlide}
             disabled={currentSlide === 0}
-            className={`p-2 rounded-full shadow-lg border cursor-pointer border-gray-200 transition-all duration-200 ${currentSlide === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white hover:bg-gray-50 hover:shadow-xl text-gray-600'
-              }`}
+            className={`p-2 rounded-full shadow-lg border cursor-pointer border-gray-200 transition-all duration-200 ${
+              currentSlide === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white hover:bg-gray-50 hover:shadow-xl text-gray-600"
+            }`}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={nextSlide}
             disabled={currentSlide >= getMaxSlideIndex()}
-            className={`p-2 rounded-full shadow-lg border cursor-pointer border-gray-200 transition-all duration-200 ${currentSlide >= getMaxSlideIndex()
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white hover:bg-gray-50 hover:shadow-xl text-gray-600'
-              }`}
+            className={`p-2 rounded-full shadow-lg border cursor-pointer border-gray-200 transition-all duration-200 ${
+              currentSlide >= getMaxSlideIndex()
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white hover:bg-gray-50 hover:shadow-xl text-gray-600"
+            }`}
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -106,43 +107,36 @@ const ClassSilder = ({ data }) => {
         <div
           ref={containerRef}
           onScroll={handleScroll}
-          className="flex gap-6 h-[400px] overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex gap-6 h-[460px] overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {data.map((classItem, index) => (
             <div
               key={classItem._id || index}
-              onClick={() => handleVideoClick(classItem._id)}
-              className={`flex-shrink-0 w-80 h-96 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:scale-105 snap-start ${classItem.background}`}
+              className="flex-shrink-0 w-80 snap-start"
             >
-              <div className="relative w-full h-full">
+              {/* Image (clickable) */}
+              <div
+                onClick={() => handleVideoClick(classItem._id)}
+                className="w-full h-90 overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105"
+              >
                 <Image
                   src={`https://${classItem.thumbnailUrl}`}
                   alt={classItem.title}
                   width={100}
                   height={100}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full rounded-md object-cover"
                 />
+              </div>
 
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-white text-xl font-semibold mb-2">
-                    {classItem.title}
-                  </h3>
-                  <p className="text-white/80 text-sm">
-                    {classItem.duration}
-                  </p>
-                </div>
-
-                {/* Hover Effect */}
-                <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                    <div className="w-0 h-0 border-l-8 border-l-white border-t-4 border-t-transparent border-b-4 border-b-transparent ml-1"></div>
-                  </div>
-                </div>
+              {/* Title & duration below the image */}
+              <div className="mt-3 px-1">
+                <h3 className="text-gray-900 text-lg font-semibold leading-tight">
+                  {classItem.title}
+                </h3>
+                {/* <p className="text-gray-600 text-sm mt-1">
+                  {classItem.duration}
+                </p> */}
               </div>
             </div>
           ))}

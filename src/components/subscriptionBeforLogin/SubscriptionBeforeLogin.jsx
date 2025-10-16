@@ -65,10 +65,10 @@ console.log("webPackages",webPackages)
               </div>
               <div>
                 <h3 className="font-semibold  mb-6">
-                  Access 500+ Exclusive Classes 🔥
+                  Access All Exclusive Classes 🔥
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Explore Jessica's full library of yoga and meditation sessions
+                  Explore YogaWithJen full library of yoga and meditation sessions
                   designed for all levels, anytime, anywhere.
                 </p>
               </div>
