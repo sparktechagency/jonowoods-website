@@ -25,18 +25,18 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Browse By Categories</h2>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-5">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
         {categoriesToShow?.map((yogaClass) => (
           <div key={yogaClass._id} className="cursor-pointer group">
             <Link href={`/categories/${yogaClass._id}`}>
-              <div className="relative h-52 lg:h-80 rounded-lg overflow-hidden">
+              <div className="relative h-28 lg:h-80 rounded-lg overflow-hidden">
                 {/* Image */}
                 <Image
                   src={getImageUrl(yogaClass?.thumbnail)}
                   alt={yogaClass.name}
                   layout="fill"
                   // objectFit="cover"
-                  className="absolute object-cover  inset-0 w-full h-full"
+                  className="absolute lg:object-cover object-fill  inset-0 w-full h-full"
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div

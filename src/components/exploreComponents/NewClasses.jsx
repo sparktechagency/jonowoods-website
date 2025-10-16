@@ -26,17 +26,17 @@ export default function NewClasses() {
       <div className="flex mb-4">
         <h2 className="text-xl font-semibold">Join a Challenge</h2>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-5">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
         {classesToShow?.map((yogaClass) => (
           <div key={yogaClass._id} className="cursor-pointer group">
             <Link href={`challenge/${yogaClass._id}`}>
-              <div className="relative h-52 lg:h-80 rounded-lg overflow-hidden">
+              <div className="relative h-28 lg:h-80 rounded-lg overflow-hidden">
                 <Image
                   src={getImageUrl(yogaClass.image)}
                   alt={yogaClass.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover "
+                  className="lg:object-cover object-fill"
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div
