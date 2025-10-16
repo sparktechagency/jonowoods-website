@@ -36,15 +36,15 @@ export default function NewClasses() {
                   alt={yogaClass.title}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="lg:object-cover object-fill"
+                  className="object-cover "
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div
-                  className="hidden lg:block absolute inset-0 bg-gradient-to-t"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
-                  }}
+                  // className="hidden lg:block absolute inset-0 bg-gradient-to-t"
+                  // style={{
+                  //   backgroundImage:
+                  //     "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
+                  // }}
                 />
                 {/* Title inside image for Desktop (hover effect) */}
                 <div className="hidden lg:flex absolute inset-0 items-center justify-center text-center px-4">

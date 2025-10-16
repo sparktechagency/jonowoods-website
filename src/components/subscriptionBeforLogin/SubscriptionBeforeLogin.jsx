@@ -2,23 +2,25 @@
 
 import React, { useState, useEffect } from "react";
 import { Check } from "lucide-react";
-import { useGetMyAccessQuery, useGetWebPackagesQuery } from "@/redux/featured/Package/packageApi";
+import {
+  useGetMyAccessQuery,
+  useGetWebPackagesQuery,
+} from "@/redux/featured/Package/packageApi";
 import CheckoutPage from "./TestStripe";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const SubscriptionBeforeLogin = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
-  const {data:userData}=useGetMyAccessQuery()
+  const { data: userData } = useGetMyAccessQuery();
   // console.log("userData",userData)
   const { data: packages, isLoading } = useGetWebPackagesQuery();
   console.log(packages);
- 
 
   const webPackages = packages?.data?.filter(
-  (pkg) => pkg.subscriptionType === "web"
-);
-console.log("webPackages",webPackages)
+    (pkg) => pkg.subscriptionType === "web"
+  );
+  console.log("webPackages", webPackages);
   const router = useRouter();
 
   // Set first package as default when packages are loaded
@@ -65,11 +67,11 @@ console.log("webPackages",webPackages)
               </div>
               <div>
                 <h3 className="font-semibold  mb-6">
-                  Access All Exclusive Classes 🔥
+                  Access 150+ Yoga Classes & Growing 🧘‍♀️
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Explore YogaWithJen full library of yoga and meditation sessions
-                  designed for all levels, anytime, anywhere.
+                  Discover Jen’s expanding library of mindful yoga flows, quick
+                  resets, and calming sessions created for busy schedules.
                 </p>
               </div>
             </div>
@@ -80,11 +82,11 @@ console.log("webPackages",webPackages)
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-6">
-                  Ad-Free, Seamless Experience 🎬
+                  Real-Life Yoga, Ad-Free ☁️
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Focus on your practice without interruptions - enjoy a
-                  completely ad-free platform.
+                  Find focus and clarity with a simple, distraction-free space
+                  designed to support your daily routine.
                 </p>
               </div>
             </div>
@@ -95,11 +97,11 @@ console.log("webPackages",webPackages)
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-6">
-                  Practice Anytime, Even Offline 📱
+                  Practice Anywhere, Anytime 📲
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Download your favorite sessions and flow with ease, no matter
-                  where life takes you.
+                  Stream or download your favorite sessions and stay consistent
+                  at home, at work, or on the go.
                 </p>
               </div>
             </div>
@@ -110,11 +112,27 @@ console.log("webPackages",webPackages)
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-6">
-                  Build a Consistent Routine ✨
+                  Stay Consistent, Feel Grounded ✨
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Stay accountable with curated monthly guides and challenges
-                  that fit seamlessly into your lifestyle.
+                  Join monthly challenges and follow guided plans that help you
+                  build strength, flexibility, and inner calm - one short
+                  session at a time.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-pink-400 flex items-center justify-center flex-shrink-0">
+                <Check className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-6">
+                Grow with a Supportive Community 🌿
+                </h3>
+                <p className="text-sm text-gray-600">
+                 Be part of a wellness journey that values balance, mindfulness, and sustainability - yoga that grows with you, not against your schedule.
+
                 </p>
               </div>
             </div>

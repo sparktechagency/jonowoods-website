@@ -36,15 +36,15 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
                   alt={yogaClass.name}
                   layout="fill"
                   // objectFit="cover"
-                  className="absolute lg:object-cover object-fill  inset-0 w-full h-full"
+                  className="absolute object-cover  inset-0 w-full h-full"
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div
-                  className="hidden lg:block absolute inset-0 bg-gradient-to-t"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
-                  }}
+                  // className="hidden lg:block absolute inset-0 bg-gradient-to-t"
+                  // style={{
+                  //   backgroundImage:
+                  //     "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
+                  // }}
                 />
                 {/* Title inside image for Desktop (hover effect) */}
                 <div className="hidden lg:flex absolute inset-0 flex-col justify-center items-center text-center px-4">
