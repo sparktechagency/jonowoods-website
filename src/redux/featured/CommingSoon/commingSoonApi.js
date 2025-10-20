@@ -50,10 +50,17 @@ const commignSoonSlice = api.injectEndpoints({
     }),
 
     singleChallengeVideo: builder.query({
-      query: (id) => {
+      query: ({id, params}) => {
+ const urlParams = new URLSearchParams();
+            if (params) {
+          params.forEach((arg) => {
+            urlParams.append(arg.name, arg.value);
+          });
+        }
         return {
           method: "GET",
           url: `/challenge/get-challenges-videos-for-users/${id}`,
+          params: urlParams,
         };
       },
       overrideExisting: true,

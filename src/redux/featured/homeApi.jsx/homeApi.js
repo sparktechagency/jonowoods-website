@@ -2,8 +2,6 @@ import { api } from "@/redux/baseUrl/baseUrl";
 
 const homeSlice = api.injectEndpoints({
   endpoints: (builder) => ({
-
-
     comingSoonLetestVideo: builder.query({
       query: () => {
         return {
@@ -12,7 +10,6 @@ const homeSlice = api.injectEndpoints({
         };
       },
     }),
-
 
     comingSoonLetestSingleVideo: builder.query({
       query: (id) => {
@@ -42,10 +39,17 @@ const homeSlice = api.injectEndpoints({
     }),
 
     categoryVideo: builder.query({
-      query: (id) => {
+      query: ({ id, params }) => {
+        const urlParams = new URLSearchParams();
+        if (params) {
+          params.forEach((arg) => {
+            urlParams.append(arg.name, arg.value);
+          });
+        }
         return {
           method: "GET",
           url: `/category/get-videos/${id}`,
+          params: urlParams,
         };
       },
     }),
@@ -77,7 +81,6 @@ const homeSlice = api.injectEndpoints({
       },
     }),
 
-
     singleSubcategory: builder.query({
       query: (id) => {
         return {
@@ -95,11 +98,6 @@ const homeSlice = api.injectEndpoints({
         };
       },
     }),
-
-
-
-
-
   }),
 });
 
@@ -113,5 +111,5 @@ export const {
   useSubCategoryVideoQuery,
   useSingleSubcategoryQuery,
   useSingleVidoeQuery,
-  useMarkVideoWatchedMutation
+  useMarkVideoWatchedMutation,
 } = homeSlice;

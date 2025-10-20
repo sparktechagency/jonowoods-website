@@ -46,7 +46,7 @@ export const VideoCard = ({
         {/* Title - shown inside image on large screens */}
         <div className="hidden lg:flex absolute inset-0 flex-col justify-end lg:justify-center items-center text-center px-4">
           <h3
-            className="text-white text-2xl font-bold tracking-wide drop-shadow-lg 
+            className="text-white  tracking-wide drop-shadow-lg 
                        bg-[#A92C2C]/80 px-3 py-1 rounded
                        opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0
                        transition-all duration-500 ease-out"

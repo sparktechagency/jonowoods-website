@@ -11,7 +11,19 @@ import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
 const ChallengePage = ({ params }) => {
   const { id } = React.use(params);
   const router = useRouter();
-  const { data, isLoading } = useSingleChallengeVideoQuery(id, { skip: !id });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(12);
+  const queryParams = [
+    {
+      name: "page",
+      value: currentPage,
+    },
+    {
+      name: "limit",
+      value: perPage,
+    },
+  ];
+  const { data, isLoading } = useSingleChallengeVideoQuery({ id, params: queryParams });
   const challengeInfo = data?.data?.categoryInfo;
   console.log(challengeInfo);
   console.log(data);
@@ -82,6 +94,14 @@ const ChallengePage = ({ params }) => {
     }
   };
 
+  const handlePageChange = (page) => {
+    const meta = data?.data?.meta;
+    if (page >= 1 && page <= meta?.totalPage) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   if (isLoading) return <Spinner />;
 
   if (!data?.data?.result || data.data.result.length === 0) {
@@ -101,6 +121,11 @@ const ChallengePage = ({ params }) => {
   // Get challenge details from first video (assuming all videos belong to same challenge)
   const challengeData = data?.data?.challengeInfo || videos[0];
   console.log(challengeData);
+  console.log("Pagination Debug:", {
+    meta: data?.data?.meta,
+    totalPage: data?.data?.meta?.totalPage,
+    condition: data?.data?.meta?.totalPage > 1
+  });
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -159,10 +184,10 @@ const ChallengePage = ({ params }) => {
                 </p>
               )}
 
-              <p className="text-sm text-gray-600">
+              {/* <p className="text-sm text-gray-600">
                 Progress: {completedVideos.length} of {videos.length} videos
                 completed
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
@@ -345,6 +370,39 @@ const ChallengePage = ({ params }) => {
             );
           })}
         </div>
+
+        {/* Pagination Controls */}
+        {data?.data?.meta?.totalPage > 1 && (
+          <div className="flex justify-center items-center gap-3 mt-8">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => handlePageChange(currentPage - 1)}
+              className={`px-4 py-2 rounded ${
+                currentPage === 1
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary-dark"
+              }`}
+            >
+              Prev
+            </button>
+
+            <span className="text-gray-700 font-medium">
+              Page {currentPage} of {data?.data?.meta?.totalPage}
+            </span>
+
+            <button
+              disabled={currentPage === data?.data?.meta?.totalPage}
+              onClick={() => handlePageChange(currentPage + 1)}
+              className={`px-4 py-2 rounded ${
+                currentPage === data?.data?.meta?.totalPage
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-primary text-white hover:bg-primary-dark"
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,71 +1,12 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
 
-const ClassSilder = ({ data }) => {
+const ClassSlider = ({ data }) => {
   const router = useRouter();
-  console.log(data);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const containerRef = useRef(null);
-
-  const getVisibleCards = () => {
-    const container = containerRef.current;
-    if (!container) return 1;
-
-    const containerWidth = container.clientWidth;
-    const cardWidth = 320 + 24; // 320px card width + 24px gap
-    return Math.floor(containerWidth / cardWidth);
-  };
-
-  const getMaxSlideIndex = () => {
-    const visibleCards = getVisibleCards();
-    return Math.max(0, data.length - visibleCards);
-  };
-
-  const scrollToSlide = (index) => {
-    const container = containerRef.current;
-    if (container) {
-      const slideWidth = 320 + 24; // 320px card width + 24px gap
-      const clampedIndex = Math.min(index, getMaxSlideIndex());
-      container.scrollTo({
-        left: slideWidth * clampedIndex,
-        behavior: "smooth",
-      });
-      setCurrentSlide(clampedIndex);
-    }
-  };
-
-  const nextSlide = () => {
-    const visibleCards = getVisibleCards();
-    const maxIndex = getMaxSlideIndex();
-    const nextIndex = Math.min(currentSlide + visibleCards, maxIndex);
-    scrollToSlide(nextIndex);
-  };
-
-  const prevSlide = () => {
-    const visibleCards = getVisibleCards();
-    const prevIndex = Math.max(currentSlide - visibleCards, 0);
-    scrollToSlide(prevIndex);
-  };
-
-  const handleScroll = () => {
-    const container = containerRef.current;
-    if (container) {
-      const slideWidth = 320 + 24; // 320px card width + 24px gap
-      const newIndex = Math.round(container.scrollLeft / slideWidth);
-      const maxIndex = getMaxSlideIndex();
-      const clampedIndex = Math.min(Math.max(newIndex, 0), maxIndex);
-      if (clampedIndex !== currentSlide) {
-        setCurrentSlide(clampedIndex);
-      }
-    }
-  };
 
   const handleVideoClick = (videoId) => {
-    // Use the correct path for Next.js App Router with route groups
     router.push(`/categories/class/${videoId}`);
   };
 
@@ -74,83 +15,52 @@ const ClassSilder = ({ data }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold text-gray-900">Classes</h2>
-
-        {/* Navigation Arrows */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={prevSlide}
-            disabled={currentSlide === 0}
-            className={`p-2 rounded-full shadow-lg border cursor-pointer border-gray-200 transition-all duration-200 ${
-              currentSlide === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-50 hover:shadow-xl text-gray-600"
-            }`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            onClick={nextSlide}
-            disabled={currentSlide >= getMaxSlideIndex()}
-            className={`p-2 rounded-full shadow-lg border cursor-pointer border-gray-200 transition-all duration-200 ${
-              currentSlide >= getMaxSlideIndex()
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-50 hover:shadow-xl text-gray-600"
-            }`}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
       </div>
 
-      {/* Classes Slider */}
-      <div className="relative">
-        <div
-          ref={containerRef}
-          onScroll={handleScroll}
-          className="flex gap-6 h-[460px] overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {data.map((classItem, index) => (
-            <div
-              key={classItem._id || index}
-              className="flex-shrink-0 w-80 snap-start"
-            >
-              {/* Image (clickable) */}
-              <div
-                onClick={() => handleVideoClick(classItem._id)}
-                className="w-full h-90 overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105"
-              >
-                <Image
-                  src={`https://${classItem.thumbnailUrl}`}
-                  alt={classItem.title}
-                  width={100}
-                  height={100}
-                  className="w-full h-full rounded-md object-cover"
-                />
-              </div>
+      {/* Classes Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
+        {data.map((classItem, index) => (
+          <div
+            key={classItem._id || index}
+            className="cursor-pointer group"
+            onClick={() => handleVideoClick(classItem._id)}
+          >
+            <div className="relative h-28 lg:h-80 rounded-lg overflow-hidden">
+              {/* Image */}
+              <Image
+                src={`https://${classItem.thumbnailUrl}`}
+                alt={classItem.title}
+                layout="fill"
+                className="absolute object-cover inset-0 w-full h-full"
+              />
 
-              {/* Title & duration below the image */}
-              <div className="mt-3 px-1">
-                <h3 className="text-gray-900 text-lg font-semibold leading-tight">
+              {/* Title inside image for Desktop (hover effect) */}
+              <div className="hidden lg:flex absolute inset-0 flex-col justify-center items-center text-center px-4">
+                <h3
+                  className="text-white   tracking-wide drop-shadow-lg 
+                     bg-[#A92C2C]/80 px-3 py-1 rounded
+                     opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0
+                     transition-all duration-500 ease-out"
+                >
                   {classItem.title}
                 </h3>
-                {/* <p className="text-gray-600 text-sm mt-1">
-                  {classItem.duration}
-                </p> */}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Custom CSS for hiding scrollbar */}
-      <style jsx>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+            {/* Title shown below image for mobile & tablet */}
+            <h3 className="block text-[14px] lg:hidden text-black font-semibold mt-2">
+              {classItem?.title?.length > 42
+                ? classItem.title.slice(0, 42) + "..."
+                : classItem?.title}
+            </h3>
+            <p className="text-[12px] text-gray-600 mt-1">
+              Duration: { classItem?.duration}
+            </p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default ClassSilder;
+export default ClassSlider;
