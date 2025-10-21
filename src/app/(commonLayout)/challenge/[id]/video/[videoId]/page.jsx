@@ -1,26 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { useMarkWatchChallengeVideoMutation, useSingleChallengeVideoQuery } from '@/redux/featured/CommingSoon/commingSoonApi';
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  useMarkWatchChallengeVideoMutation,
+  useSingleChallengeVideoQuery,
+} from "@/redux/featured/CommingSoon/commingSoonApi";
 // import Spinner from '../../../Spinner';
-import Image from 'next/image';
-import { getImageUrl } from '@/components/share/imageUrl';
-import Spinner from '@/app/(commonLayout)/Spinner';
+import Image from "next/image";
+import { getImageUrl } from "@/components/share/imageUrl";
+import Spinner from "@/app/(commonLayout)/Spinner";
 
 const VideoPlayerPage = ({ params }) => {
   const { id: challengeId, videoId } = React.use(params);
+  console.log(challengeId, videoId);
   const router = useRouter();
-  const { data, isLoading, refetch } = useSingleChallengeVideoQuery(challengeId, { skip: !challengeId });
+  const { data, isLoading, refetch } = useSingleChallengeVideoQuery(
+    { id: challengeId },
+    { skip: !challengeId }
+  );
+
   const [markWatchChallengeVideo] = useMarkWatchChallengeVideoMutation();
-  console.log(data)
-  
+  console.log(data);
+
   const [videos, setVideos] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
   const [completedVideos, setCompletedVideos] = useState([]);
   const [nextVideoUnlockTime, setNextVideoUnlockTime] = useState(null);
-  const [countdown, setCountdown] = useState('');
+  const [countdown, setCountdown] = useState("");
   const completionProcessedRef = useRef(new Set());
   const countdownIntervalRef = useRef(null);
 
@@ -34,15 +42,15 @@ const VideoPlayerPage = ({ params }) => {
       const hours = Math.floor(difference / (1000 * 60 * 60));
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-      
+
       return {
         formatted: `${hours}h ${minutes}m ${seconds}s`,
-        isExpired: false
+        isExpired: false,
       };
     } else {
       return {
-        formatted: 'Unlocked',
-        isExpired: true
+        formatted: "Unlocked",
+        isExpired: true,
       };
     }
   };
@@ -53,22 +61,23 @@ const VideoPlayerPage = ({ params }) => {
       const sortedVideos = [...data.data.result];
       setVideos(sortedVideos);
 
-      const current = sortedVideos.find(video => video._id === videoId);
+      const current = sortedVideos.find((video) => video._id === videoId);
       setCurrentVideo(current);
 
       const completed = sortedVideos
-        .filter(video => video.isVideoCompleted)
-        .map(video => video._id);
+        .filter((video) => video.isVideoCompleted)
+        .map((video) => video._id);
       setCompletedVideos(completed);
 
       // Check if current video is accessible
       if (current && !current.isEnabled) {
-        toast.error('Video not accessible', {
-          description: 'This video is locked. Please complete previous videos first.'
+        toast.error("Video not accessible", {
+          description:
+            "This video is locked. Please complete previous videos first.",
         });
         router.push(`/challenge/${challengeId}`);
       }
-      
+
       completionProcessedRef.current.clear();
     }
   }, [data, videoId, challengeId, router]);
@@ -83,8 +92,8 @@ const VideoPlayerPage = ({ params }) => {
         if (countdownInfo.isExpired) {
           setNextVideoUnlockTime(null);
           refetch();
-          toast.success('New video unlocked!', {
-            description: 'You can now watch the next video.',
+          toast.success("New video unlocked!", {
+            description: "You can now watch the next video.",
             duration: 5000,
           });
         }
@@ -106,75 +115,81 @@ const VideoPlayerPage = ({ params }) => {
     if (completionProcessedRef.current.has(videoId)) {
       return;
     }
-    
+
     completionProcessedRef.current.add(videoId);
-    
+
     try {
       const response = await markWatchChallengeVideo(videoId).unwrap();
-      
-      setCompletedVideos(prev => [...prev, videoId]);
-      
+
+      setCompletedVideos((prev) => [...prev, videoId]);
+
       if (response?.data?.nextVideoInfo?.nextUnlockTime) {
         // Video completed but next video has timer
         setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
-        
-        const countdownInfo = calculateCountdown(response.data.nextVideoInfo.nextUnlockTime);
-        
-        toast.success('Video completed!', {
+
+        const countdownInfo = calculateCountdown(
+          response.data.nextVideoInfo.nextUnlockTime
+        );
+
+        toast.success("Video completed!", {
           description: `Next video will unlock in ${countdownInfo.formatted}.`,
           duration: 5000,
         });
       } else {
         // Video completed and next video is immediately available
-        const currentIndex = videos.findIndex(v => v._id === videoId);
-        
+        const currentIndex = videos.findIndex((v) => v._id === videoId);
+
         if (currentIndex < videos.length - 1) {
           const nextVideo = videos[currentIndex + 1];
-          
+
           if (nextVideo && nextVideo.isEnabled) {
-            toast.success('Video completed!', {
+            toast.success("Video completed!", {
               description: `You've unlocked "${nextVideo.title}"! Click to watch next video.`,
               duration: 5000,
               action: {
-                label: 'Watch Next',
-                onClick: () => router.push(`/challenge/${challengeId}/video/${nextVideo._id}`)
-              }
+                label: "Watch Next",
+                onClick: () =>
+                  router.push(
+                    `/challenge/${challengeId}/video/${nextVideo._id}`
+                  ),
+              },
             });
           } else {
-            toast.success('Video completed!', {
-              description: 'Please wait for the next video to unlock.',
+            toast.success("Video completed!", {
+              description: "Please wait for the next video to unlock.",
               duration: 5000,
             });
           }
         } else {
-          toast.success('Congratulations!', {
-            description: 'You have completed all challenge videos!',
+          toast.success("Congratulations!", {
+            description: "You have completed all challenge videos!",
             duration: 5000,
           });
         }
       }
-      
+
       refetch();
     } catch (error) {
-      console.error('Error marking video as completed:', error);
-      toast.error('Failed to mark video as completed', {
-        description: 'Please try again later.'
+      console.error("Error marking video as completed:", error);
+      toast.error("Failed to mark video as completed", {
+        description: "Please try again later.",
       });
     }
   };
 
   // Get next and previous video
-  const currentIndex = videos.findIndex(v => v._id === videoId);
-  const nextVideo = currentIndex < videos.length - 1 ? videos[currentIndex + 1] : null;
+  const currentIndex = videos.findIndex((v) => v._id === videoId);
+  const nextVideo =
+    currentIndex < videos.length - 1 ? videos[currentIndex + 1] : null;
   const prevVideo = currentIndex > 0 ? videos[currentIndex - 1] : null;
 
   if (isLoading) return <Spinner />;
-  
+
   if (!currentVideo) {
     return (
       <div className="container mx-auto p-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Video not found</h2>
-        <button 
+        <button
           onClick={() => router.push(`/challenge/${challengeId}`)}
           className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
         >
@@ -190,22 +205,27 @@ const VideoPlayerPage = ({ params }) => {
     <div className="container mx-auto px-4 py-6">
       {/* Navigation */}
       <div className="mb-4 flex items-center justify-between">
-        <button 
+        <button
           onClick={() => router.push(`/challenge/${challengeId}`)}
           className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
         >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5 mr-2" 
-            fill="none" 
-            viewBox="0 0 24 24" 
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Back to Challenge
         </button>
-        
+
         <div className="text-sm text-gray-600">
           Video {currentIndex + 1} of {videos.length}
         </div>
@@ -225,34 +245,47 @@ const VideoPlayerPage = ({ params }) => {
           >
             Your browser does not support the video tag.
           </video>
-          
+
           {/* Completion status overlay */}
           {isCurrentVideoCompleted && (
             <div className="absolute top-4 right-4 bg-green-500 text-white text-sm font-medium px-3 py-1 rounded-full flex items-center">
-              <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              <svg
+                className="h-4 w-4 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
               </svg>
               Completed
             </div>
           )}
         </div>
-        
+
         {/* Video Info */}
         <div className="p-6">
-          <h1 className="text-xl md:text-2xl font-bold mb-2">{currentVideo.title}</h1>
-          <p className="text-sm text-gray-600 mb-4">Duration: {currentVideo.duration}</p>
-          
+          <h1 className="text-xl md:text-2xl font-bold mb-2">
+            {currentVideo.title}
+          </h1>
+          <p className="text-sm text-gray-600 mb-4">
+            Duration: {currentVideo.duration}
+          </p>
+
           {currentVideo.description && (
             <p className="text-gray-700 leading-relaxed mb-4">
               {currentVideo.description}
             </p>
           )}
-          
+
           {/* Completion status and next unlock info */}
           {isCurrentVideoCompleted && nextVideoUnlockTime && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800">
-                🎉 Video completed! Next video unlocks in <strong>{countdown}</strong>
+                🎉 Video completed! Next video unlocks in{" "}
+                <strong>{countdown}</strong>
               </p>
             </div>
           )}
@@ -263,18 +296,30 @@ const VideoPlayerPage = ({ params }) => {
       <div className="flex justify-between items-center mb-6">
         {prevVideo ? (
           <button
-            onClick={() => router.push(`/challenge/${challengeId}/${prevVideo._id}`)}
+            onClick={() =>
+              router.push(`/challenge/${challengeId}/${prevVideo._id}`)
+            }
             className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Previous Video
           </button>
         ) : (
           <div></div>
         )}
-        
+
         {/* {nextVideo && nextVideo.isEnabled ? (
           <button
             onClick={() => router.push(`/challenge/${challengeId}/${nextVideo._id}`)}

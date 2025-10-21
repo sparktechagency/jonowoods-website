@@ -2,8 +2,7 @@ import { api } from "@/redux/baseUrl/baseUrl";
 
 const commignSoonSlice = api.injectEndpoints({
   endpoints: (builder) => ({
-
-      quotation : builder.query({
+    quotation: builder.query({
       query: () => {
         return {
           method: "GET",
@@ -50,9 +49,9 @@ const commignSoonSlice = api.injectEndpoints({
     }),
 
     singleChallengeVideo: builder.query({
-      query: ({id, params}) => {
- const urlParams = new URLSearchParams();
-            if (params) {
+      query: ({ id, params }) => {
+        const urlParams = new URLSearchParams();
+        if (params) {
           params.forEach((arg) => {
             urlParams.append(arg.name, arg.value);
           });
@@ -65,7 +64,7 @@ const commignSoonSlice = api.injectEndpoints({
       },
       overrideExisting: true,
     }),
-    
+
     markWatchChallengeVideo: builder.mutation({
       query: (id) => {
         return {
@@ -82,7 +81,6 @@ const commignSoonSlice = api.injectEndpoints({
         };
       },
     }),
-
   }),
 });
 
@@ -95,5 +93,4 @@ export const {
   useSingleChallengeVideoQuery,
   useMarkWatchChallengeVideoMutation,
   useMarkWatchCoursesVideoMutation,
-
 } = commignSoonSlice;
