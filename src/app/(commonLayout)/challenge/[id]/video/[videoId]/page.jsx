@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import { getImageUrl } from "@/components/share/imageUrl";
 import Spinner from "@/app/(commonLayout)/Spinner";
+import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 
 const VideoPlayerPage = ({ params }) => {
   const { id: challengeId, videoId } = React.use(params);
@@ -234,7 +235,7 @@ const VideoPlayerPage = ({ params }) => {
       {/* Video Player Section */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div className="relative">
-          <video
+          {/* <video
             key={currentVideo._id}
             controls
             controlsList="nodownload"
@@ -244,7 +245,27 @@ const VideoPlayerPage = ({ params }) => {
             onEnded={() => handleVideoComplete(currentVideo._id)}
           >
             Your browser does not support the video tag.
-          </video>
+          </video> */}
+          <UniversalVideoPlayer
+            video={currentVideo}
+            autoplay={false}
+            aspectRatio="16:9"
+            watermark={{
+              text: `© ${getYear} Yoga With Jen`,
+              position: "top-right"
+            }}
+            onSecurityViolation={(type) => {
+              // Log to backend
+              fetch('/api/security-log', {
+                method: 'POST',
+                body: JSON.stringify({
+                  videoId: currentVideo._id,
+                  violationType: type,
+                })
+              });
+            }}
+            onPlay={() => console.log('Playing')}
+          />
 
           {/* Completion status overlay */}
           {isCurrentVideoCompleted && (

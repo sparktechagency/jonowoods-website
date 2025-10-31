@@ -3,6 +3,7 @@ import { useComingSoonLetestSingleVideoQuery } from "@/redux/featured/homeApi.js
 import React from "react";
 import Spinner from "../../Spinner";
 import Image from "next/image";
+import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 // import { useComingSoonLetestSingleVideoQuery } from "../../../redux/featured/homeApi.jsx/homeApi";
 // import Spinner from "../../(commonLayout)/Spinner";
 
@@ -91,14 +92,26 @@ const SingleVideoPage = ({ params }) => {
 
           {/* Video Player */}
           <div className="mt-6 rounded-lg overflow-hidden shadow-lg border border-gray-200">
-            <video
-              controls
-              className="w-full h-auto"
-              src={`https://${video.videoUrl}`}
-              poster={`https://${video.thumbnailUrl}`}
-            >
-              Your browser does not support the video tag.
-            </video>
+             <UniversalVideoPlayer
+                      video={video}
+                      autoplay={false}
+                      aspectRatio="16:9"
+                      watermark={{
+                        text: `© ${getYear} Yoga With Jen`,
+                        position: "top-right"
+                      }}
+                      onSecurityViolation={(type) => {
+                        // Log to backend
+                        fetch('/api/security-log', {
+                          method: 'POST',
+                          body: JSON.stringify({
+                            videoId: currentVideo._id,
+                            violationType: type,
+                          })
+                        });
+                      }}
+                      onPlay={() => console.log('Playing')}
+                    />
           </div>
         </div>
 
