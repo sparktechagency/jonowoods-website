@@ -394,14 +394,14 @@ export default function FitnessVideoPage({ params }) {
           {/* Equipment */}
           {videoData.equipment && videoData.equipment.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-medium text-gray-700">
+              {/* <p className="text-xs font-medium text-gray-700">
                 Props/Equipment Needed
-              </p>
+              </p> */}
               <div className="flex flex-wrap gap-2 mt-2">
                 {videoData.equipment.map((item, index) => (
                   <span
                     key={index}
-                    className="text-xs bg-gray-100 px-2 py-1 rounded"
+                    className="text-xs bg-gray-100 px-4 py-2 rounded-xl"
                   >
                     {item}
                   </span>
@@ -410,7 +410,7 @@ export default function FitnessVideoPage({ params }) {
             </div>
           )}
           {/* Engagement Section */}
-          <div className="flex items-center space-x-4 pb-4 border-b border-gray-100">
+          <div className="flex items-center space-x-4 pb-4 border-gray-100">
             <button
               onClick={() => handleLike(videoData._id)}
               className="flex items-center space-x-2  min-w-[24px] min-h-[24px]"

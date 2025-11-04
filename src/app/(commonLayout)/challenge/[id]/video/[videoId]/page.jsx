@@ -12,6 +12,7 @@ import Image from "next/image";
 import { getImageUrl } from "@/components/share/imageUrl";
 import Spinner from "@/app/(commonLayout)/Spinner";
 import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
+import { Clock } from "lucide-react";
 
 const VideoPlayerPage = ({ params }) => {
   const { id: challengeId, videoId } = React.use(params);
@@ -32,7 +33,7 @@ const VideoPlayerPage = ({ params }) => {
   const [countdown, setCountdown] = useState("");
   const completionProcessedRef = useRef(new Set());
   const countdownIntervalRef = useRef(null);
-
+console.log("currentVideo", currentVideo);
   // Function to calculate countdown
   const calculateCountdown = (unlockTime) => {
     const now = new Date().getTime();
@@ -233,7 +234,7 @@ const VideoPlayerPage = ({ params }) => {
       </div>
 
       {/* Video Player Section */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden ">
         <div className="relative">
           {/* <video
             key={currentVideo._id}
@@ -289,20 +290,44 @@ const VideoPlayerPage = ({ params }) => {
           )}
         </div>
 
-        {/* Video Info */}
+      
+      </div>
+  {/* Video Info */}
         <div className="p-6 rounded-lg mt-6 shadow-md">
-          <h1 className="text-xl md:text-2xl font-bold mb-2">
+          <h1 className="md:text-xl lg:text-2xl font-bold mb-2">
             {currentVideo.title}
           </h1>
-          <p className="text-sm text-gray-600 mb-4">
-            Duration: {currentVideo.duration}
+          <p className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+            <Clock className="w-4 h-4 text-gray-600 mr-2" />
+            {currentVideo.duration}
           </p>
+
+  {/* Equipment */}
+          {currentVideo.equipment && currentVideo.equipment.length > 0 && (
+            <div className="mb-4">
+              {/* <p className="text-xs font-medium text-gray-700">
+                Props/Equipment Needed
+              </p> */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {videoData.equipment.map((item, index) => (
+                  <span
+                    key={index}
+                    className="text-xs bg-gray-100 px-4 py-2 rounded-xl"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {currentVideo.description && (
             <p className="text-gray-700 leading-relaxed mb-4">
-              {currentVideo.description}
+             Description: {currentVideo.description}
             </p>
           )}
+
+
 
           {/* Completion status and next unlock info */}
           {isCurrentVideoCompleted && nextVideoUnlockTime && (
@@ -314,7 +339,6 @@ const VideoPlayerPage = ({ params }) => {
             </div>
           )}
         </div>
-      </div>
 
       {/* Navigation Controls */}
       <div className="flex justify-between items-center mb-6">

@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import React, { useMemo, useState } from "react"
-import { Heart, Share2, Bookmark, Eye, Calendar, Clock } from "lucide-react"
-import Spinner from "@/app/(commonLayout)/Spinner"
-import UniversalVideoPlayer from "../UniversalVideoPlayer"
-import { useInspirationLatestVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi"
+import React, { useMemo, useState } from "react";
+import { Heart, Share2, Bookmark, Eye, Calendar, Clock } from "lucide-react";
+import Spinner from "@/app/(commonLayout)/Spinner";
+import UniversalVideoPlayer from "../UniversalVideoPlayer";
+import { useInspirationLatestVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
 
 const DailyInspiration = () => {
-  const { data, isLoading } = useInspirationLatestVideoQuery()
-  const [showFullDesc, setShowFullDesc] = useState(false)
-  const [liked, setLiked] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const { data, isLoading } = useInspirationLatestVideoQuery();
+  const [showFullDesc, setShowFullDesc] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const video = data?.data || {}
+  const video = data?.data || {};
   const {
     title,
     description,
@@ -20,53 +20,66 @@ const DailyInspiration = () => {
     views,
     likes,
     createdAt,
-    tags,
+    equipment,
     category,
     author,
     related,
-  } = video || {}
+  } = video || {};
 
   const published = useMemo(() => {
-    if (!createdAt) return ""
+    if (!createdAt) return "";
     try {
-      return new Date(createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
+      return new Date(createdAt).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
     } catch {
-      return ""
+      return "";
     }
-  }, [createdAt])
+  }, [createdAt]);
 
   const formatNumber = (num) => {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-    if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-    return num?.toString()
-  }
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num?.toString();
+  };
 
-  if (isLoading) return <Spinner />
+  if (isLoading) return <Spinner />;
 
   if (!video || !video.videoUrl) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full p-8 rounded-2xl bg-white border border-slate-200 shadow-lg text-center">
           <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            <svg
+              className="w-8 h-8 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">No Video Found</h3>
-          <p className="text-slate-600 text-sm">Please check back later for new content</p>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">
+            No Video Found
+          </h3>
+          <p className="text-slate-600 text-sm">
+            Please check back later for new content
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
-
         {/* Video Player Section */}
         <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
           <UniversalVideoPlayer
@@ -81,10 +94,8 @@ const DailyInspiration = () => {
 
         {/* Content Grid */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8  p-6 rounded-2xl  shadow-sm">
-
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4">
-
             {/* Title & Category */}
             <div>
               <div className="flex items-start justify-between gap-4 mb-2">
@@ -103,7 +114,9 @@ const DailyInspiration = () => {
                 {views != null && (
                   <div className="flex items-center gap-1.5">
                     <Eye className="w-4 h-4" />
-                    <span className="font-medium">{formatNumber(views)} views</span>
+                    <span className="font-medium">
+                      {formatNumber(views)} views
+                    </span>
                   </div>
                 )}
                 {/* {published && (
@@ -126,31 +139,10 @@ const DailyInspiration = () => {
                 )}
               </div>
             </div>
-
-
-            {/* Description Card */}
-            <div className=" rounded-2xl bg-white  ">
-              <h2 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
-                <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
-               Description
-              </h2>
-              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
-                {formatDescription(description, showFullDesc)}
-              </p>
-              {description && description.length > 220 && (
-                <button
-                  onClick={() => setShowFullDesc(!showFullDesc)}
-                  className="mt-3 text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors"
-                >
-                  {showFullDesc ? "Show less" : "Read more →"}
-                </button>
-              )}
-            </div>
-
-            {/* Tags */}
-            {Array.isArray(tags) && tags.length > 0 && (
+            {/* equipment */}
+            {Array.isArray(equipment) && equipment.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag, i) => (
+                {equipment.map((tag, i) => (
                   <span
                     key={i}
                     className="px-4 py-2 rounded-full bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 text-slate-700 text-sm font-medium hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer"
@@ -160,6 +152,26 @@ const DailyInspiration = () => {
                 ))}
               </div>
             )}
+
+            {/* Description Card */}
+            <div className=" rounded-2xl bg-white  ">
+              <h2 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+                <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+                Description
+              </h2>
+              <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">
+                {formatDescription(description, showFullDesc)}
+              </p>
+
+              {description && description.length > 220 && (
+                <button
+                  onClick={() => setShowFullDesc(!showFullDesc)}
+                  className="mt-3 text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors"
+                >
+                  {showFullDesc ? "Show less" : "Read more →"}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Sidebar - Related Videos */}
@@ -181,16 +193,15 @@ const DailyInspiration = () => {
         </div>
       </div>
     </div>
-  )
-}
-
+  );
+};
 
 function formatDescription(desc, full) {
-  if (!desc) return "No description available"
-  const clean = String(desc).trim()
-  if (full) return clean
-  if (clean.length <= 220) return clean
-  return clean.slice(0, 220) + "..."
+  if (!desc) return "No description available";
+  const clean = String(desc).trim();
+  if (full) return clean;
+  if (clean.length <= 220) return clean;
+  return clean.slice(0, 220) + "...";
 }
 
-export default DailyInspiration
+export default DailyInspiration;
