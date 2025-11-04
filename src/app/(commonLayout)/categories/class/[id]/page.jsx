@@ -1,7 +1,7 @@
 "use client";
 
 import { jwtDecode } from "jwt-decode";
-import { Heart, MoreHorizontal, Send } from "lucide-react";
+import { Clock, Heart, MoreHorizontal, Send } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import commectIcon from "../../../../../../public/assests/comment.png";
@@ -380,7 +380,10 @@ export default function FitnessVideoPage({ params }) {
             <h1 className="text-xl font-semibold text-gray-900 mb-2">
               {videoData.title}
             </h1>
-            <p className="text-sm text-gray-600 mb-1">{videoData.duration} </p>
+            <div className="flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-gray-600" />
+              <p className="text-sm text-gray-600 mb-1">{videoData.duration} </p>
+            </div>
             <p className="text-xs text-gray-500 mb-3">
               {" "}
               <span className="font-medium">Description : </span>{" "}
