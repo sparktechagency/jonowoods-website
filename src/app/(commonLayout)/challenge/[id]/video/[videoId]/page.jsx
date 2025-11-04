@@ -203,7 +203,7 @@ const VideoPlayerPage = ({ params }) => {
   const isCurrentVideoCompleted = completedVideos.includes(currentVideo._id);
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
       {/* Navigation */}
       <div className="mb-4 flex items-center justify-between">
         <button
@@ -227,9 +227,9 @@ const VideoPlayerPage = ({ params }) => {
           Back to Challenge
         </button>
 
-        <div className="text-sm text-gray-600">
+        {/* <div className="text-sm text-gray-600">
           Video {currentIndex + 1} of {videos.length}
-        </div>
+        </div> */}
       </div>
 
       {/* Video Player Section */}
@@ -246,26 +246,29 @@ const VideoPlayerPage = ({ params }) => {
           >
             Your browser does not support the video tag.
           </video> */}
-          <UniversalVideoPlayer
-            video={currentVideo}
-            autoplay={false}
-            aspectRatio="16:9"
-            watermark={{
-              text: `© ${getYear} Yoga With Jen`,
-              position: "top-right"
-            }}
-            onSecurityViolation={(type) => {
-              // Log to backend
-              fetch('/api/security-log', {
-                method: 'POST',
-                body: JSON.stringify({
-                  videoId: currentVideo._id,
-                  violationType: type,
-                })
-              });
-            }}
-            onPlay={() => console.log('Playing')}
-          />
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
+            {" "}
+            <UniversalVideoPlayer
+              video={currentVideo}
+              autoplay={false}
+              aspectRatio="16:9"
+              watermark={{
+                text: ` Yoga With Jen`,
+                position: "top-right",
+              }}
+              onSecurityViolation={(type) => {
+                // Log to backend
+                fetch("/api/security-log", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    videoId: currentVideo._id,
+                    violationType: type,
+                  }),
+                });
+              }}
+              onPlay={() => console.log("Playing")}
+            />
+          </div>
 
           {/* Completion status overlay */}
           {isCurrentVideoCompleted && (
@@ -287,7 +290,7 @@ const VideoPlayerPage = ({ params }) => {
         </div>
 
         {/* Video Info */}
-        <div className="p-6">
+        <div className="p-6 rounded-lg mt-6 shadow-md">
           <h1 className="text-xl md:text-2xl font-bold mb-2">
             {currentVideo.title}
           </h1>
@@ -340,126 +343,7 @@ const VideoPlayerPage = ({ params }) => {
         ) : (
           <div></div>
         )}
-
-        {/* {nextVideo && nextVideo.isEnabled ? (
-          <button
-            onClick={() => router.push(`/challenge/${challengeId}/${nextVideo._id}`)}
-            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Next Video
-            <svg className="h-4 w-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        ) : nextVideo ? (
-          <div className="text-sm text-gray-500 px-4 py-2">
-            Next video locked
-            {nextVideoUnlockTime && ` - unlocks in ${countdown}`}
-          </div>
-        ) : (
-          <div className="text-sm text-gray-500 px-4 py-2">
-            Last video in challenge
-          </div>
-        )} */}
       </div>
-
-      {/* Related Videos */}
-      {/* <div>
-        <h2 className="text-lg font-semibold mb-4">Other Videos in This Challenge</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {videos.map((video, index) => {
-            const isAccessible = video.isEnabled;
-            const isCompleted = completedVideos.includes(video._id);
-            const isCurrent = video._id === videoId;
-            
-            return (
-              <div 
-                key={video._id}
-                onClick={() => {
-                  if (isAccessible && !isCurrent) {
-                    router.push(`/challenge/${challengeId}/${video._id}`);
-                  } else if (!isAccessible) {
-                    toast.info('Video locked', {
-                      description: 'Complete previous videos to unlock this one.'
-                    });
-                  }
-                }}
-                className={`
-                  relative rounded-lg overflow-hidden cursor-pointer border transition-all duration-300
-                  ${isAccessible && !isCurrent ? 'hover:shadow-lg hover:scale-105 border-gray-200' : 'border-gray-300'}
-                  ${isCurrent ? 'ring-2 ring-red-500 opacity-75' : ''}
-                  ${!isAccessible ? 'opacity-50 cursor-not-allowed' : ''}
-                  ${isCompleted ? 'ring-1 ring-green-400' : ''}
-                `}
-              >
-                <div className="relative h-32">
-                  <Image
-                    src={getImageUrl(video.thumbnailUrl || video.image)}
-                    alt={video.title}
-                    fill
-                    className="object-cover"
-                  />
-                  
-                  {!isAccessible && (
-                    <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        className="h-6 w-6 text-white" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor"
-                      >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
-                        />
-                      </svg>
-                    </div>
-                  )}
-                  
-                  {isCurrent && (
-                    <div className="absolute inset-0 bg-red-600 bg-opacity-20 flex items-center justify-center">
-                      <div className="bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
-                        NOW PLAYING
-                      </div>
-                    </div>
-                  )}
-                  
-                  {isCompleted && (
-                    <div className="absolute top-1 right-1 bg-green-500 rounded-full p-1">
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        className="h-3 w-3 text-white" 
-                        viewBox="0 0 20 20" 
-                        fill="currentColor"
-                      >
-                        <path 
-                          fillRule="evenodd" 
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" 
-                          clipRule="evenodd" 
-                        />
-                      </svg>
-                    </div>
-                  )}
-                  
-                  <div className="absolute top-1 left-1 bg-white text-gray-800 text-xs font-medium px-1 py-0.5 rounded">
-                    {index + 1}
-                  </div>
-                </div>
-                
-                <div className="p-2">
-                  <h3 className="font-medium text-xs line-clamp-2 text-gray-900 mb-1">
-                    {video.title}
-                  </h3>
-                  <p className="text-xs text-gray-500">{video.duration}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div> */}
     </div>
   );
 };

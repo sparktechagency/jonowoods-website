@@ -132,7 +132,7 @@ const ChallengePage = ({ params }) => {
       {/* Challenge Details Header */}
       <div className="mb-8">
         {/* Back button */}
-        <button
+        {/* <button
           onClick={() => router.push("/challenge")}
           className="mb-4 flex items-center text-gray-600 hover:text-gray-800 transition-colors"
         >
@@ -151,14 +151,14 @@ const ChallengePage = ({ params }) => {
             />
           </svg>
           Back to Challenges
-        </button>
+        </button> */}
 
         {/* Challenge header */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="md:flex">
             {/* Challenge thumbnail */}
             <div className="md:w-1/3 lg:w-1/4">
-              <div className="relative h-64 md:h-full">
+              <div className="relative h-72 md:h-72">
                 <Image
                   src={getImageUrl(challengeInfo?.image)}
                   alt={
@@ -172,15 +172,15 @@ const ChallengePage = ({ params }) => {
 
             {/* Challenge details */}
             <div className="p-6 md:w-2/3 lg:w-3/4">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {challengeInfo?.name}
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                <span className="font-medium text-base">Challenge Name:</span> {challengeInfo?.name}
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600"></div>
 
-              {challengeInfo?.description && (
+             {challengeInfo?.description && (
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  {challengeInfo?.description}
+                   Description: {challengeInfo?.description}
                 </p>
               )}
 
