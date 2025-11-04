@@ -107,7 +107,7 @@ const TodaysVideoPlayer = () => {
                     <span className="font-medium">{formatNumber(views)} views</span>
                   </div>
                 )}
-                {published && (
+                {/* {published && (
                   <>
                     <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                     <div className="flex items-center gap-1.5">
@@ -115,7 +115,7 @@ const TodaysVideoPlayer = () => {
                       <span>{published}</span>
                     </div>
                   </>
-                )}
+                )} */}
                 {duration && (
                   <>
                     <div className="w-1 h-1 rounded-full bg-slate-300"></div>

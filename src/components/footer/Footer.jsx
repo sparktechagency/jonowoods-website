@@ -90,7 +90,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="w-full sm:w-1/2 sm:mx-0 lg:w-full"
               >
-                <Button
+                {/* <Button
                   variant="outline"
                   className="w-full border-gray-300 items-center justify-center h-16"
                 >
@@ -110,7 +110,14 @@ export default function Footer() {
                       Apple Store
                     </span>
                   </div>
-                </Button>
+                </Button> */}
+                <Image
+                  src="/assests/app-store.png"
+                  width={180}
+                  height={60}
+                  alt="apple"
+                  className="m-auto"
+                />
               </Link>
               <Link
                 href="https://play.google.com"
@@ -118,7 +125,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="w-full sm:w-1/2 sm:mx-0 lg:w-full"
               >
-                <Button
+                {/* <Button
                   variant="outline"
                   className="w-full border-gray-300 items-center justify-center h-16"
                 >
@@ -138,7 +145,14 @@ export default function Footer() {
                       Google Play
                     </span>
                   </div>
-                </Button>
+                </Button> */}
+                <Image
+                  src="/assests/google-play.png"
+                  width={180}
+                  height={60}
+                  alt="google-play"
+                  className="m-auto"
+                />
               </Link>
             </div>
           </div>
