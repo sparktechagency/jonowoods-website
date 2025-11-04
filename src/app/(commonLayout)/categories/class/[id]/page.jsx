@@ -1,34 +1,48 @@
 "use client";
 
-
-import { jwtDecode } from 'jwt-decode';
-import { Heart, MoreHorizontal, Send } from 'lucide-react';
-import Image from 'next/image';
-import React, { useEffect, useRef, useState } from 'react';
-import commectIcon from '../../../../../../public/assests/comment.png';
-import { useCreateCommentMutation, useDeleteCommentMutation, useEditCommentMutation, useGetCommentQuery, useLikeReplyMutation, useReplyCommentMutation, useVideoDeleteCommentMutation } from '../../../../../redux/featured/commentApi/commentApi';
-import Spinner from '../../../Spinner';
-import { useSingleVidoeQuery } from '@/redux/featured/homeApi.jsx/homeApi';
-import { useVideoFavoriteMutation } from '@/redux/featured/favoriteApi/favoriteApi';
-import { getImageUrl } from '@/components/share/imageUrl';
-import { toast } from 'sonner';
+import { jwtDecode } from "jwt-decode";
+import { Heart, MoreHorizontal, Send } from "lucide-react";
+import Image from "next/image";
+import React, { useEffect, useRef, useState } from "react";
+import commectIcon from "../../../../../../public/assests/comment.png";
+import {
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
+  useEditCommentMutation,
+  useGetCommentQuery,
+  useLikeReplyMutation,
+  useReplyCommentMutation,
+  useVideoDeleteCommentMutation,
+} from "../../../../../redux/featured/commentApi/commentApi";
+import Spinner from "../../../Spinner";
+import { useSingleVidoeQuery } from "@/redux/featured/homeApi.jsx/homeApi";
+import { useVideoFavoriteMutation } from "@/redux/featured/favoriteApi/favoriteApi";
+import { getImageUrl } from "@/components/share/imageUrl";
+import { toast } from "sonner";
+import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
   const [isLiked, setIsLiked] = useState(null);
   const [likeCount, setLikeCount] = useState(0);
-  const [comment, setComment] = useState('');
-  const [replyText, setReplyText] = useState('');
-  const token = localStorage.getItem('token');
+  const [comment, setComment] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const token = localStorage.getItem("token");
   const decoded = jwtDecode(token);
   const currentUserId = decoded.id;
 
   // API hooks
   const { data, isLoading, refetch } = useSingleVidoeQuery(id, { skip: !id });
-  const { data: commentData, isLoading: commentDataLoading, refetch: refetchComments } = useGetCommentQuery(id, { skip: !id });
-  const [createComment, { isLoading: commentLoading }] = useCreateCommentMutation();
+  const {
+    data: commentData,
+    isLoading: commentDataLoading,
+    refetch: refetchComments,
+  } = useGetCommentQuery(id, { skip: !id });
+  const [createComment, { isLoading: commentLoading }] =
+    useCreateCommentMutation();
   const [editComment, { isLoading: editLoading }] = useEditCommentMutation();
-  const [videoDeleteComment, { isLoading: deleteLoading }] = useVideoDeleteCommentMutation();
+  const [videoDeleteComment, { isLoading: deleteLoading }] =
+    useVideoDeleteCommentMutation();
   const [replyComment, { isLoading: replyLoading }] = useReplyCommentMutation();
   const [likeReply, { isLoading: likeLoading }] = useLikeReplyMutation();
   const [favorite, { isLoading: favLoading }] = useVideoFavoriteMutation();
@@ -63,7 +77,7 @@ export default function FitnessVideoPage({ params }) {
       setIsLiked(!isLiked);
       refetch();
     } catch (error) {
-      console.error('Error liking video:', error)
+      console.error("Error liking video:", error);
     }
   };
 
@@ -76,22 +90,22 @@ export default function FitnessVideoPage({ params }) {
         // Edit existing comment
         await editComment({
           id: editingComment,
-          content: comment
+          content: comment,
         }).unwrap();
       } else {
         // Create new comment
         await createComment({
           videoId: id,
-          content: comment
+          content: comment,
         }).unwrap();
       }
 
-      setComment('');
+      setComment("");
       setEditingComment(null);
       setReplyingTo(null);
       refetchComments(); // Refresh comments after successful operation
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      console.error("Error submitting comment:", error);
     }
   };
 
@@ -102,31 +116,30 @@ export default function FitnessVideoPage({ params }) {
     try {
       await replyComment({
         id: commentId,
-        data: { content: replyText }
+        data: { content: replyText },
       }).unwrap();
 
-      setReplyText('');
+      setReplyText("");
       setReplyingTo(null);
       refetchComments();
     } catch (error) {
-      console.error('Error submitting reply:', error);
+      console.error("Error submitting reply:", error);
     }
   };
 
   const handleDeleteComment = async (commentId) => {
-    console.log(commentId)
+    console.log(commentId);
 
-      try {
-        const res=await videoDeleteComment(commentId).unwrap();
-        
-        refetchComments();
-        if(res?.success) {
-          toast.success('Comment deleted successfully');
-        }
-      } catch (error) {
-        console.error('Error deleting comment:', error);
+    try {
+      const res = await videoDeleteComment(commentId).unwrap();
+
+      refetchComments();
+      if (res?.success) {
+        toast.success("Comment deleted successfully");
       }
-  
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
   };
 
   const handleLikeComment = async (commentId) => {
@@ -134,7 +147,7 @@ export default function FitnessVideoPage({ params }) {
       await likeReply(commentId).unwrap();
       refetchComments();
     } catch (error) {
-      console.error('Error liking comment:', error);
+      console.error("Error liking comment:", error);
     }
   };
 
@@ -156,8 +169,8 @@ export default function FitnessVideoPage({ params }) {
   const handleCancel = () => {
     setEditingComment(null);
     setReplyingTo(null);
-    setComment('');
-    setReplyText('');
+    setComment("");
+    setReplyText("");
   };
 
   const formatTimeAgo = (timestamp) => {
@@ -165,9 +178,10 @@ export default function FitnessVideoPage({ params }) {
     const commentTime = new Date(timestamp);
     const diffInMinutes = Math.floor((now - commentTime) / (1000 * 60));
 
-    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 1) return "Just now";
     if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
+    if (diffInMinutes < 1440)
+      return `${Math.floor(diffInMinutes / 60)} hours ago`;
     return `${Math.floor(diffInMinutes / 1440)} days ago`;
   };
 
@@ -177,18 +191,22 @@ export default function FitnessVideoPage({ params }) {
     // In production, you should check if the comment belongs to the current user
     const isCurrentUser = true; // Change this to proper user check: comment.userId === currentUser?.id
     // const isCurrentUser = comment.userId === currentUserId;
-    console.log("comment", comment)
+    console.log("comment", comment);
     return (
       <div key={comment._id} className="mb-4">
-        <div className="flex items-start space-x-3 group" style={{ marginLeft: `${depth * 20}px` }}>
+        <div
+          className="flex items-start space-x-3 group"
+          style={{ marginLeft: `${depth * 20}px` }}
+        >
           {/* Avatar */}
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
             <span className="text-xs font-medium text-gray-600">
               <Image
-                src={getImageUrl(comment.commentCreatorId?.image) || '/assests/profile.png'}
-
-
-                alt={comment.commentCreatorId?.name || 'User'}
+                src={
+                  getImageUrl(comment.commentCreatorId?.image) ||
+                  "/assests/profile.png"
+                }
+                alt={comment.commentCreatorId?.name || "User"}
                 width={32}
                 height={32}
                 className="rounded-full object-cover"
@@ -201,8 +219,7 @@ export default function FitnessVideoPage({ params }) {
             {/* User info and time */}
             <div className="flex items-center space-x-2 mb-1">
               <span className="text-sm font-medium text-gray-900">
-                {comment.commentCreatorId?.name || 'Anonymous'}
-
+                {comment.commentCreatorId?.name || "Anonymous"}
               </span>
               <span className="text-xs text-gray-500">
                 {formatTimeAgo(comment.createdAt)}
@@ -219,10 +236,14 @@ export default function FitnessVideoPage({ params }) {
                 className="flex cursor-pointer items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
                 disabled={likeLoading}
               >
-                <Heart className={`w-3 h-3 ${comment.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+                <Heart
+                  className={`w-3 h-3 ${
+                    comment.isLiked ? "fill-red-500 text-red-500" : ""
+                  }`}
+                />
                 <span>{comment.likes || 0}</span>
-                <span className={`${comment.isLiked ? 'text-red-500' : ''}`}>
-                  {comment.isLiked ? 'Liked' : 'Like'}
+                <span className={`${comment.isLiked ? "text-red-500" : ""}`}>
+                  {comment.isLiked ? "Liked" : "Like"}
                 </span>
               </button>
 
@@ -241,14 +262,14 @@ export default function FitnessVideoPage({ params }) {
                     className="text-gray-500 cursor-pointer hover:text-blue-500 transition-colors"
                     disabled={editLoading}
                   >
-                    {editLoading ? 'Editing...' : 'Edit'}
+                    {editLoading ? "Editing..." : "Edit"}
                   </button>
                   <button
                     onClick={() => handleDeleteComment(comment._id)}
                     className="text-gray-500 cursor-pointer hover:text-red-500 transition-colors"
                     disabled={deleteLoading}
                   >
-                    {deleteLoading ? 'Deleting...' : 'Delete'}
+                    {deleteLoading ? "Deleting..." : "Delete"}
                   </button>
                 </>
               )}
@@ -273,11 +294,13 @@ export default function FitnessVideoPage({ params }) {
               </div>
               <div className="flex-1 relative">
                 <input
-                  ref={(el) => replyInputRefs.current[comment._id] = el}
+                  ref={(el) => (replyInputRefs.current[comment._id] = el)}
                   type="text"
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={`@${comment.userName || 'User'} write your comment`}
+                  placeholder={`@${
+                    comment.userName || "User"
+                  } write your comment`}
                   className="w-full px-3 py-2 border cursor-pointer border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
                 <button
@@ -312,19 +335,21 @@ export default function FitnessVideoPage({ params }) {
   };
 
   if (isLoading) {
-    return <Spinner />
+    return <Spinner />;
   }
 
   if (!data?.data) {
-    return <div className="container mx-auto bg-white p-4">Video not found</div>;
+    return (
+      <div className="container mx-auto bg-white p-4">Video not found</div>
+    );
   }
 
   const videoData = data.data;
 
   return (
-    <div className="container mx-auto bg-white">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
       {/* Video Section */}
-      <div className="mt-10">
+      {/* <div className="mt-10">
         <video
           controls
           src={`https://${videoData.videoUrl}`}
@@ -333,53 +358,86 @@ export default function FitnessVideoPage({ params }) {
         >
           Your browser does not support the video tag.
         </video>
+      </div> */}
+
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
+        <UniversalVideoPlayer
+          video={videoData}
+          autoplay={false}
+          muted={true}
+          aspectRatio="16:9"
+          style={{ width: "100%" }}
+          watermark={{ text: "Yoga With Jen", position: "top-right" }}
+        />
       </div>
 
       {/* Content Section */}
-      <div className="p-4">
-        {/* Title and Details */}
-        <div className="mb-4">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">{videoData.title}</h1>
-          <p className="text-sm text-gray-600 mb-1">{videoData.duration} </p>
-          <p className="text-xs text-gray-500 mb-3"> <span className="font-medium">Description : </span>  {videoData.description} </p>
-          <p className="text-xs text-gray-600 leading-relaxed">
-           
-          </p>
-        </div>
-
-        {/* Equipment */}
-        {videoData.equipment && videoData.equipment.length > 0 && (
+      <div className="mt-6">
+        <div className="p-6  rounded-2xl shadow-md">
+          {" "}
+          {/* Title and Details */}
           <div className="mb-4">
-            <p className="text-xs font-medium text-gray-700">Props/Equipment Needed</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {videoData.equipment.map((item, index) => (
-                <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
-                  {item}
-                </span>
-              ))}
-            </div>
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              {videoData.title}
+            </h1>
+            <p className="text-sm text-gray-600 mb-1">{videoData.duration} </p>
+            <p className="text-xs text-gray-500 mb-3">
+              {" "}
+              <span className="font-medium">Description : </span>{" "}
+              {videoData.description}{" "}
+            </p>
+            <p className="text-xs text-gray-600 leading-relaxed"></p>
           </div>
-        )}
-
-        {/* Engagement Section */}
-        <div className="flex items-center space-x-4 pb-4 border-b border-gray-100">
-          <button
-            onClick={() => handleLike(videoData._id)}
-            className="flex items-center space-x-2 min-w-[24px] min-h-[24px]"
-            aria-label={isLiked ? 'Unlike video' : 'Like video'}
-            disabled={favLoading}
-          >
-            <Heart
-              className={`w-6 h-6 cursor-pointer transition-colors ${favLoading ? 'opacity-50' : ''} ${isLiked ? 'text-red-500 fill-current' : 'text-gray-400 hover:text-red-500'
-                }`}
-            />
-          </button>
-
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 flex items-center justify-center">
-              <Image src={commectIcon} alt="comment icons" width={20} height={20} />
+          {/* Equipment */}
+          {videoData.equipment && videoData.equipment.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-medium text-gray-700">
+                Props/Equipment Needed
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {videoData.equipment.map((item, index) => (
+                  <span
+                    key={index}
+                    className="text-xs bg-gray-100 px-2 py-1 rounded"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
             </div>
-            <span className="text-sm font-medium text-gray-900">{comments.length}</span>
+          )}
+          {/* Engagement Section */}
+          <div className="flex items-center space-x-4 pb-4 border-b border-gray-100">
+            <button
+              onClick={() => handleLike(videoData._id)}
+              className="flex items-center space-x-2  min-w-[24px] min-h-[24px]"
+              aria-label={isLiked ? "Unlike video" : "Like video"}
+              disabled={favLoading}
+            >
+              <Heart
+                className={`w-6 h-6 cursor-pointer transition-colors ${
+                  favLoading ? "opacity-50" : ""
+                } ${
+                  isLiked
+                    ? "text-red-500 fill-current"
+                    : "text-gray-400 hover:text-red-500"
+                }`}
+              />
+            </button>
+
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-6 flex items-center justify-center">
+                <Image
+                  src={commectIcon}
+                  alt="comment icons"
+                  width={20}
+                  height={20}
+                />
+              </div>
+              <span className="text-sm font-medium text-gray-900">
+                {comments.length}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -393,8 +451,8 @@ export default function FitnessVideoPage({ params }) {
               onChange={(e) => setComment(e.target.value)}
               placeholder={
                 editingComment
-                  ? 'Edit your comment...'
-                  : 'Write your comment here'
+                  ? "Edit your comment..."
+                  : "Write your comment here"
               }
               className="w-full px-4 py-3 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent pr-12"
               disabled={commentLoading || editLoading}
@@ -404,7 +462,7 @@ export default function FitnessVideoPage({ params }) {
               className="absolute right-6 top-1/2 transform -translate-y-1/2"
               disabled={commentLoading || editLoading || !comment.trim()}
             >
-              <Send className="w-12 h-12 text-red-500" />
+              <Send className="w-8 h-8 text-primary" />
             </button>
           </div>
           {editingComment && (

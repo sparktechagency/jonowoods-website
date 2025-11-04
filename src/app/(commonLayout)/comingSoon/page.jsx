@@ -1,13 +1,7 @@
-"use client";
 
-import VideoPlayer from "@/components/VideoPlayer";
-import Spinner from "../Spinner";
 import { useComingSoonLatestVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
-import ComingSoonComponents from "@/components/comingSoon/ComingSoonComponents";
+import ComingSoonPlayer from "@/components/video-play/ComingSoorPlayer";
 
-// import Spinner from "../(commonLayout)/Spinner";
-// import VideoPlayer from "../../components/VideoPlayer";
-// import { useComingSoonLatestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 
 
 const page = () => {
@@ -15,10 +9,11 @@ const page = () => {
 
   return (
     <div>
-      {
+      {/* {
         isLoading ? <Spinner /> : <VideoPlayer data={data?.data} />
 
-      }
+      } */}
+      <ComingSoonPlayer/>
     </div>
   );
 };

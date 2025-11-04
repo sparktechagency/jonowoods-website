@@ -1,17 +1,25 @@
-"use client";
 
-import Spinner from "../Spinner";
-import VideoPlayer from "../../../components/VideoPlayer";
-import { useTodayLetestVideoQuery } from "../../../redux/featured/CommingSoon/commingSoonApi";
-
+import TodaysVideoPlayer from "@/components/video-play/TodayVideoPlayer";
 
 const page = () => {
-  const { data, isLoading } = useTodayLetestVideoQuery();
   return (
     <div>
-      {
+      {/* {
         isLoading ? <Spinner /> : <VideoPlayer data={data?.data} />
-      }
+      } */}
+      <TodaysVideoPlayer/>
+      {/* <div className="container mx-auto px-4 h-96">
+        <UniversalVideoPlayer
+          video={data?.data}
+          autoplay={false}
+          showControls={true}
+          muted={true}
+          aspectRatio="16:9"
+          style={{ width: "100%", height: "auto" }}
+          className="rounded-lg shadow-lg"
+          watermark={{ text: "Yoga With Jen", position: "top-right" }}
+        />
+      </div> */}
     </div>
   );
 };

@@ -151,7 +151,7 @@ const SubscriptionCard = ({ packageData, userData }) => {
 
             <Button
               className="w-full mt-4 py-5 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200"
-              onClick={() => (window.location.href = "/subscription-package")}
+              onClick={() => (window.location.href = "/subscription")}
             >
               Extend Subscription
             </Button>

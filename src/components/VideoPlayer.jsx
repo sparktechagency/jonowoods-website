@@ -98,6 +98,8 @@ const VideoPlayer = ({ data, onComplete }) => {
           )}
 
           {/* Video element */}
+
+          
           <video
             ref={videoRef}
             controls={isPlaying}

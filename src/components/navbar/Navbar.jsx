@@ -83,7 +83,7 @@ export default function Navbar() {
 
   // Redux queries and mutations
   const { data: userData } = useMyProfileQuery();
-  // console.log("userData", userData);
+  console.log("userData", userData);
   const {
     data: notificationData,
     isLoading,

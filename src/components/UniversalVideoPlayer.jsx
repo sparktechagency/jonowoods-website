@@ -109,13 +109,13 @@ const UniversalVideoPlayer = ({
   }, [isMounted, onSecurityViolation]);
 
   // Disable right click
-  useEffect(() => {
-    if (!isMounted) return;
+  // useEffect(() => {
+  //   if (!isMounted) return;
 
-    const disableRightClick = (e) => e.preventDefault();
-    document.addEventListener("contextmenu", disableRightClick);
-    return () => document.removeEventListener("contextmenu", disableRightClick);
-  }, [isMounted]);
+  //   const disableRightClick = (e) => e.preventDefault();
+  //   document.addEventListener("contextmenu", disableRightClick);
+  //   return () => document.removeEventListener("contextmenu", disableRightClick);
+  // }, [isMounted]);
 
   // Tab hide detection
   useEffect(() => {
@@ -236,6 +236,7 @@ const UniversalVideoPlayer = ({
         overflow: "hidden",
         borderRadius: "8px",
         userSelect: "none",
+            zIndex: 0,
         ...style,
       }}
       className={className}
@@ -287,9 +288,9 @@ const UniversalVideoPlayer = ({
         <div
           style={{
             position: "absolute",
-            [watermark.position?.includes("top") ? "top" : "bottom"]: 16,
-            [watermark.position?.includes("right") ? "right" : "left"]: 16,
-            zIndex: 100,
+            [watermark.position?.includes("top") ? "top" : "bottom"]: 8,
+            [watermark.position?.includes("right") ? "right" : "left"]: 8,
+             zIndex: 1,
             pointerEvents: "none",
           }}
           className="bg-black/50 text-white/60 px-3 py-1 rounded text-xs font-semibold"
