@@ -1,11 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communityLeaderBoard";
 
 const Leaderboard = () => {
-  const [isVisible, setIsVisible] = useState(true);
-  const [activeTab, setActiveTab] = useState("time");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Get active tab from URL, default to "time"
+  const activeTab = searchParams.get("tab") || "time";
+  
+  // Get user email from localStorage
+  const getUserEmail = () => {
+    if (typeof window !== "undefined") {
+      const userInfo = localStorage.getItem("userInfo");
+      if (userInfo) {
+        try {
+          const parsed = JSON.parse(userInfo);
+          return parsed?.email || null;
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  };
+
+  // Initialize visibility from localStorage based on user email, default to true
+  const [isVisible, setIsVisible] = useState(() => {
+    const userEmail = getUserEmail();
+    if (typeof window !== "undefined" && userEmail) {
+      const saved = localStorage.getItem(`leaderboard_visible_${userEmail}`);
+      return saved !== null ? saved === "true" : true;
+    }
+    return true;
+  });
+
   const { data: leaderboard } = useCommunityLeaderBoardQuery();
   const leaderboardData = leaderboard?.data;
 
@@ -26,14 +57,32 @@ const Leaderboard = () => {
   const streaksData = mapData(loginCountData, "loginCount");
   const sessionsData = mapData(completedSessionsData, "completedSessionsCount");
 
+  // Handle tab change with URL update
+  const handleTabChange = (tab) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  // Handle visibility toggle with localStorage based on user email
+  const handleToggleVisibility = () => {
+    const newVisibility = !isVisible;
+    setIsVisible(newVisibility);
+    const userEmail = getUserEmail();
+    if (typeof window !== "undefined" && userEmail) {
+      localStorage.setItem(`leaderboard_visible_${userEmail}`, String(newVisibility));
+    }
+  };
+
   return (
     <div className="w-full my-10 px-4 md:px-8 lg:px-12">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-medium text-red-500">Leaderboard</h2>
         <button
-          onClick={() => setIsVisible(!isVisible)}
+          onClick={handleToggleVisibility}
           className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           style={{ backgroundColor: isVisible ? '#ef4444' : '#9ca3af' }}
+          aria-label="Toggle leaderboard visibility"
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -49,7 +98,7 @@ const Leaderboard = () => {
           <div className="lg:hidden mb-6">
             <div className="flex border-b border-gray-200">
               <button
-                onClick={() => setActiveTab("time")}
+                onClick={() => handleTabChange("time")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === "time"
                     ? "text-red-500 border-b-2 border-red-500"
@@ -59,7 +108,7 @@ const Leaderboard = () => {
                 Total Time
               </button>
               <button
-                onClick={() => setActiveTab("streaks")}
+                onClick={() => handleTabChange("streaks")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === "streaks"
                     ? "text-red-500 border-b-2 border-red-500"
@@ -69,7 +118,7 @@ const Leaderboard = () => {
                 Streaks
               </button>
               <button
-                onClick={() => setActiveTab("sessions")}
+                onClick={() => handleTabChange("sessions")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === "sessions"
                     ? "text-red-500 border-b-2 border-red-500"
