@@ -22,6 +22,7 @@ const UniversalVideoPlayer = ({
   const iframeRef = useRef(null);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
+  const messageHandlerRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,7 +32,7 @@ const UniversalVideoPlayer = ({
 
   useEffect(() => {
     setIsMounted(true);
-    setIsLoading(true); // Start loading when component mounts
+    setIsLoading(true);
   }, []);
 
   const getPaddingBottom = () => {
@@ -45,6 +46,41 @@ const UniversalVideoPlayer = ({
         return "56.25%";
     }
   };
+
+  // Listen for iframe messages to detect video end
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleMessage = (event) => {
+      // Check if message is from iframe
+      if (event.origin !== "https://iframe.mediadelivery.net") return;
+
+      try {
+        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+        
+        // Handle different event types
+        if (data.event === "ended" || data.type === "ended") {
+          console.log("Video ended - triggering onEnded callback");
+          onEnded();
+        } else if (data.event === "play" || data.type === "play") {
+          onPlay();
+        } else if (data.event === "pause" || data.type === "pause") {
+          onPause();
+        } else if (data.event === "ready" || data.type === "ready") {
+          onReady();
+        }
+      } catch (e) {
+        // Ignore parsing errors
+      }
+    };
+
+    messageHandlerRef.current = handleMessage;
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [isMounted, onEnded, onPlay, onPause, onReady]);
 
   // DevTools Detection
   useEffect(() => {
@@ -108,15 +144,6 @@ const UniversalVideoPlayer = ({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isMounted, onSecurityViolation]);
 
-  // Disable right click
-  // useEffect(() => {
-  //   if (!isMounted) return;
-
-  //   const disableRightClick = (e) => e.preventDefault();
-  //   document.addEventListener("contextmenu", disableRightClick);
-  //   return () => document.removeEventListener("contextmenu", disableRightClick);
-  // }, [isMounted]);
-
   // Tab hide detection
   useEffect(() => {
     if (!isMounted) return;
@@ -154,7 +181,6 @@ const UniversalVideoPlayer = ({
     let loadingTimeout;
 
     const handleLoad = () => {
-      // Wait a bit for video to buffer
       setTimeout(() => {
         setIsLoading(false);
       }, 1500);
@@ -165,7 +191,6 @@ const UniversalVideoPlayer = ({
       setError("Failed to load video");
     };
 
-    // Set timeout to hide loading after 8 seconds max
     loadingTimeout = setTimeout(() => {
       setIsLoading(false);
     }, 8000);
@@ -222,7 +247,7 @@ const UniversalVideoPlayer = ({
     );
   }
 
-  const iframeUrl = `https://iframe.mediadelivery.net/embed/${video.libraryId}/${video.videoId}?autoplay=${autoplay}&muted=${muted}&responsive=true`;
+  const iframeUrl = `https://iframe.mediadelivery.net/embed/${video.libraryId}/${video.videoId}?autoplay=${autoplay}&muted=${muted}&loop=false&preload=true&responsive=true`;
 
   return (
     <div
@@ -236,12 +261,12 @@ const UniversalVideoPlayer = ({
         overflow: "hidden",
         borderRadius: "8px",
         userSelect: "none",
-            zIndex: 0,
+        zIndex: 0,
         ...style,
       }}
       className={className}
     >
-      {(devToolsOpen || securityWarning) && (
+      {/* {(devToolsOpen || securityWarning) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 z-50 text-white text-center p-4 gap-4">
           <div className="text-5xl">🔒</div>
           <div className="space-y-2">
@@ -270,7 +295,7 @@ const UniversalVideoPlayer = ({
             Continue
           </button>
         </div>
-      )}
+      )} */}
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
@@ -290,7 +315,7 @@ const UniversalVideoPlayer = ({
             position: "absolute",
             [watermark.position?.includes("top") ? "top" : "bottom"]: 8,
             [watermark.position?.includes("right") ? "right" : "left"]: 8,
-             zIndex: 1,
+            zIndex: 1,
             pointerEvents: "none",
           }}
           className="bg-black/50 text-white/60 px-3 py-1 rounded text-xs font-semibold"
