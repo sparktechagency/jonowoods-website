@@ -30,6 +30,9 @@ const VideoPlayerPage = ({ params }) => {
   const [countdown, setCountdown] = useState("");
   const completionProcessedRef = useRef(new Set());
   const countdownIntervalRef = useRef(null);
+  const isProcessingCompletionRef = useRef(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const hasCheckedAccessRef = useRef(false);
 
   // Function to calculate countdown
   const calculateCountdown = (unlockTime) => {
@@ -68,18 +71,16 @@ const VideoPlayerPage = ({ params }) => {
         .map((video) => video._id);
       setCompletedVideos(completed);
 
-      // Check if current video is accessible
-      if (current && !current.isEnabled) {
-        toast.error("Video not accessible", {
-          description:
-            "This video is locked. Please complete previous videos first.",
+      // Only check accessibility once on initial load
+      if (current && !current.isEnabled && !hasCheckedAccessRef.current && !isNavigating) {
+        hasCheckedAccessRef.current = true;
+        toast.error("This video is locked", {
+          description: "Please complete previous videos first.",
         });
         router.push(`/challenge/${challengeId}`);
       }
-
-      completionProcessedRef.current.clear();
     }
-  }, [data, videoId, challengeId, router]);
+  }, [data, videoId, challengeId, router, isNavigating]);
 
   // Countdown timer effect
   useEffect(() => {
@@ -110,69 +111,102 @@ const VideoPlayerPage = ({ params }) => {
   }, [nextVideoUnlockTime, refetch]);
 
   // Handle video completion
-  const handleVideoComplete = async (videoId) => {
-    if (completionProcessedRef.current.has(videoId)) {
+  const handleVideoComplete = async (videoId, shouldNavigate = false) => {
+    // Prevent duplicate processing
+    if (completionProcessedRef.current.has(videoId) || isProcessingCompletionRef.current) {
+      console.log("Already processing or completed:", videoId);
       return;
     }
 
+    isProcessingCompletionRef.current = true;
     completionProcessedRef.current.add(videoId);
 
     try {
+      console.log("Marking video as complete:", videoId);
       const response = await markWatchChallengeVideo(videoId).unwrap();
 
-      setCompletedVideos((prev) => [...prev, videoId]);
+      // Update local state immediately
+      setCompletedVideos((prev) => {
+        if (prev.includes(videoId)) return prev;
+        return [...prev, videoId];
+      });
 
+      // Handle time-locked next video
       if (response?.data?.nextVideoInfo?.nextUnlockTime) {
         setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
+        const countdownInfo = calculateCountdown(response.data.nextVideoInfo.nextUnlockTime);
+        
+        toast.success("Video completed!", {
+          description: `Next video will unlock in ${countdownInfo.formatted}`,
+          duration: 5000,
+        });
+        
+        isProcessingCompletionRef.current = false;
+        return; // Don't navigate if next video is time-locked
+      }
 
-        // const countdownInfo = calculateCountdown(
-        //   response.data.nextVideoInfo.nextUnlockTime
-        // );
-
-        // toast.success("Video completed!", {
-        //   description: `Next video will unlock in ${countdownInfo.formatted}.`,
-        //   duration: 5000,
-        // });
-      } else {
+      // If we should navigate to next video
+      if (shouldNavigate) {
         const currentIndex = videos.findIndex((v) => v._id === videoId);
 
         if (currentIndex < videos.length - 1) {
           const nextVideo = videos[currentIndex + 1];
 
-          if (nextVideo && nextVideo.isEnabled) {
+          if (nextVideo) {
+            setIsNavigating(true);
+            
             toast.success("Video completed!", {
-              description: `You've unlocked "${nextVideo.title}"!`,
-              duration: 5000,
-              action: {
-                label: "Watch Next",
-                onClick: () =>
-                  router.push(
-                    `/challenge/${challengeId}/video/${nextVideo._id}`
-                  ),
-              },
+              description: `Loading next video: ${nextVideo.title}`,
+              duration: 2000,
             });
-          } else {
-            toast.success("Video completed!", {
-              description: "Please wait for the next video to unlock.",
-              duration: 5000,
-            });
+
+            // Refetch to get latest state
+            const refetchedData = await refetch();
+            
+            // Small delay to ensure state updates
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Navigate to next video
+            console.log("Navigating to next video:", nextVideo._id);
+            router.push(`/challenge/${challengeId}/video/${nextVideo._id}`);
           }
         } else {
           toast.success("Congratulations!", {
             description: "You have completed all challenge videos!",
             duration: 5000,
           });
+          isProcessingCompletionRef.current = false;
         }
+      } else {
+        // Manual complete without auto-navigation
+        const currentIndex = videos.findIndex((v) => v._id === videoId);
+        
+        if (currentIndex < videos.length - 1) {
+          const nextVideo = videos[currentIndex + 1];
+          
+          toast.success("Video marked as complete!", {
+            description: nextVideo ? "You can now watch the next video." : "",
+            duration: 3000,
+          });
+        } else {
+          toast.success("Congratulations!", {
+            description: "You have completed all challenge videos!",
+            duration: 5000,
+          });
+        }
+        
+        // Refetch to update UI
+        await refetch();
+        isProcessingCompletionRef.current = false;
       }
-
-      refetch();
     } catch (error) {
       console.error("Error marking video as completed:", error);
       toast.error("Failed to mark video as completed", {
-        description: "Please try again later.",
+        description: error?.data?.message || "Please try again later.",
       });
       // Remove from processed set if failed
       completionProcessedRef.current.delete(videoId);
+      isProcessingCompletionRef.current = false;
     }
   };
 
@@ -183,19 +217,29 @@ const VideoPlayerPage = ({ params }) => {
       return;
     }
 
-    await handleVideoComplete(currentVideo._id);
-    
-    // After marking complete, check if next video is available
-    setTimeout(() => {
-      const currentIndex = videos.findIndex((v) => v._id === currentVideo._id);
-      const nextVideo = currentIndex < videos.length - 1 ? videos[currentIndex + 1] : null;
-      
-      if (nextVideo && nextVideo.isEnabled) {
-        // Navigate to next video
-        router.push(`/challenge/${challengeId}/video/${nextVideo._id}`);
-      }
-    }, 1000); // Small delay to ensure state updates
+    if (isMarkingComplete || isProcessingCompletionRef.current) {
+      return;
+    }
+
+    // Manual complete with auto-navigation
+    await handleVideoComplete(currentVideo._id, true);
   };
+
+  // Video ended handler - AUTO NAVIGATION
+  const handleVideoEnded = async () => {
+    console.log("Video ended, marking as complete and navigating to next");
+    if (!isCurrentVideoCompleted && !isProcessingCompletionRef.current) {
+      await handleVideoComplete(currentVideo._id, true); // Auto-navigate on video end
+    }
+  };
+
+  // Reset navigation state when component unmounts or video changes
+  useEffect(() => {
+    return () => {
+      setIsNavigating(false);
+      isProcessingCompletionRef.current = false;
+    };
+  }, [videoId]);
 
   // Get next and previous video
   const currentIndex = videos.findIndex((v) => v._id === videoId);
@@ -203,7 +247,18 @@ const VideoPlayerPage = ({ params }) => {
     currentIndex < videos.length - 1 ? videos[currentIndex + 1] : null;
   const prevVideo = currentIndex > 0 ? videos[currentIndex - 1] : null;
 
-  if (isLoading) return <Spinner />;
+  if (isLoading || isNavigating) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Spinner />
+          {isNavigating && (
+            <p className="mt-4 text-gray-600">Loading next video...</p>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   if (!currentVideo) {
     return (
@@ -274,7 +329,7 @@ const VideoPlayerPage = ({ params }) => {
                 });
               }}
               onPlay={() => console.log("Playing")}
-              onEnded={() => handleVideoComplete(currentVideo._id)}
+              onEnded={handleVideoEnded}
             />
           </div>
 
@@ -335,10 +390,10 @@ const VideoPlayerPage = ({ params }) => {
           <div className="mt-4">
             <button
               onClick={handleManualComplete}
-              disabled={isMarkingComplete}
+              disabled={isMarkingComplete || isProcessingCompletionRef.current || isNavigating}
               className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isMarkingComplete ? (
+              {isMarkingComplete || isProcessingCompletionRef.current || isNavigating ? (
                 <>
                   <svg
                     className="animate-spin h-4 w-4 mr-2"
@@ -360,7 +415,7 @@ const VideoPlayerPage = ({ params }) => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Marking Complete...
+                  {isNavigating ? "Loading next video..." : "Marking Complete..."}
                 </>
               ) : (
                 <>
@@ -394,13 +449,14 @@ const VideoPlayerPage = ({ params }) => {
       </div>
 
       {/* Navigation Controls */}
-      <div className="flex justify-between items-center mt-6">
+      {/* <div className="flex justify-between items-center mt-6">
         {prevVideo ? (
           <button
             onClick={() =>
               router.push(`/challenge/${challengeId}/video/${prevVideo._id}`)
             }
-            className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            disabled={isNavigating}
+            className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
             <svg
               className="h-4 w-4 mr-2"
@@ -427,7 +483,8 @@ const VideoPlayerPage = ({ params }) => {
               onClick={() =>
                 router.push(`/challenge/${challengeId}/video/${nextVideo._id}`)
               }
-              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              disabled={isNavigating}
+              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
             >
               Next Video
               <svg
@@ -468,7 +525,7 @@ const VideoPlayerPage = ({ params }) => {
         ) : (
           <div></div>
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
