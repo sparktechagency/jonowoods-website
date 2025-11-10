@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <div className="flex flex-col border-t mt-12 md:mt-20 px-6 md:px-12 lg:px-20">
       {/* Header */}
-      <header className="container mx-auto py-10 px-4 rounded-md">
+      <header className="container  py-10 px-4 rounded-md  max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Logo and Mobile Navigation */}
           <div className="flex flex-col items-center lg:items-start w-full lg:w-auto">
@@ -178,7 +178,7 @@ export default function Footer() {
 
       {/* Footer */}
       <footer className="py-6 border-t border-gray-200">
-        <div className="container mx-auto px-4">
+        <div className=" mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="order-2 md:order-1">
               <p className="text-sm text-gray-600 text-center md:text-left">

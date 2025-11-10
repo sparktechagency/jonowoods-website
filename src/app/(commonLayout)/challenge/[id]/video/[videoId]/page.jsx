@@ -12,6 +12,7 @@ import { getImageUrl } from "@/components/share/imageUrl";
 import Spinner from "@/app/(commonLayout)/Spinner";
 import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const VideoPlayerPage = ({ params }) => {
   const { id: challengeId, videoId } = React.use(params);
@@ -21,7 +22,8 @@ const VideoPlayerPage = ({ params }) => {
     { skip: !challengeId }
   );
 
-  const [markWatchChallengeVideo, { isLoading: isMarkingComplete }] = useMarkWatchChallengeVideoMutation();
+  const [markWatchChallengeVideo, { isLoading: isMarkingComplete }] =
+    useMarkWatchChallengeVideoMutation();
 
   const [videos, setVideos] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
@@ -72,7 +74,12 @@ const VideoPlayerPage = ({ params }) => {
       setCompletedVideos(completed);
 
       // Only check accessibility once on initial load
-      if (current && !current.isEnabled && !hasCheckedAccessRef.current && !isNavigating) {
+      if (
+        current &&
+        !current.isEnabled &&
+        !hasCheckedAccessRef.current &&
+        !isNavigating
+      ) {
         hasCheckedAccessRef.current = true;
         toast.error("This video is locked", {
           description: "Please complete previous videos first.",
@@ -113,7 +120,10 @@ const VideoPlayerPage = ({ params }) => {
   // Handle video completion
   const handleVideoComplete = async (videoId, shouldNavigate = false) => {
     // Prevent duplicate processing
-    if (completionProcessedRef.current.has(videoId) || isProcessingCompletionRef.current) {
+    if (
+      completionProcessedRef.current.has(videoId) ||
+      isProcessingCompletionRef.current
+    ) {
       console.log("Already processing or completed:", videoId);
       return;
     }
@@ -134,13 +144,15 @@ const VideoPlayerPage = ({ params }) => {
       // Handle time-locked next video
       if (response?.data?.nextVideoInfo?.nextUnlockTime) {
         setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
-        const countdownInfo = calculateCountdown(response.data.nextVideoInfo.nextUnlockTime);
-        
+        const countdownInfo = calculateCountdown(
+          response.data.nextVideoInfo.nextUnlockTime
+        );
+
         toast.success("Video completed!", {
           description: `Next video will unlock in ${countdownInfo.formatted}`,
           duration: 5000,
         });
-        
+
         isProcessingCompletionRef.current = false;
         return; // Don't navigate if next video is time-locked
       }
@@ -154,7 +166,7 @@ const VideoPlayerPage = ({ params }) => {
 
           if (nextVideo) {
             setIsNavigating(true);
-            
+
             toast.success("Video completed!", {
               description: `Loading next video: ${nextVideo.title}`,
               duration: 2000,
@@ -162,10 +174,10 @@ const VideoPlayerPage = ({ params }) => {
 
             // Refetch to get latest state
             const refetchedData = await refetch();
-            
+
             // Small delay to ensure state updates
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
             // Navigate to next video
             console.log("Navigating to next video:", nextVideo._id);
             router.push(`/challenge/${challengeId}/video/${nextVideo._id}`);
@@ -180,10 +192,10 @@ const VideoPlayerPage = ({ params }) => {
       } else {
         // Manual complete without auto-navigation
         const currentIndex = videos.findIndex((v) => v._id === videoId);
-        
+
         if (currentIndex < videos.length - 1) {
           const nextVideo = videos[currentIndex + 1];
-          
+
           toast.success("Video marked as complete!", {
             description: nextVideo ? "You can now watch the next video." : "",
             duration: 3000,
@@ -194,7 +206,7 @@ const VideoPlayerPage = ({ params }) => {
             duration: 5000,
           });
         }
-        
+
         // Refetch to update UI
         await refetch();
         isProcessingCompletionRef.current = false;
@@ -275,7 +287,8 @@ const VideoPlayerPage = ({ params }) => {
   }
 
   const isCurrentVideoCompleted = completedVideos.includes(currentVideo._id);
-  const canGoToNext = nextVideo && (nextVideo.isEnabled || isCurrentVideoCompleted);
+  const canGoToNext =
+    nextVideo && (nextVideo.isEnabled || isCurrentVideoCompleted);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
@@ -302,9 +315,7 @@ const VideoPlayerPage = ({ params }) => {
           Back to Challenge
         </button>
 
-        <div className="text-sm text-gray-600">
-          Video {currentIndex + 1} of {videos.length}
-        </div>
+     
       </div>
 
       {/* Video Player Section */}
@@ -355,9 +366,44 @@ const VideoPlayerPage = ({ params }) => {
 
       {/* Video Info */}
       <div className="p-6 rounded-lg mt-6 shadow-md">
-        <h1 className="md:text-xl lg:text-2xl font-bold mb-2">
-          {currentVideo.title}
-        </h1>
+        <div className="w-full flex justify-between">
+          <h1 className="md:text-xl lg:text-2xl font-bold mb-2">
+            {currentVideo.title}
+          </h1>
+          <div>
+            {/* Manual Complete Button - Only show if not completed */}
+            {!isCurrentVideoCompleted && (
+              <div className="">
+                <button
+                  onClick={handleManualComplete}
+                  disabled={
+                    isMarkingComplete ||
+                    isProcessingCompletionRef.current ||
+                    isNavigating
+                  }
+                  className="flex items-center px-2 py-1 lg:px-6 lg:py-3 bg-primary cursor-pointer text-white rounded-sm hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isMarkingComplete ||
+                  isProcessingCompletionRef.current ||
+                  isNavigating ? (
+                    <>
+                  
+                      {isNavigating
+                        ? "Loading next video..."
+                        : "Marking Complete..."}
+                    </>
+                  ) : (
+                    <>
+                      
+                     Next Video
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         <p className="flex items-center gap-2 text-sm text-gray-600 mb-4">
           <Clock className="w-4 h-4 text-gray-600 mr-2" />
           {currentVideo.duration}
@@ -385,58 +431,6 @@ const VideoPlayerPage = ({ params }) => {
           </p>
         )}
 
-        {/* Manual Complete Button - Only show if not completed */}
-        {!isCurrentVideoCompleted && (
-          <div className="mt-4">
-            <button
-              onClick={handleManualComplete}
-              disabled={isMarkingComplete || isProcessingCompletionRef.current || isNavigating}
-              className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isMarkingComplete || isProcessingCompletionRef.current || isNavigating ? (
-                <>
-                  <svg
-                    className="animate-spin h-4 w-4 mr-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  {isNavigating ? "Loading next video..." : "Marking Complete..."}
-                </>
-              ) : (
-                <>
-                  <svg
-                    className="h-5 w-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Mark as Complete
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
         {/* Completion status and next unlock info */}
         {isCurrentVideoCompleted && nextVideoUnlockTime && (
           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mt-4">
@@ -447,85 +441,6 @@ const VideoPlayerPage = ({ params }) => {
           </div>
         )}
       </div>
-
-      {/* Navigation Controls */}
-      {/* <div className="flex justify-between items-center mt-6">
-        {prevVideo ? (
-          <button
-            onClick={() =>
-              router.push(`/challenge/${challengeId}/video/${prevVideo._id}`)
-            }
-            disabled={isNavigating}
-            className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-          >
-            <svg
-              className="h-4 w-4 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-            Previous Video
-          </button>
-        ) : (
-          <div></div>
-        )}
-
-        {nextVideo ? (
-          canGoToNext ? (
-            <button
-              onClick={() =>
-                router.push(`/challenge/${challengeId}/video/${nextVideo._id}`)
-              }
-              disabled={isNavigating}
-              className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-            >
-              Next Video
-              <svg
-                className="h-4 w-4 ml-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          ) : (
-            <button
-              disabled
-              className="flex items-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-            >
-              Next Video (Locked)
-              <svg
-                className="h-4 w-4 ml-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-            </button>
-          )
-        ) : (
-          <div></div>
-        )}
-      </div> */}
     </div>
   );
 };

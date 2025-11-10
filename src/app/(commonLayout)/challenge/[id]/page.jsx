@@ -188,6 +188,8 @@ const ChallengePage = ({ params }) => {
                 Progress: {completedVideos.length} of {videos.length} videos
                 completed
               </p> */}
+              <p className=" ">Total Videos: <span className="font-bold text-primary">{videos.length}</span></p>
+              <p className=" ">Complete Videos: <span className="font-bold text-primary">{completedVideos.length}</span></p>
             </div>
           </div>
         </div>
