@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 
 export default function Footer() {
   return (
-    <div className="flex flex-col border-t mt-12 md:mt-20 px-6 md:px-12 lg:px-20">
+    <div className="flex flex-col border-t mt-12 md:mt-20 ">
       {/* Header */}
       <header className="container  py-10 px-4 rounded-md  max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
@@ -177,15 +177,15 @@ export default function Footer() {
       </header>
 
       {/* Footer */}
-      <footer className="py-6 border-t border-gray-200">
-        <div className=" mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="order-2 md:order-1">
+      <footer className="    py-6 border-t border-gray-200">
+        <div className="container  max-w-6xl mx-auto">
+          <div className="flex justify-center ">
+           
               <p className="text-sm text-gray-600 text-center md:text-left">
                 © {new Date().getFullYear()} yogawebapp@gmail.com. All rights
                 reserved.
               </p>
-            </div>
+        
             {/* <div className="order-1 md:order-2 flex flex-wrap justify-center gap-x-4 gap-y-2">
               <Link
                 href="/terms"
