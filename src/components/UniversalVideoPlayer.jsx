@@ -266,7 +266,7 @@ const UniversalVideoPlayer = ({
       }}
       className={className}
     >
-      {/* {(devToolsOpen || securityWarning) && (
+      {(devToolsOpen || securityWarning) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 z-50 text-white text-center p-4 gap-4">
           <div className="text-5xl">🔒</div>
           <div className="space-y-2">
@@ -295,7 +295,7 @@ const UniversalVideoPlayer = ({
             Continue
           </button>
         </div>
-      )} */}
+      )}
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
