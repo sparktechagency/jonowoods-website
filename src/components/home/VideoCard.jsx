@@ -22,7 +22,7 @@ export const VideoCard = ({
     <section className="w-full overflow-hidden rounded-lg mb-8">
       <div
         onClick={handleClick}
-        className="relative h-[25vh] md:h-[50vh] lg:h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
+        className="relative h-[25vh] md:h-[30vh] lg:h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
       >
         {/* Background Image */}
         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat">
