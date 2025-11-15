@@ -352,11 +352,11 @@ const VideoPlayerPage = ({ params }) => {
               >
                 <Image
                   // src={getImageUrl(currentVideo.thumbnailUrl)}
-                      src={
-                currentVideo?.thumbnailUrl?.startsWith("http")
-                  ? currentVideo.thumbnailUrl
-                  : `https://${currentVideo.thumbnailUrl}`
-              }
+                  src={
+                    currentVideo?.thumbnailUrl?.startsWith("http")
+                      ? currentVideo.thumbnailUrl
+                      : `https://${currentVideo.thumbnailUrl}`
+                  }
                   alt="Video thumbnail"
                   width={1280}
                   height={720}
@@ -392,7 +392,7 @@ const VideoPlayerPage = ({ params }) => {
                   });
                 }}
                 onPlay={() => console.log("Playing")}
-                 onEnded={handleVideoEnded}  
+                onEnded={handleVideoEnded}
               />
             )}
           </div>
@@ -423,34 +423,7 @@ const VideoPlayerPage = ({ params }) => {
           <h1 className="md:text-xl lg:text-2xl font-bold mb-2">
             {currentVideo.title}
           </h1>
-          <div>
-            {/* Manual Complete Button - Only show if not completed */}
-            {!isCurrentVideoCompleted && (
-              <div className="">
-                <button
-                  onClick={handleManualComplete}
-                  disabled={
-                    isMarkingComplete ||
-                    isProcessingCompletionRef.current ||
-                    isNavigating
-                  }
-                  className="flex items-center px-2 py-1 lg:px-6 lg:py-3 bg-primary cursor-pointer text-white rounded-sm hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isMarkingComplete ||
-                  isProcessingCompletionRef.current ||
-                  isNavigating ? (
-                    <>
-                      {isNavigating
-                        ? "Loading next video..."
-                        : "Marking Complete..."}
-                    </>
-                  ) : (
-                    <>Next Video</>
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
+          <div></div>
         </div>
 
         <p className="flex items-center gap-2 text-sm text-gray-600 mb-4">
@@ -487,6 +460,36 @@ const VideoPlayerPage = ({ params }) => {
               🎉 Video completed! Next video unlocks in{" "}
               <strong>{countdown}</strong>
             </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-end mt-4">
+        {" "}
+        {/* Manual Complete Button - Only show if not completed */}
+        {!isCurrentVideoCompleted && (
+          <div className="">
+            <button
+              onClick={handleManualComplete}
+              disabled={
+                isMarkingComplete ||
+                isProcessingCompletionRef.current ||
+                isNavigating
+              }
+              className="flex items-center px-2 py-1 lg:px-6 lg:py-3 bg-primary cursor-pointer text-white rounded-sm hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isMarkingComplete ||
+              isProcessingCompletionRef.current ||
+              isNavigating ? (
+                <>
+                  {isNavigating
+                    ? "Loading next video..."
+                    : "Marking Complete..."}
+                </>
+              ) : (
+                <>Next Video</>
+              )}
+            </button>
           </div>
         )}
       </div>
