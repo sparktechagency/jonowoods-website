@@ -6,12 +6,14 @@ import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 import { Heart, Share2, Bookmark, Eye, Calendar, Clock } from "lucide-react";
 import { useTodayLetestVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
 import Spinner from "@/app/(commonLayout)/Spinner";
+import Image from "next/image";
 
 const ComingSoonPlayer = () => {
   const { data, isLoading } = useTodayLetestVideoQuery();
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   const video = data?.data || {};
   const {
@@ -82,7 +84,7 @@ const ComingSoonPlayer = () => {
     <div className="min-h-screen ">
       <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
         {/* Video Player Section */}
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
+        {/* <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
           <UniversalVideoPlayer
             video={video}
             autoplay={false}
@@ -91,6 +93,53 @@ const ComingSoonPlayer = () => {
             style={{ width: "100%" }}
             watermark={{ text: "Yoga With Jen", position: "top-right" }}
           />
+        </div> */}
+
+        <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+          {/* If not clicked yet → show thumbnail */}
+          {!showVideo && video?.thumbnailUrl && (
+            <div className="relative w-full h-[25vh] md:h-[30vh] lg:h-[70vh]">
+              <Image
+                src={
+                  video?.thumbnailUrl?.startsWith("http")
+                    ? video.thumbnailUrl
+                    : `https://${video.thumbnailUrl}`
+                }
+                alt={video.title}
+                width={1280}
+                height={720}
+                className="w-full h-full object-cover"
+              />
+
+              {/* Play Button Overlay */}
+              <button
+                onClick={() => setShowVideo(true)}
+                className="absolute inset-0 flex items-center justify-center  hover:bg-opacity-40 transition"
+              >
+                <div className="w-12 h-12 bg-red  rounded-full flex items-center justify-center shadow-lg">
+                  <svg
+                    className="w-8 h-8 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M6 4l12 6-12 6V4z" />
+                  </svg>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {/* If clicked → show actual video */}
+          {showVideo && (
+            <UniversalVideoPlayer
+              video={video}
+              autoplay={true}
+              muted={false}
+              aspectRatio="16:9"
+              style={{ width: "100%" }}
+              watermark={{ text: "Yoga With Jen", position: "top-right" }}
+            />
+          )}
         </div>
 
         {/* Content Grid */}

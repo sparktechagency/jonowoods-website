@@ -105,9 +105,9 @@ const TodaysVideoPlayer = () => {
                 onClick={() => setShowVideo(true)}
                 className="absolute inset-0 flex items-center justify-center  hover:bg-opacity-40 transition"
               >
-                <div className="w-10 h-10 bg-red  rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-red  rounded-full flex items-center justify-center shadow-lg">
                   <svg
-                    className="w-6 h-6 text-white"
+                    className="w-8 h-8 text-white"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
