@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 
 export default function Footer() {
   return (
-    <div className="flex flex-col border-t mt-12 md:mt-20 ">
+    <div className="flex flex-col border-t mt-6 md:mt-20 ">
       {/* Header */}
-      <header className="container  py-10 px-4 rounded-md  max-w-6xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+      <header className="container py-6 lg:py-10 px-4 rounded-md  max-w-6xl mx-auto">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
           {/* Logo and Mobile Navigation */}
           <div className="flex flex-col items-center lg:items-start w-full lg:w-auto">
             <Image
@@ -177,7 +177,7 @@ export default function Footer() {
       </header>
 
       {/* Footer */}
-      <footer className="    py-6 border-t border-gray-200">
+      <footer className="  py-3  lg:py-6 border-t border-gray-200">
         <div className="container  max-w-6xl mx-auto">
           <div className="flex justify-center ">
            
