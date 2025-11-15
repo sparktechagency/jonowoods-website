@@ -287,10 +287,10 @@ const ChallengePage = ({ params }) => {
                   {/* Play button overlay */}
                   {isAccessible && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg- bg-opacity-30">
-                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-8 w-8 text-red-600 ml-1"
+                          className="h-10 w-10 text-white "
                           fill="currentColor"
                           viewBox="0 0 24 24"
                         >
