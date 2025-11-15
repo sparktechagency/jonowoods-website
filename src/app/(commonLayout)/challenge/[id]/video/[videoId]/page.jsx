@@ -35,6 +35,7 @@ const VideoPlayerPage = ({ params }) => {
   const isProcessingCompletionRef = useRef(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const hasCheckedAccessRef = useRef(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   // Function to calculate countdown
   const calculateCountdown = (unlockTime) => {
@@ -314,14 +315,12 @@ const VideoPlayerPage = ({ params }) => {
           </svg>
           Back to Challenge
         </button>
-
-     
       </div>
 
       {/* Video Player Section */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="relative">
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+          {/* <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <UniversalVideoPlayer
               video={currentVideo}
               autoplay={false}
@@ -342,6 +341,60 @@ const VideoPlayerPage = ({ params }) => {
               onPlay={() => console.log("Playing")}
               onEnded={handleVideoEnded}
             />
+          </div> */}
+
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            {!showVideo ? (
+              // Thumbnail block
+              <div
+                className="relative cursor-pointer group"
+                onClick={() => setShowVideo(true)}
+              >
+                <Image
+                  // src={getImageUrl(currentVideo.thumbnailUrl)}
+                      src={
+                currentVideo?.thumbnailUrl?.startsWith("http")
+                  ? currentVideo.thumbnailUrl
+                  : `https://${currentVideo.thumbnailUrl}`
+              }
+                  alt="Video thumbnail"
+                  width={1280}
+                  height={720}
+                  className="rounded-2xl w-full h-[25vh] lg:h-[70vh] object-cover"
+                />
+
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-red-500 rounded-full p-2  transition">
+                    <svg className="w-8 h-8 text-red" viewBox="0 0 24 24">
+                      <polygon points="5,3 19,12 5,21" fill="white" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Video player section
+              <UniversalVideoPlayer
+                video={currentVideo}
+                autoplay={true}
+                aspectRatio="16:9"
+                watermark={{
+                  text: `Yoga With Jen`,
+                  position: "top-right",
+                }}
+                onSecurityViolation={(type) => {
+                  fetch("/api/security-log", {
+                    method: "POST",
+                    body: JSON.stringify({
+                      videoId: currentVideo._id,
+                      violationType: type,
+                    }),
+                  });
+                }}
+                onPlay={() => console.log("Playing")}
+                 onEnded={handleVideoEnded}  
+              />
+            )}
           </div>
 
           {/* Completion status overlay */}
@@ -387,16 +440,12 @@ const VideoPlayerPage = ({ params }) => {
                   isProcessingCompletionRef.current ||
                   isNavigating ? (
                     <>
-                  
                       {isNavigating
                         ? "Loading next video..."
                         : "Marking Complete..."}
                     </>
                   ) : (
-                    <>
-                      
-                     Next Video
-                    </>
+                    <>Next Video</>
                   )}
                 </button>
               </div>

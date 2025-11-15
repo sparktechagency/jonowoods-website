@@ -7,6 +7,7 @@ import { useSingleChallengeVideoQuery } from "@/redux/featured/CommingSoon/commi
 import Spinner from "../../Spinner";
 import Image from "next/image";
 import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
+import { Button } from "@/components/ui/button";
 
 const ChallengePage = ({ params }) => {
   const { id } = React.use(params);
@@ -23,13 +24,17 @@ const ChallengePage = ({ params }) => {
       value: perPage,
     },
   ];
-  const { data, isLoading } = useSingleChallengeVideoQuery({ id, params: queryParams });
+  const { data, isLoading } = useSingleChallengeVideoQuery({
+    id,
+    params: queryParams,
+  });
   const challengeInfo = data?.data?.categoryInfo;
   console.log(challengeInfo);
   console.log(data);
 
   const [videos, setVideos] = useState([]);
   const [completedVideos, setCompletedVideos] = useState([]);
+  const [allVideos, setAllVideos] = useState([]);
 
   // Initialize videos and completed videos
   useEffect(() => {
@@ -37,10 +42,18 @@ const ChallengePage = ({ params }) => {
       const sortedVideos = [...data.data.result];
       setVideos(sortedVideos);
 
+      // Keep track of all videos across all pages
+      setAllVideos((prev) => {
+        const existing = prev.filter(
+          (v) => !sortedVideos.find((sv) => sv._id === v._id)
+        );
+        return [...existing, ...sortedVideos];
+      });
+
       const completed = sortedVideos
         .filter((video) => video.isVideoCompleted)
         .map((video) => video._id);
-      setCompletedVideos(completed);
+      setCompletedVideos((prev) => [...new Set([...prev, ...completed])]);
     }
   }, [data]);
 
@@ -94,6 +107,29 @@ const ChallengePage = ({ params }) => {
     }
   };
 
+  // Find next available video from current page
+  const findNextAvailableVideo = () => {
+    // First check current page videos
+    for (let i = 0; i < videos.length; i++) {
+      if (isVideoAccessible(i) && !completedVideos.includes(videos[i]._id)) {
+        return videos[i];
+      }
+    }
+    return null;
+  };
+
+  // Handle Next Flow button click
+  const handleNextFlow = () => {
+    const nextVideo = findNextAvailableVideo();
+    if (nextVideo) {
+      router.push(`/challenge/${id}/video/${nextVideo._id}`);
+    } else {
+      toast.info("No available video", {
+        description: "You have completed all available videos!",
+      });
+    }
+  };
+
   const handlePageChange = (page) => {
     const meta = data?.data?.meta;
     if (page >= 1 && page <= meta?.totalPage) {
@@ -124,7 +160,7 @@ const ChallengePage = ({ params }) => {
   console.log("Pagination Debug:", {
     meta: data?.data?.meta,
     totalPage: data?.data?.meta?.totalPage,
-    condition: data?.data?.meta?.totalPage > 1
+    condition: data?.data?.meta?.totalPage > 1,
   });
 
   return (
@@ -173,14 +209,15 @@ const ChallengePage = ({ params }) => {
             {/* Challenge details */}
             <div className="p-6 md:w-2/3 lg:w-3/4">
               <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-                <span className="font-medium text-base">Challenge Name:</span> {challengeInfo?.name}
+                <span className="font-medium text-base">Challenge Name:</span>{" "}
+                {challengeInfo?.name}
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-gray-600"></div>
 
-             {challengeInfo?.description && (
+              {challengeInfo?.description && (
                 <p className="text-gray-700 leading-relaxed mb-4">
-                   Description: {challengeInfo?.description}
+                  Description: {challengeInfo?.description}
                 </p>
               )}
 
@@ -188,8 +225,16 @@ const ChallengePage = ({ params }) => {
                 Progress: {completedVideos.length} of {videos.length} videos
                 completed
               </p> */}
-              <p className=" ">Total Videos: <span className="font-bold text-primary">{videos.length}</span></p>
-              <p className=" ">Complete Videos: <span className="font-bold text-primary">{completedVideos.length}</span></p>
+              <p className=" ">
+                Total Videos:{" "}
+                <span className="font-bold text-primary">{videos.length}</span>
+              </p>
+              <p className=" ">
+                Complete Videos:{" "}
+                <span className="font-bold text-primary">
+                  {completedVideos.length}
+                </span>
+              </p>
             </div>
           </div>
         </div>
@@ -198,6 +243,22 @@ const ChallengePage = ({ params }) => {
       {/* Videos Grid */}
       <div className="mb-8">
         <h2 className="text-xl md:text-2xl font-bold mb-6">Challenge Videos</h2>
+
+        {/* Next Flow Button - Fixed at bottom on mobile only */}
+        <div className="block md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-50">
+          <div className="flex justify-end">
+            <Button
+              onClick={handleNextFlow}
+              className="py-6 text-white font-semibold px-6 rounded-md transform transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+            >
+              Next Flow
+            </Button>
+          </div>
+        </div>
+
+        {/* Add bottom padding to prevent content from being hidden behind fixed button */}
+        <div className="block md:hidden h-20"></div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {videos.map((video, index) => {
             const isAccessible = isVideoAccessible(index);
