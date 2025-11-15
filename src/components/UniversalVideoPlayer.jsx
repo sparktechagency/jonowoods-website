@@ -332,6 +332,7 @@ const UniversalVideoPlayer = ({
         allowFullScreen
         sandbox="allow-scripts allow-same-origin allow-presentation"
         referrerPolicy="no-referrer"
+       
         className="absolute top-0 left-0 w-full h-full border-0"
         onLoad={() => {
           setTimeout(() => setIsLoading(false), 1500);

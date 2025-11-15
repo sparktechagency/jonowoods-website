@@ -30,6 +30,7 @@ export default function FitnessVideoPage({ params }) {
   const token = localStorage.getItem("token");
   const decoded = jwtDecode(token);
   const currentUserId = decoded.id;
+  const [play, setPlay] = useState(false);
 
   // API hooks
   const { data, isLoading, refetch } = useSingleVidoeQuery(id, { skip: !id });
@@ -345,6 +346,7 @@ export default function FitnessVideoPage({ params }) {
   }
 
   const videoData = data.data;
+  console.log("videoData ",videoData)
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
@@ -360,7 +362,7 @@ export default function FitnessVideoPage({ params }) {
         </video>
       </div> */}
 
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
+      {/* <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
         <UniversalVideoPlayer
           video={videoData}
           autoplay={false}
@@ -369,6 +371,45 @@ export default function FitnessVideoPage({ params }) {
           style={{ width: "100%" }}
           watermark={{ text: "Yoga With Jen", position: "top-right" }}
         />
+      </div> */}
+      <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+        {!play ? (
+          <div
+            className="relative cursor-pointer"
+            onClick={() => setPlay(true)}
+          >
+            <Image
+              // src={getImageUrl(videoData?.thumbnailUrl)}
+              src={
+                videoData?.thumbnailUrl?.startsWith("http")
+                  ? videoData.thumbnailUrl
+                  : `https://${videoData.thumbnailUrl}`
+              }
+              alt="Video thumbnail"
+              width={1280}
+              height={720}
+              className="rounded-2xl w-full h-[25vh] lg:h-[70vh] object-cover"
+            />
+
+            {/* Play Button Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-red-500 rounded-full p-2">
+                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24">
+                  <polygon points="5,3 19,12 5,21" fill="white" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <UniversalVideoPlayer
+            video={videoData}
+            autoplay={true}
+            muted={false}
+            aspectRatio="16:9"
+            style={{ width: "100%", }}
+            watermark={{ text: "Yoga With Jen", position: "top-right" }}
+          />
+        )}
       </div>
 
       {/* Content Section */}
@@ -382,7 +423,9 @@ export default function FitnessVideoPage({ params }) {
             </h1>
             <div className="flex items-center space-x-2">
               <Clock className="w-4 h-4 text-gray-600" />
-              <p className="text-sm text-gray-600 mb-1">{videoData.duration} </p>
+              <p className="text-sm text-gray-600 mb-1">
+                {videoData.duration}{" "}
+              </p>
             </div>
             <p className="text-xs text-gray-500 mb-3">
               {" "}
