@@ -4,12 +4,17 @@ import { VideoCard } from "./VideoCard";
 import { Lock } from "lucide-react";
 
 export const ComingSoon = () => {
-  const { data } = useComingSoonLatestVideoQuery();
+  const { data, isLoading, isError } = useComingSoonLatestVideoQuery();
   console.log("ComingSoon data:", data);
 
   const videoData = data?.data;
   console.log(videoData);
-  const image = `https://${data?.data?.thumbnailUrl}`;
+  
+  // Fallback image - jodi kono data na thake ba thumbnailUrl na thake
+  const fallbackImage = "/assests/Rectangle (11).png";
+  const image = videoData?.thumbnailUrl
+    ? `https://${videoData.thumbnailUrl}`
+    : fallbackImage;
   console.log(image);
 
   // Handle redirect for "itsHere" status - navigate based on type
@@ -36,10 +41,10 @@ export const ComingSoon = () => {
 
   // Determine content based on isReady status
   const renderContent = () => {
-    if (!videoData) {
+    // Loading state
+    if (isLoading) {
       return (
-        <div className="mb-4  px-4 md:px-8 lg:px-12">
-          {/* Animated title - only visible on large devices */}
+        <div className="mb-4 px-4 md:px-8 lg:px-12">
           <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
             Coming Soon
           </h2>
@@ -48,10 +53,25 @@ export const ComingSoon = () => {
       );
     }
 
+    // Error state or no data - fallback image dekhabe
+    if (isError || !videoData) {
+      return (
+        <div className="mb-4 px-4 md:px-8 lg:px-12">
+          <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+          <VideoCard
+            title="Coming Soon"
+            imageUrl={fallbackImage}
+            overlayText=""
+            route={null}
+            onClick={null}
+          />
+        </div>
+      );
+    }
+
     if (videoData.isReady === "comingSoon") {
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          {/* Animated title - only visible on large devices */}
           <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
           <div className="relative">
             <VideoCard
@@ -69,7 +89,6 @@ export const ComingSoon = () => {
                   size={48}
                   className="mx-auto mb-2 animate-pulse text-primary"
                 />
-                {/* Animated Coming Soon text */}
                 <p className="text-lg font-semibold animate-bounce">
                   Coming Soon
                 </p>
@@ -122,17 +141,14 @@ export const ComingSoon = () => {
       );
     }
 
-    // Default fallback
+    // Default fallback - jodi kono condition match na kore
     return (
-      <div className="mb-4 px-4 lg:px-0">
-        {/* Title with animation - only visible on large devices */}
-        <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
-          Coming Soon
-        </h2>
+      <div className="mb-4 px-4 md:px-8 lg:px-12">
+        <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
         <VideoCard
           title="Coming Soon"
-          imageUrl={image}
-          overlayText="Coming Soon"
+          imageUrl={fallbackImage}
+          overlayText=""
           route={null}
           onClick={null}
         />

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communityLeaderBoard";
 
+const STORAGE_KEY = "leaderboard_visible";
+
 const Leaderboard = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -11,34 +13,20 @@ const Leaderboard = () => {
   // Get active tab from URL, default to "time"
   const activeTab = searchParams.get("tab") || "time";
   
-  // Get user email from localStorage
-  const getUserEmail = () => {
-    if (typeof window !== "undefined") {
-      const userInfo = localStorage.getItem("userInfo");
-      if (userInfo) {
-        try {
-          const parsed = JSON.parse(userInfo);
-          return parsed?.email || null;
-        } catch (e) {
-          return null;
-        }
-      }
-    }
-    return null;
-  };
-
-  // Initialize visibility from localStorage based on user email, default to true
-  const [isVisible, setIsVisible] = useState(() => {
-    const userEmail = getUserEmail();
-    if (typeof window !== "undefined" && userEmail) {
-      const saved = localStorage.getItem(`leaderboard_visible_${userEmail}`);
-      return saved !== null ? saved === "true" : true;
-    }
-    return true;
-  });
+  // Initialize with null to handle hydration properly
+  const [isVisible, setIsVisible] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const { data: leaderboard } = useCommunityLeaderBoardQuery();
   const leaderboardData = leaderboard?.data;
+
+  // Load saved preference after component mounts
+  useEffect(() => {
+    setIsMounted(true);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    // Default to true if no saved preference
+    setIsVisible(saved !== null ? saved === "true" : true);
+  }, []);
 
   // Defensive fallback to empty arrays
   const matTimeData = leaderboardData?.topByMatTime || [];
@@ -64,15 +52,26 @@ const Leaderboard = () => {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  // Handle visibility toggle with localStorage based on user email
+  // Handle visibility toggle with localStorage
   const handleToggleVisibility = () => {
     const newVisibility = !isVisible;
     setIsVisible(newVisibility);
-    const userEmail = getUserEmail();
-    if (typeof window !== "undefined" && userEmail) {
-      localStorage.setItem(`leaderboard_visible_${userEmail}`, String(newVisibility));
-    }
+    localStorage.setItem(STORAGE_KEY, String(newVisibility));
   };
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!isMounted || isVisible === null) {
+    return (
+      <div className="w-full my-10 px-4 md:px-8 lg:px-12">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium text-red-500">Leaderboard</h2>
+          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
+            <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full my-10 px-4 md:px-8 lg:px-12">
