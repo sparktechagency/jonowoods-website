@@ -31,7 +31,7 @@ export const VideoCard = ({
               src={imageUrl}
               alt={title || "Thumbnail"}
               fill
-              className="lg:object-cover object-fill"
+              className="object-cover "
               unoptimized
               loading="lazy"
             />
