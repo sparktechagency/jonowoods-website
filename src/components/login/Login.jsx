@@ -55,7 +55,7 @@ export default function LoginUser() {
       const { accessToken, refreshToken } = res.data;
       // Save tokens and dispatch success
       localStorage.setItem("token", accessToken);
-      dispatch(loginSuccess(accessToken));
+      dispatch(loginSuccess({ accessToken }));
       
       toast.success("Login successful! Welcome back.");
       

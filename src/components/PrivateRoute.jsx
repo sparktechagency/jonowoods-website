@@ -6,13 +6,13 @@ import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
 
 const PrivateRoute = ({ children }) => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const { data: accessData, isLoading: accessLoading, error } = useGetMyAccessQuery();
   
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const hasValidToken = token && token !== "undefined" && token !== "null";
     
-    if (!token) {
+    if (!hasValidToken) {
       // Save the current path to redirect back after login
       localStorage.setItem("redirectPath", window.location.pathname);
       router.push("/login");
@@ -26,10 +26,12 @@ const PrivateRoute = ({ children }) => {
     
     // Handle error case
     if (error) {
-      console.error("Error fetching access data:", error);
-      // If there's an error, you might want to redirect to login or show an error message
-      localStorage.removeItem("token"); // Clear invalid token
-      router.push("/login");
+      const status = error?.status;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem("token");
+        router.push("/login");
+        return;
+      }
       return;
     }
     
