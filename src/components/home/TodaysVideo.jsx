@@ -7,7 +7,13 @@ export const TodaysVideo = () => {
   const { data } = useTodayLetestVideoQuery();
   console.log("today video data ",data)
 
-  const image = `https://${data?.data?.thumbnailUrl}`;
+ if (!data?.data) return null;
+
+  // const image = `https://${data?.data?.thumbnailUrl}`;
+
+   const image = data?.data?.thumbnailUrl
+    ? `https://${data?.data?.thumbnailUrl}`
+    : null;
   console.log("today video image ",image)
 
   const title = data?.data?.title;

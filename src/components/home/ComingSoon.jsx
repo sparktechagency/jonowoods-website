@@ -11,10 +11,11 @@ export const ComingSoon = () => {
   console.log(videoData);
   
   // Fallback image - jodi kono data na thake ba thumbnailUrl na thake
-  const fallbackImage = "/assests/Rectangle (11).png";
+ if (isLoading || isError || !data?.data) return null;
+
   const image = videoData?.thumbnailUrl
     ? `https://${videoData.thumbnailUrl}`
-    : fallbackImage;
+    : null; // no default image
   console.log(image);
 
   // Handle redirect for "itsHere" status - navigate based on type

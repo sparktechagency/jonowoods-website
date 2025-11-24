@@ -5,11 +5,14 @@ import { VideoCard } from "./VideoCard";
 export const DailyInspiration = () => {
   const { data } = useInspirationLatestVideoQuery();
 
+  // If no data, render nothing
+  if (!data?.data) return null;
+
   const image = data?.data?.thumbnailUrl
     ? `https://${data?.data?.thumbnailUrl}`
-    : "/assests/Rectangle (16).png"; // default image
+    : null; // no default image
 
-  const title = data?.data?.title || "Daily Inspiration";
+  const title = data?.data?.title;
 
   return (
     <section className="mb-8 px-4 md:px-8 lg:px-12">
