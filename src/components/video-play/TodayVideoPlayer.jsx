@@ -185,9 +185,9 @@ const TodaysVideoPlayer = () => {
                 {equipment.map((tag, i) => (
                   <span
                     key={i}
-                    className="px-4 py-2 rounded-full bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 text-slate-700 text-sm font-medium hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer"
+                    className="px-4 py-1 rounded-full bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 text-slate-700 text-sm font-medium hover:border-purple-300 hover:bg-purple-50 transition-all cursor-pointer"
                   >
-                    #{String(tag).trim()}
+                    {String(tag).trim()}
                   </span>
                 ))}
               </div>
