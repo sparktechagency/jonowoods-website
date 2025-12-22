@@ -89,7 +89,7 @@ export default function FavoriteComponents() {
       )}
 
       <h1 className="text-2xl font-bold mb-6 text-gray-800">
-        My favorite Videos
+        My Favorite Videos
       </h1>
 
       <div className="grid grid-cols-1 gap-6">

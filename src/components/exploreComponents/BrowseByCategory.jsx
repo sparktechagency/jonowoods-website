@@ -47,7 +47,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
                   // }}
                 />
                 {/* Title inside image for Desktop (hover effect) */}
-                <div className="hidden lg:flex absolute inset-0 flex-col justify-center items-center text-center px-4">
+                {/* <div className="hidden lg:flex absolute inset-0 flex-col justify-center items-center text-center px-4">
                   <h3
                     className="text-white  tracking-wide drop-shadow-lg 
                        bg-[#A92C2C]/80 px-3 py-1 rounded
@@ -56,11 +56,11 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
                   >
                     {yogaClass.name}
                   </h3>
-                </div>
+                </div> */}
               </div>
             </Link>
             {/* Title shown below image for mobile & tablet */}
-            <h3 className="block text-[14px] lg:hidden text-black font-semibold mt-2">
+            <h3 className="block text-[14px] lg:text-xl text-black font-semibold mt-2">
               {yogaClass.name}
             </h3>
           </div>

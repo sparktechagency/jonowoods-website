@@ -44,7 +44,7 @@ export const VideoCard = ({
         <div className="hidden  absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
 
         {/* Title - shown inside image on large screens */}
-        <div className="hidden lg:flex absolute inset-0 flex-col justify-end lg:justify-center items-center text-center px-4">
+        {/* <div className="hidden lg:flex absolute inset-0 flex-col justify-end lg:justify-center items-center text-center px-4">
           <h3
             className="text-white  tracking-wide drop-shadow-lg 
                        bg-[#A92C2C]/80 px-3 py-1 rounded
@@ -53,11 +53,11 @@ export const VideoCard = ({
           >
             {title}
           </h3>
-        </div>
+        </div> */}
       </div>
 
       {/* Title - shown below image on mobile & tablet */}
-      <h3 className="block lg:hidden  text-black  font-semibold mt-2">
+      <h3 className="block text-[14px] lg:text-xl  text-black  font-semibold mt-2">
         {title}
       </h3>
     </section>
