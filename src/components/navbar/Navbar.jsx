@@ -400,7 +400,7 @@ export default function Navbar() {
   // Navigation items
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "favorite", path: "/favorite" },
+    { name: "Favorite", path: "/favorite" },
     { name: "Explore", path: "/explore" },
     { name: "Community", path: "/community" },
   ];

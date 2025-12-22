@@ -53,20 +53,39 @@ export default function LoginUser() {
       console.log(res);
       
       const { accessToken, refreshToken } = res.data;
-      // Save tokens and dispatch success
+      
+      // Save tokens and dispatch success - ensure localStorage is set first
       localStorage.setItem("token", accessToken);
       dispatch(loginSuccess({ accessToken }));
       
       toast.success("Login successful! Welcome back.");
       
+      // Wait for Redux state and localStorage to sync before navigating
+      // This ensures the token is available when PrivateRoute checks it
+      // Increased timeout to ensure everything is properly synced
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Verify token is actually set before navigating
+      const verifyToken = localStorage.getItem("token");
+      if (!verifyToken || verifyToken === "undefined" || verifyToken === "null") {
+        console.error("Token not properly set, retrying...");
+        localStorage.setItem("token", accessToken);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      
       // Check if there's a redirect path saved
       const redirectPath = localStorage.getItem("redirectPath");
       if (redirectPath) {
         localStorage.removeItem("redirectPath");
-        router.push(redirectPath);
+        // Use replace instead of push to avoid back button issues
+        router.replace(redirectPath);
+        // Force a refresh to ensure all queries refetch with the new token
+        setTimeout(() => router.refresh(), 100);
       } else {
-        // Default redirect to home - let PrivateRoute handle access checking
-        router.push("/");
+        // Default redirect to home - use replace and refresh to ensure clean navigation
+        router.replace("/");
+        // Force a refresh to ensure all queries refetch with the new token
+        setTimeout(() => router.refresh(), 100);
       }
     } catch (error) {
       console.error("Login failed:", error);
