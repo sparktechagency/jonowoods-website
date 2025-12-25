@@ -470,7 +470,10 @@ export default function Navbar() {
               alt="Logo"
               width={100}
               height={100}
+              sizes="(max-width: 768px) 64px, 100px"
               className="w-16 h-10"
+              quality={90}
+              priority
             />
           </Link>
 

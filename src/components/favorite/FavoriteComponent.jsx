@@ -113,7 +113,10 @@ export default function FavoriteComponents() {
                         }
                         height={200}
                         width={300}
+                        sizes="(max-width: 768px) 100vw, 40vw"
                         className="w-full h-full object-cover  rounded-lg"
+                        quality={85}
+                        loading="lazy"
                         onError={(e) => {
                           e.target.src = "/placeholder-thumbnail.jpg"; // Fallback image
                         }}

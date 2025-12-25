@@ -56,7 +56,10 @@ export default function ClassDetails({ classId, onBack }) {
               src={yogaClass.image}
               alt={yogaClass.title}
               fill
+              sizes="(max-width: 1024px) 100vw, 60vw"
               className="object-cover"
+              quality={85}
+              loading="lazy"
             />
           </div>
         </div>

@@ -388,7 +388,10 @@ export default function FitnessVideoPage({ params }) {
               alt="Video thumbnail"
               width={1280}
               height={720}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
               className="rounded-2xl w-full h-[25vh] lg:h-[70vh] object-cover"
+              quality={85}
+              loading="lazy"
             />
 
             {/* Play Button Overlay */}

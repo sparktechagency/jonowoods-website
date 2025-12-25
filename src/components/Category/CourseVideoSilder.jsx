@@ -120,7 +120,10 @@ const CourseVideoSilder = ({ data }) => {
                     alt={classItem.title || 'Course thumbnail'}
                     width={100}
                     height={100}
+                    sizes="(max-width: 640px) 100vw, 320px"
                     className="w-full h-full object-cover"
+                    quality={85}
+                    loading="lazy"
                     onError={(e) => {
                       e.target.src = '/fallback-image.jpg'; // Add this in public/ folder
                     }}

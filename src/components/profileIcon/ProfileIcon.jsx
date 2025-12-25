@@ -21,9 +21,12 @@ const ProfileIcon = ({
         src={getImageUrl(image)}
         height={size}
         width={size}
+        sizes={`${size}px`}
         alt="Profile"
         style={{ width: `${size}px`, height: `${size}px` }}
         className={`rounded-full object-cover ${containerClasses}`}
+        quality={85}
+        loading="lazy"
       />
     );
   }

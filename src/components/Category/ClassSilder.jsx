@@ -30,8 +30,11 @@ const ClassSlider = ({ data }) => {
               <Image
                 src={`https://${classItem.thumbnailUrl}`}
                 alt={classItem.title}
-                layout="fill"
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="absolute object-cover inset-0 w-full h-full"
+                quality={85}
+                loading="lazy"
               />
 
               {/* Title inside image for Desktop (hover effect) */}

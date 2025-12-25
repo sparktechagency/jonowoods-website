@@ -147,7 +147,10 @@ export default function ProductDetails({ params }) {
                 alt={product.name}
                 height={300}
                 width={300}
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="w-full h-full  object-contain p-4"
+                quality={85}
+                loading="lazy"
               />
             </div>
             <p className="text-description mb-6">{product.description}</p>

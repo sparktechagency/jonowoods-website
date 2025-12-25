@@ -105,7 +105,9 @@ export default function LoginUser() {
             alt="Side Illustration"
             width={700}
             height={700}
+            sizes="(max-width: 1024px) 0px, 50vw"
             className="object-cover w-full h-full"
+            quality={85}
             priority
           />
         </div>
@@ -119,8 +121,11 @@ export default function LoginUser() {
               src="/assests/logo.png"
               height={120}
               width={160}
+              sizes="(max-width: 768px) 120px, 160px"
               alt="Logo"
               className="mx-auto"
+              quality={90}
+              priority
             />
           </div>
 

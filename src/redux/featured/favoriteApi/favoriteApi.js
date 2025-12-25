@@ -29,7 +29,7 @@ const favoriteSlice = api.injectEndpoints({
           url: `/favorite/${id}`,
         };
       },
-      invalidatesTags: ['Favorite']
+      invalidatesTags: ['Favorite','Videos']
     }),
 
 

@@ -15,7 +15,10 @@ export default function Footer() {
               src="/assests/logo.png"
               width={150}
               height={150}
+              sizes="(max-width: 768px) 120px, 150px"
               alt="logo"
+              quality={90}
+              loading="lazy"
             />
 
             {/* Mobile Navigation - Shows on small screens */}
@@ -115,8 +118,11 @@ export default function Footer() {
                   src="/assests/app-store.png"
                   width={180}
                   height={60}
+                  sizes="(max-width: 768px) 150px, 180px"
                   alt="apple"
                   className="m-auto"
+                  quality={85}
+                  loading="lazy"
                 />
               </Link>
               <Link
@@ -150,8 +156,11 @@ export default function Footer() {
                   src="/assests/google-play.png"
                   width={180}
                   height={60}
+                  sizes="(max-width: 768px) 150px, 180px"
                   alt="google-play"
                   className="m-auto"
+                  quality={85}
+                  loading="lazy"
                 />
               </Link>
             </div>

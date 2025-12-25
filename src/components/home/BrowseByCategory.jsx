@@ -30,9 +30,11 @@ export default function BrowseByCategory({
                 <Image
                   src={yogaClass.image}
                   alt={yogaClass.title}
-                  layout="fill"
-                  objectFit="cover"
-                  className="absolute inset-0 w-full h-full"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="absolute inset-0 w-full h-full object-cover"
+                  quality={85}
+                  loading="lazy"
                 />
                 {/* Gradient Overlay on top of the image */}
                 <div

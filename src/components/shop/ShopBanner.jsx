@@ -134,9 +134,11 @@ export default function ShopBanner() {
         <Image
           src={image15}
           alt="Banner Image"
-          layout="fill"
-          objectFit="cover"
-          className="opacity-50"
+          fill
+          sizes="100vw"
+          className="opacity-50 object-cover"
+          quality={85}
+          loading="lazy"
         />
       </div>
 

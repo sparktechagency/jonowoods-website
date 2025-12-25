@@ -86,7 +86,10 @@ const VideoPlayer = ({ data, onComplete }) => {
                 alt={data?.title}
                 width={1280}
                 height={720}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
                 className="w-full h-full object-cover rounded-md"
+                quality={85}
+                loading="lazy"
               />
               {/* Play button overlay */}
               <div className="absolute inset-0 flex items-center justify-center  group-hover:bg-opacity-40 transition-all duration-200 rounded-md">

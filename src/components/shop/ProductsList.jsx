@@ -253,7 +253,10 @@ export default function ProductsList() {
                       alt={product.name}
                       height={150}
                       width={300}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       className="w-full rounded-xl object-contain"
+                      quality={85}
+                      loading="lazy"
                     />
                   </div>
                 </div>

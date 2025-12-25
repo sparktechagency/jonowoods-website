@@ -9,6 +9,7 @@ const homeSlice = api.injectEndpoints({
           url: "/comingSoon/latest",
         };
       },
+      providesTags: ["Videos"],
     }),
 
     comingSoonLetestSingleVideo: builder.query({
@@ -18,6 +19,7 @@ const homeSlice = api.injectEndpoints({
           url: `/comingSoon/latest/${id}`,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     getCategory: builder.query({
@@ -27,6 +29,7 @@ const homeSlice = api.injectEndpoints({
           url: "/category",
         };
       },
+      providesTags: ["Videos"],
     }),
 
     categoryWithSubcategory: builder.query({
@@ -36,6 +39,7 @@ const homeSlice = api.injectEndpoints({
           url: `/category/subcategory/${id}`,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     categoryVideo: builder.query({
@@ -52,6 +56,7 @@ const homeSlice = api.injectEndpoints({
           params: urlParams,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     categoryVideoById: builder.query({
@@ -61,6 +66,7 @@ const homeSlice = api.injectEndpoints({
           url: `/videos/${id}`,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     subCategoryVideo: builder.query({
@@ -70,6 +76,7 @@ const homeSlice = api.injectEndpoints({
           url: `/subcategory/get-videos/${id}`,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     markVideoWatched: builder.mutation({
@@ -79,6 +86,7 @@ const homeSlice = api.injectEndpoints({
           url: `/videos/mark-video-watched/${id}`,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     singleSubcategory: builder.query({
@@ -88,6 +96,7 @@ const homeSlice = api.injectEndpoints({
           url: `/subcategory/single/${id}`,
         };
       },
+      providesTags: ["Videos"],
     }),
 
     singleVidoe: builder.query({
@@ -97,7 +106,9 @@ const homeSlice = api.injectEndpoints({
           url: `/videos/${id}`,
         };
       },
+      providesTags: ["Videos","Favorite"],
     }),
+
   }),
 });
 

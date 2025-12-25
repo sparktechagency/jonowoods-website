@@ -126,7 +126,10 @@ const CourseSlider = ({ data }) => {
                   alt={classItem.name}
                   width={100}
                   height={100}
+                  sizes="(max-width: 640px) 100vw, 320px"
                   className="w-full h-full object-cover rounded-md"
+                  quality={85}
+                  loading="lazy"
                 />
               </div>
 

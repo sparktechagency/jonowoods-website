@@ -35,8 +35,10 @@ export default function NewClasses() {
                   src={getImageUrl(yogaClass.image)}
                   alt={yogaClass.title}
                   fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   className="object-cover "
+                  quality={85}
+                  loading="lazy"
                 />
                 {/* Gradient Overlay for Desktop */}
                 <div

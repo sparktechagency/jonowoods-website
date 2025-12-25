@@ -199,7 +199,15 @@ const VideoPostCard = ({ post }) => {
       return (
         <div className="relative w-full h-80 max-h-80 rounded-lg overflow-hidden">
           <div className="w-full h-full bg-gray-300 flex items-center justify-center rounded-lg">
-            <Image src={getVideoAndThumbnail(post.thumbnailUrl)} width={120} height={120} className="w-full h-full object-cover text-gray-600" />
+            <Image 
+              src={getVideoAndThumbnail(post.thumbnailUrl)} 
+              width={120} 
+              height={120} 
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="w-full h-full object-cover text-gray-600" 
+              quality={85}
+              loading="lazy"
+            />
 
 
 
