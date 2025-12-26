@@ -12,6 +12,7 @@ import { loginSuccess } from "@/redux/featured/auth/authSlice"; // Import your a
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
+import ButtonSpinner from "@/app/(commonLayout)/ButtonSpinner";
 
 export default function LoginUser() {
   const [showPassword, setShowPassword] = useState(false);
@@ -181,10 +182,10 @@ export default function LoginUser() {
             {/* Sign In Button */}
             <Button
               type="submit"
-              className="w-full h-10 md:h-12 bg-button text-white rounded-md"
+              className="w-full h-10 md:h-12 bg-button text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
-              {isLoading ? "Signing In..." : "Sign In"}
+              {isLoading ? <div><ButtonSpinner /></div> : "Sign In"}
             </Button>
 
             {/* Links */}
