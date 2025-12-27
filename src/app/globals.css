@@ -52,8 +52,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* --primary: oklch(0.205 0 0); */
-  /* --primary-foreground: oklch(0.985 0 0); */
+  --primary: #de5555;
+  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -135,7 +135,7 @@
 } */
 
 .bg-button {
-  background: #a92c2c;
+  background: #de5555;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -149,17 +149,17 @@
 
 /* Hover Effect */
 .bg-button:hover {
-  background: #ca3939;
+  background: #de5555;
   transform: scale(1.05);
 }
 .text-red {
-  color: #8c1921;
+  color: #de5555;
 }
 .text-description {
   color: #a3a3a3f5;
 }
 .bg-red {
-  background-color: #ca3939;
+  background-color: #de5555;
 }
 h1,
 h2,

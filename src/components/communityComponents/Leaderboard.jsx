@@ -64,7 +64,7 @@ const Leaderboard = () => {
     return (
       <div className="w-full my-10 px-4 md:px-8 lg:px-12">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-red-500">Leaderboard</h2>
+          <h2 className="text-lg font-medium text-primary">Leaderboard</h2>
           <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
             <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
           </div>
@@ -76,10 +76,10 @@ const Leaderboard = () => {
   return (
     <div className="w-full my-10 px-4 md:px-8 lg:px-12">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-medium text-red-500">Leaderboard</h2>
+          <h2 className="text-lg font-medium text-primary">Leaderboard</h2>
         <button
           onClick={handleToggleVisibility}
-          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           style={{ backgroundColor: isVisible ? '#ef4444' : '#9ca3af' }}
           aria-label="Toggle leaderboard visibility"
         >
@@ -100,7 +100,7 @@ const Leaderboard = () => {
                 onClick={() => handleTabChange("time")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === "time"
-                    ? "text-red-500 border-b-2 border-red-500"
+                    ? "text-primary border-b-2 border-primary"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -110,7 +110,7 @@ const Leaderboard = () => {
                 onClick={() => handleTabChange("streaks")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === "streaks"
-                    ? "text-red-500 border-b-2 border-red-500"
+                    ? "text-primary border-b-2 border-primary"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -120,7 +120,7 @@ const Leaderboard = () => {
                 onClick={() => handleTabChange("sessions")}
                 className={`flex-1 py-3 text-sm font-medium transition-colors ${
                   activeTab === "sessions"
-                    ? "text-red-500 border-b-2 border-red-500"
+                    ? "text-primary border-b-2 border-primary"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -132,7 +132,7 @@ const Leaderboard = () => {
             <div className="mt-4">
               {activeTab === "time" && (
                 <div className="bg-white rounded-lg shadow">
-                  <div className="bg-red-500 text-white p-3 rounded-t-lg">
+                  <div className="bg-primary text-white p-3 rounded-t-lg">
                     <h3 className="font-medium text-center">Total Time (Minutes)</h3>
                   </div>
                   <LeaderboardTable data={timeData} />
@@ -140,7 +140,7 @@ const Leaderboard = () => {
               )}
               {activeTab === "streaks" && (
                 <div className="bg-white rounded-lg shadow">
-                  <div className="bg-red-500 text-white p-3 rounded-t-lg">
+                  <div className="bg-primary text-white p-3 rounded-t-lg">
                     <h3 className="font-medium text-center">Streaks (Login Count)</h3>
                   </div>
                   <LeaderboardTable data={streaksData} />
@@ -148,7 +148,7 @@ const Leaderboard = () => {
               )}
               {activeTab === "sessions" && (
                 <div className="bg-white rounded-lg shadow">
-                  <div className="bg-red-500 text-white p-3 rounded-t-lg">
+                  <div className="bg-primary text-white p-3 rounded-t-lg">
                     <h3 className="font-medium text-center">Sessions Completed</h3>
                   </div>
                   <LeaderboardTable data={sessionsData} />
@@ -161,7 +161,7 @@ const Leaderboard = () => {
           <div className="hidden lg:grid grid-cols-3 gap-10">
             {/* Total Time Column */}
             <div className="bg-white rounded-lg shadow">
-              <div className="bg-red-500 text-white p-3 rounded-t-lg">
+              <div className="bg-primary text-white p-3 rounded-t-lg">
                 <h3 className="font-medium text-center">Total Time (Minutes)</h3>
               </div>
               <LeaderboardTable data={timeData} />
@@ -169,7 +169,7 @@ const Leaderboard = () => {
 
             {/* Streaks Column */}
             <div className="bg-white rounded-lg shadow">
-              <div className="bg-red-500 text-white p-3 rounded-t-lg">
+              <div className="bg-primary text-white p-3 rounded-t-lg">
                 <h3 className="font-medium text-center">Streaks (Login Count)</h3>
               </div>
               <LeaderboardTable data={streaksData} />
@@ -177,7 +177,7 @@ const Leaderboard = () => {
 
             {/* Sessions Column */}
             <div className="bg-white rounded-lg shadow">
-              <div className="bg-red-500 text-white p-3 rounded-t-lg">
+              <div className="bg-primary text-white p-3 rounded-t-lg">
                 <h3 className="font-medium text-center">Sessions Completed</h3>
               </div>
               <LeaderboardTable data={sessionsData} />
