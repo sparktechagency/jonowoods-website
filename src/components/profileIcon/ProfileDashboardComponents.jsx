@@ -110,8 +110,8 @@ const SubscriptionCard = ({ packageData, userData }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200">
-            <p className="text-5xl font-bold text-red-500 mb-2">
+          <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-primary/10 to-primary/20 rounded-lg border border-primary/20">
+            <p className="text-5xl font-bold text-primary  mb-2">
               {calculateDaysRemaining()}
             </p>
             <p className="text-lg font-medium text-gray-700 mb-4">
@@ -150,7 +150,7 @@ const SubscriptionCard = ({ packageData, userData }) => {
             </div>
 
             <Button
-              className="w-full mt-4 py-5 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200"
+              className="w-full mt-4 py-5 bg-primary hover:bg-primary/80 text-white font-medium transition-colors duration-200"
               onClick={() => (window.location.href = "/subscription")}
             >
               Extend Subscription
@@ -303,7 +303,7 @@ export default function ProfileDashboardComponents() {
           <DialogTrigger asChild>
             <Button
               variant="destructive"
-              className="bg-red-600 hover:bg-red-700 shadow-sm"
+              className="bg-primary py-5 hover:bg-primary/80 shadow-sm"
             >
               Edit Profile
             </Button>
@@ -365,7 +365,7 @@ export default function ProfileDashboardComponents() {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="py-3"
+                    className="py-5"
                   />
                 </div>
 
@@ -379,7 +379,7 @@ export default function ProfileDashboardComponents() {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="py-3  cursor-not-allowed"
+                    className="py-5  cursor-not-allowed"
                     disabled
                   />
                 </div>
@@ -392,12 +392,12 @@ export default function ProfileDashboardComponents() {
                     defaultCountry="US"
                     value={formData.phone}
                     onChange={handlePhoneChange}
-                    className={`w-full border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500 ${
-                      phoneError ? "border-red-500" : "border-gray-300"
+                    className={`w-full border p-2 rounded-md focus:ring-2 focus:ring-primary focus:border-primary ${
+                      phoneError ? "border-primary" : "border-gray-300"
                     }`}
                   />
                   {phoneError && (
-                    <p className="text-sm text-red-500 mt-1">{phoneError}</p>
+                    <p className="text-sm text-primary mt-1">{phoneError}</p>
                   )}
                 </div>
 
@@ -411,14 +411,14 @@ export default function ProfileDashboardComponents() {
                     value={formData.address}
                     onChange={handleChange}
                     required
-                    className="py-3"
+                    className="py-5"
                   />
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-medium transition-colors duration-200"
+                className="w-full py-5 bg-primary hover:bg-primary/80 text-white font-medium transition-colors duration-200"
                 disabled={updating || (formData.phone && phoneError)}
               >
                 {updating ? "Updating..." : "Update Profile"}
@@ -428,12 +428,12 @@ export default function ProfileDashboardComponents() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 mb-8">
         <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="text-red-500">
-                <Flame size={24} />
+          <CardContent className="pt-6 text-center">
+            <div className="flex items-center  justify-center gap-3 mb-2">
+              <div className="text-primary">
+                <Flame size={32} />
               </div>
               <h3 className="font-medium text-gray-700">Streak</h3>
             </div>
@@ -444,10 +444,10 @@ export default function ProfileDashboardComponents() {
         </Card>
 
         <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="text-red-500">
-                <Clock size={24} />
+          <CardContent className="pt-6 text-center">
+            <div className="flex items-center  justify-center gap-3 mb-2">
+              <div className="text-primary">
+                <Clock size={32} />
               </div>
               <h3 className="font-medium text-gray-700">Yoga Sessions</h3>
             </div>
@@ -458,10 +458,10 @@ export default function ProfileDashboardComponents() {
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+        {/* <Card className="border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="text-red-500">
+              <div className="text-primary">
                 <Clock size={24} />
               </div>
               <h3 className="font-medium text-gray-700">Total Mat Time</h3>
@@ -470,7 +470,7 @@ export default function ProfileDashboardComponents() {
               {userData?.matTime || 0} Min
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <SubscriptionCard packageData={packageData} userData={userData} />
