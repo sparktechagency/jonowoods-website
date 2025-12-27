@@ -205,7 +205,7 @@ export const CommentsContainer = ({ postId, currentUserId, commentsCount = 0 }) 
     <>
       <button
         onClick={handleOpenComments}
-        className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+        className="flex items-center gap-2 text-gray-600 hover:text-primary hover:font-semibold transition-colors cursor-pointer"
       >
         <MessageSquare className="h-5 w-5" />
         <span className="text-sm">

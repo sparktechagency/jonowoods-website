@@ -226,10 +226,10 @@ const PostDisplay = ({
                     onClick={() => handleLike(post._id)}
                   >
                     <HeartIcon
-                      className={`h-8 w-8 mr-1 ${
+                      className={`h-7 w-7 mr-1 ${
                         (post.likedBy || []).includes(currentUserId)
-                          ? "text-white fill-red-500"
-                          : "text-red-500"
+                          ? "text-white fill-primary"
+                          : "text-primary"
                       }`}
                     />
                     {post.likes || 0}

@@ -267,7 +267,7 @@ export default function FavoriteComponents() {
           )
         ) : (
           <div className="text-center py-12">
-            <div className="mx-auto w-24 h-24 text-gray-400 mb-4">
+            <div className="mx-auto w-24 h-24 text-primary mb-4">
               <Heart className="w-full h-full" />
             </div>
             <h3 className="text-xl font-medium text-gray-700">
@@ -278,7 +278,7 @@ export default function FavoriteComponents() {
               and add some!
             </p>
             <Link href="/explore">
-              <button className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+              <button className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary/80">
                 Browse Videos
               </button>
             </Link>

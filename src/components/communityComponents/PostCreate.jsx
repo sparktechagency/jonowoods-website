@@ -79,7 +79,7 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
     <div className="w-full mb-6">
       <Card className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xl font-semibold text-red-500">
+          <div className="text-xl font-semibold text-primary">
             {editPost ? "Edit Your Post" : "What's On Your Mind"}
           </div>
           {editPost && (
@@ -113,7 +113,7 @@ const PostCreate = ({ editPost = null, onEditCancel, onPostSuccess }) => {
           )}
           <Button
             onClick={handlePost}
-            className="bg-red-500 text-white rounded-full px-6"
+            className="bg-primary text-white rounded-full px-6"
           >
             {isLoading
               ? editPost
