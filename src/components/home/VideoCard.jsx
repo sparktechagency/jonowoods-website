@@ -1,4 +1,6 @@
 "use client";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -9,6 +11,7 @@ export const VideoCard = ({
   onClick,
 }) => {
   const router = useRouter();
+  const [imgLoading, setImgLoading] = useState(true);
 
   const handleClick = () => {
     if (onClick) {
@@ -24,41 +27,36 @@ export const VideoCard = ({
         onClick={handleClick}
         className="relative h-[25vh] md:h-[30vh] lg:h-[70vh] w-full bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
       >
+        {/* Image loading overlay */}
+        {imgLoading && imageUrl && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          </div>
+        )}
+
         {/* Background Image */}
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat">
+        <div className="absolute inset-0">
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={title || "Thumbnail"}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover"
               quality={85}
               loading="lazy"
+              onLoadingComplete={() => setImgLoading(false)}
+              className={`object-cover transition-opacity duration-500 ${
+                imgLoading ? "opacity-0" : "opacity-100"
+              }`}
             />
           ) : (
-            <div className="w-full h-full bg-gray-800"></div>
+            <div className="w-full h-full bg-gray-800" />
           )}
         </div>
-
-        {/* Gradient Overlay (only for large screens) */}
-        <div className="hidden  absolute inset-0 bg-gradient-to-t from-red-800/70 via-red-900/40 to-transparent" />
-
-        {/* Title - shown inside image on large screens */}
-        {/* <div className="hidden lg:flex absolute inset-0 flex-col justify-end lg:justify-center items-center text-center px-4">
-          <h3
-            className="text-white  tracking-wide drop-shadow-lg 
-                       bg-[#A92C2C]/80 px-3 py-1 rounded
-                       opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0
-                       transition-all duration-500 ease-out"
-          >
-            {title}
-          </h3>
-        </div> */}
       </div>
 
-      {/* Title - shown below image on mobile & tablet */}
-      <h3 className="block text-[14px] lg:text-xl  text-black  font-semibold mt-2">
+      {/* Title */}
+      <h3 className="block text-[14px] lg:text-xl text-black font-semibold mt-2">
         {title}
       </h3>
     </section>
