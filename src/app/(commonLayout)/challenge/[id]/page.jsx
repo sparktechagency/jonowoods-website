@@ -245,7 +245,7 @@ const ChallengePage = ({ params }) => {
         <h2 className="text-xl md:text-2xl font-bold mb-6">Challenge Videos</h2>
 
         {/* Next Flow Button - Fixed at bottom on mobile only */}
-        <div className="block md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg z-50">
+        <div className="block md:hidden fixed bottom-0 left-0 right-0 p-4   z-50">
           <div className="flex justify-end">
             <Button
               onClick={handleNextFlow}

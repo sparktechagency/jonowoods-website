@@ -1,18 +1,49 @@
 "use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useGetCategoryQuery } from "../../redux/featured/homeApi.jsx/homeApi";
-import { getImageUrl } from "../share/imageUrl";
-import { useState } from "react";
+import ImageWithLoader from "../share/ImageWithLoader";
 
 export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   const router = useRouter();
-  const { data, isLoading } = useGetCategoryQuery();
+  const { data, isLoading, isError } = useGetCategoryQuery();
   const [showAll, setShowAll] = useState(false);
 
-  if (isLoading) return <div>Loading...</div>;
+  /* ======================
+     API Loading State
+  ====================== */
+  if (isLoading) {
+    return (
+      <section className="mb-10 px-4 md:px-8 lg:px-12">
+        <h2 className="text-xl font-semibold mb-4">Browse By Categories</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="h-28 lg:h-80 rounded-lg bg-gray-200 animate-pulse"
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  /* ======================
+     API Error State
+  ====================== */
+  if (isError) {
+    return (
+      <section className="mb-10 px-4 md:px-8 lg:px-12">
+        <h2 className="text-xl font-semibold mb-4">Browse By Categories</h2>
+        <p className="text-center text-red-500">
+          Failed to load categories. Please try again later.
+        </p>
+      </section>
+    );
+  }
 
   const categoriesToShow = showAll ? data?.data : data?.data?.slice(0, 6);
 
@@ -25,52 +56,16 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Browse By Categories</h2>
       </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
         {categoriesToShow?.map((yogaClass) => (
-          <div key={yogaClass._id} className="cursor-pointer group">
-            <Link href={`/categories/${yogaClass._id}`}>
-              <div className="relative h-28 lg:h-80 rounded-lg overflow-hidden">
-                {/* Image */}
-                <Image
-                  src={getImageUrl(yogaClass?.thumbnail)}
-                  alt={yogaClass.name}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="absolute object-cover  inset-0 w-full h-full"
-                  quality={85}
-                  loading="lazy"
-                />
-                {/* Gradient Overlay for Desktop */}
-                <div
-                  // className="hidden lg:block absolute inset-0 bg-gradient-to-t"
-                  // style={{
-                  //   backgroundImage:
-                  //     "linear-gradient(to bottom, #FFFFFF00, #FFFFFF00, #A92C2C)",
-                  // }}
-                />
-                {/* Title inside image for Desktop (hover effect) */}
-                {/* <div className="hidden lg:flex absolute inset-0 flex-col justify-center items-center text-center px-4">
-                  <h3
-                    className="text-white  tracking-wide drop-shadow-lg 
-                       bg-[#A92C2C]/80 px-3 py-1 rounded
-                       opacity-0 translate-y-60 group-hover:opacity-100 group-hover:translate-y-0
-                       transition-all duration-500 ease-out"
-                  >
-                    {yogaClass.name}
-                  </h3>
-                </div> */}
-              </div>
-            </Link>
-            {/* Title shown below image for mobile & tablet */}
-            <h3 className="block text-[14px] lg:text-xl text-black font-semibold mt-2">
-              {yogaClass.name}
-            </h3>
-          </div>
+          <CategoryCard key={yogaClass._id} yogaClass={yogaClass} />
         ))}
       </div>
+
       {/* Show the "See More" button if the number of categories exceeds 6 */}
       {data?.data?.length > 6 && (
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-4">
           <Button
             variant="link"
             className="text-rose-500 hover:text-rose-600 cursor-pointer"
@@ -81,5 +76,26 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
         </div>
       )}
     </section>
+  );
+}
+
+/* =========================
+   Single Category Card
+========================= */
+function CategoryCard({ yogaClass }) {
+  return (
+    <div className="cursor-pointer group">
+      <Link href={`/categories/${yogaClass._id}`}>
+        <ImageWithLoader
+          src={yogaClass?.thumbnail}
+          alt={yogaClass.name}
+          containerClassName="h-28 lg:h-80 rounded-lg"
+        />
+      </Link>
+
+      <h3 className="block text-[14px] lg:text-xl text-black font-semibold mt-2">
+        {yogaClass.name}
+      </h3>
+    </div>
   );
 }

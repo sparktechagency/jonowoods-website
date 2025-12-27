@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { getImageUrl } from "@/components/share/imageUrl";
 import { useGetCategoryQuery } from "@/redux/featured/homeApi.jsx/homeApi";
-import Image from "next/image";
+import ImageWithLoader from "@/components/share/ImageWithLoader";
 import Link from "next/link";
 
 export default function CategoriesPage() {
@@ -58,31 +56,14 @@ export default function CategoriesPage() {
    Single Category Card
 ========================= */
 function CategoryCard({ category }) {
-  const [imgLoading, setImgLoading] = useState(true);
-
   return (
     <div className="cursor-pointer group">
       <Link href={`/categories/${category._id}`}>
-        <div className="relative h-28 lg:h-80 rounded-lg overflow-hidden bg-gray-200">
-
-          {/* Image loading spinner */}
-          {imgLoading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
-            </div>
-          )}
-
-          <Image
-            src={getImageUrl(category.thumbnail)}
-            alt={category.name}
-            layout="fill"
-            loading="lazy"
-            onLoadingComplete={() => setImgLoading(false)}
-            className={`object-cover transition-opacity duration-300 ${
-              imgLoading ? "opacity-0" : "opacity-100"
-            }`}
-          />
-        </div>
+        <ImageWithLoader
+          src={category.thumbnail}
+          alt={category.name}
+          containerClassName="h-28 lg:h-80 rounded-lg"
+        />
       </Link>
 
       <h3 className="block text-[14px] lg:text-xl text-black font-semibold mt-2">
