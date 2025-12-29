@@ -14,11 +14,19 @@ export default function ImageWithLoader({
   fill = true,
   height,
   width,
+  onLoadComplete,
   ...props
 }) {
   const [imgLoading, setImgLoading] = useState(true);
 
   const imageUrl = getImageUrl(src);
+
+  const handleLoadComplete = () => {
+    setImgLoading(false);
+    if (onLoadComplete) {
+      onLoadComplete();
+    }
+  };
 
   return (
     <div className={`relative overflow-hidden bg-gray-200 ${containerClassName}`}>
@@ -38,7 +46,7 @@ export default function ImageWithLoader({
         sizes={sizes}
         quality={quality}
         loading="lazy"
-        onLoadingComplete={() => setImgLoading(false)}
+        onLoadingComplete={handleLoadComplete}
         className={`object-cover transition-opacity duration-300 ${
           imgLoading ? "opacity-0" : "opacity-100"
         } ${className}`}

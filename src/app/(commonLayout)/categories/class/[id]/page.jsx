@@ -17,9 +17,10 @@ import {
 import Spinner from "../../../Spinner";
 import { useSingleVidoeQuery } from "@/redux/featured/homeApi.jsx/homeApi";
 import { useVideoFavoriteMutation } from "@/redux/featured/favoriteApi/favoriteApi";
-import { getImageUrl } from "@/components/share/imageUrl";
+import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
 import { toast } from "sonner";
 import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
+import ImageWithLoader from "@/components/share/ImageWithLoader";
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -31,6 +32,7 @@ export default function FitnessVideoPage({ params }) {
   const decoded = jwtDecode(token);
   const currentUserId = decoded.id;
   const [play, setPlay] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(true);
 
   // API hooks
   const { data, isLoading, refetch } = useSingleVidoeQuery(id, { skip: !id });
@@ -68,6 +70,8 @@ export default function FitnessVideoPage({ params }) {
       setLikeCount(data.data.likes || 0);
       // Set initial favorite status from API response
       setIsLiked(data.data.isFavorite || false);
+      // Reset thumbnail loading when video data changes
+      setThumbnailLoading(true);
     }
   }, [data]);
 
@@ -350,58 +354,33 @@ export default function FitnessVideoPage({ params }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 lg:py-8">
-      {/* Video Section */}
-      {/* <div className="mt-10">
-        <video
-          controls
-          src={`https://${videoData.videoUrl}`}
-          className="w-full h-auto max-h-[70vh] mx-auto border rounded-md"
-          autoPlay
-        >
-          Your browser does not support the video tag.
-        </video>
-      </div> */}
-
-      {/* <div className="relative rounded-2xl overflow-hidden shadow-2xl ">
-        <UniversalVideoPlayer
-          video={videoData}
-          autoplay={false}
-          muted={true}
-          aspectRatio="16:9"
-          style={{ width: "100%" }}
-          watermark={{ text: "Yoga With Jen", position: "top-right" }}
-        />
-      </div> */}
-      <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+   
+      <div className="relative rounded-2xl overflow-hidden shadow-md">
         {!play ? (
           <div
             className="relative cursor-pointer"
             onClick={() => setPlay(true)}
           >
-            <Image
-              // src={getImageUrl(videoData?.thumbnailUrl)}
-              src={
-                videoData?.thumbnailUrl?.startsWith("http")
-                  ? videoData.thumbnailUrl
-                  : `https://${videoData.thumbnailUrl}`
-              }
+            {/* Thumbnail Image with Loader */}
+            <ImageWithLoader
+              src={getVideoAndThumbnail(videoData?.thumbnailUrl)}
               alt="Video thumbnail"
-              width={1280}
-              height={720}
+              containerClassName="rounded-2xl w-full h-[25vh] lg:h-[70vh]"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
-              className="rounded-2xl w-full h-[25vh] lg:h-[70vh] object-cover"
               quality={85}
-              loading="lazy"
+              onLoadComplete={() => setThumbnailLoading(false)}
             />
 
-            {/* Play Button Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-red-500 rounded-full p-2">
-                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24">
-                  <polygon points="5,3 19,12 5,21" fill="white" />
-                </svg>
+            {/* Play Button Overlay - Only show when thumbnail is loaded */}
+            {!thumbnailLoading && (
+              <div className="absolute inset-0 flex items-center justify-center z-20">
+                <div className="bg-red-500 rounded-full p-2">
+                  <svg className="w-8 h-8 text-white" viewBox="0 0 24 24">
+                    <polygon points="5,3 19,12 5,21" fill="white" />
+                  </svg>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ) : (
           <UniversalVideoPlayer

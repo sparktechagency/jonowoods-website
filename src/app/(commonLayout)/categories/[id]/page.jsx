@@ -28,6 +28,7 @@ const page = ({ params }) => {
 
 
   const { data: category, isLoading: categoryLoading } = useCategoryWithSubcategoryQuery(id, { skip: !id });
+  console.log( "category",category)
   console.log(category?.data?.result)
 
 
