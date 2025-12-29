@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useSingleChallengeVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
 import Spinner from "../../Spinner";
-import Image from "next/image";
+import ImageWithLoader from "@/components/share/ImageWithLoader";
 import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
 import { Button } from "@/components/ui/button";
 
@@ -194,16 +194,13 @@ const ChallengePage = ({ params }) => {
           <div className="md:flex">
             {/* Challenge thumbnail */}
             <div className="md:w-1/3 lg:w-1/4">
-              <div className="relative h-72 md:h-72">
-                <Image
-                  src={getImageUrl(challengeInfo?.image)}
-                  alt={
-                    challengeData?.name || challengeData?.title || "Challenge"
-                  }
-                  fill
-                  className="object-cover"
-                />
-              </div>
+              <ImageWithLoader
+                src={getImageUrl(challengeInfo?.image)}
+                alt={
+                  challengeData?.name || challengeData?.title || "Challenge"
+                }
+                containerClassName="h-72 md:h-72"
+              />
             </div>
 
             {/* Challenge details */}
@@ -281,13 +278,12 @@ const ChallengePage = ({ params }) => {
               >
                 {/* Video thumbnail */}
                 <div className="relative h-48">
-                  <Image
+                  <ImageWithLoader
                     src={getVideoAndThumbnail(
                       video.thumbnailUrl || video.image
                     )}
                     alt={video.title}
-                    fill
-                    className="object-cover"
+                    containerClassName="h-48"
                   />
 
                   {/* Lock overlay for inaccessible videos */}

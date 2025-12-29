@@ -7,8 +7,8 @@ import {
   useMarkWatchChallengeVideoMutation,
   useSingleChallengeVideoQuery,
 } from "@/redux/featured/CommingSoon/commingSoonApi";
-import Image from "next/image";
-import { getImageUrl } from "@/components/share/imageUrl";
+import ImageWithLoader from "@/components/share/ImageWithLoader";
+import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
 import Spinner from "@/app/(commonLayout)/Spinner";
 import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 import { Clock } from "lucide-react";
@@ -36,6 +36,7 @@ const VideoPlayerPage = ({ params }) => {
   const [isNavigating, setIsNavigating] = useState(false);
   const hasCheckedAccessRef = useRef(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(true);
 
   // Function to calculate countdown
   const calculateCountdown = (unlockTime) => {
@@ -68,6 +69,11 @@ const VideoPlayerPage = ({ params }) => {
 
       const current = sortedVideos.find((video) => video._id === videoId);
       setCurrentVideo(current);
+
+      // Reset thumbnail loading when video changes
+      if (current?.thumbnailUrl) {
+        setThumbnailLoading(true);
+      }
 
       const completed = sortedVideos
         .filter((video) => video.isVideoCompleted)
@@ -350,27 +356,25 @@ const VideoPlayerPage = ({ params }) => {
                 className="relative cursor-pointer group"
                 onClick={() => setShowVideo(true)}
               >
-                <Image
-                  // src={getImageUrl(currentVideo.thumbnailUrl)}
-                  src={
-                    currentVideo?.thumbnailUrl?.startsWith("http")
-                      ? currentVideo.thumbnailUrl
-                      : `https://${currentVideo.thumbnailUrl}`
-                  }
+                <ImageWithLoader
+                  src={getVideoAndThumbnail(currentVideo?.thumbnailUrl)}
                   alt="Video thumbnail"
-                  width={1280}
-                  height={720}
-                  className="rounded-2xl w-full h-[25vh] lg:h-[70vh] object-cover"
+                  containerClassName="rounded-2xl w-full h-[25vh] lg:h-[70vh]"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
+                  quality={85}
+                  onLoadComplete={() => setThumbnailLoading(false)}
                 />
 
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-red-500 rounded-full p-2  transition">
-                    <svg className="w-8 h-8 text-red" viewBox="0 0 24 24">
-                      <polygon points="5,3 19,12 5,21" fill="white" />
-                    </svg>
+                {/* Play Button Overlay - Only show when thumbnail is loaded */}
+                {!thumbnailLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20">
+                    <div className="bg-red-500 rounded-full p-2  transition">
+                      <svg className="w-8 h-8 text-red" viewBox="0 0 24 24">
+                        <polygon points="5,3 19,12 5,21" fill="white" />
+                      </svg>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               // Video player section
