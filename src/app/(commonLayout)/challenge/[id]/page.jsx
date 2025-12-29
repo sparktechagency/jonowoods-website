@@ -35,6 +35,7 @@ const ChallengePage = ({ params }) => {
   const [videos, setVideos] = useState([]);
   const [completedVideos, setCompletedVideos] = useState([]);
   const [allVideos, setAllVideos] = useState([]);
+  const [thumbnailLoadingStates, setThumbnailLoadingStates] = useState({});
 
   // Initialize videos and completed videos
   useEffect(() => {
@@ -261,6 +262,7 @@ const ChallengePage = ({ params }) => {
             const isAccessible = isVideoAccessible(index);
             const isCompleted = completedVideos.includes(video._id);
             const videoCountdown = getVideoCountdown(video);
+            const isThumbnailLoading = thumbnailLoadingStates[video._id] !== false;
 
             return (
               <div
@@ -284,11 +286,17 @@ const ChallengePage = ({ params }) => {
                     )}
                     alt={video.title}
                     containerClassName="h-48"
+                    onLoadComplete={() => {
+                      setThumbnailLoadingStates((prev) => ({
+                        ...prev,
+                        [video._id]: false,
+                      }));
+                    }}
                   />
 
-                  {/* Lock overlay for inaccessible videos */}
-                  {!isAccessible && (
-                    <div className="absolute inset-0   flex items-center justify-center">
+                  {/* Lock overlay for inaccessible videos - Only show when thumbnail is loaded */}
+                  {!isAccessible && !isThumbnailLoading && (
+                    <div className="absolute inset-0   flex items-center justify-center z-10">
                       <div className="text-center bg-red-600 text-white px-5 py-3 opacity-80 rounded-lg">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -341,9 +349,9 @@ const ChallengePage = ({ params }) => {
                     Video {index + 1}
                   </div>
 
-                  {/* Play button overlay */}
-                  {isAccessible && (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg- bg-opacity-30">
+                  {/* Play button overlay - Only show when thumbnail is loaded */}
+                  {isAccessible && !isThumbnailLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg- bg-opacity-30 z-10">
                       <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

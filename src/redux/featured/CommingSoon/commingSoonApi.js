@@ -64,6 +64,7 @@ const commignSoonSlice = api.injectEndpoints({
         };
       },
       overrideExisting: true,
+      providesTags: ["ChallengeVideo"],
     }),
 
     markWatchChallengeVideo: builder.mutation({
@@ -82,7 +83,9 @@ const commignSoonSlice = api.injectEndpoints({
           url: `/videos/mark-video-watched/${id}`,
         };
       },
+      invalidatesTags: ["ChallengeVideo"],
     }),
+    
   }),
 });
 
