@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 import { Heart, Share2, Bookmark, Eye, Calendar, Clock } from "lucide-react";
 import { useTodayLetestVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
 import Spinner from "@/app/(commonLayout)/Spinner";
-import Image from "next/image";
+import ImageWithLoader from "@/components/share/ImageWithLoader";
+import { getVideoAndThumbnail } from "@/components/share/imageUrl";
 
 const TodaysVideoPlayer = () => {
   const { data, isLoading } = useTodayLetestVideoQuery();
@@ -13,6 +14,7 @@ const TodaysVideoPlayer = () => {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(true);
 
   const video = data?.data || {};
   console.log("from video player", video);
@@ -41,6 +43,13 @@ const TodaysVideoPlayer = () => {
       return "";
     }
   }, [createdAt]);
+
+  // Reset thumbnail loading when video data changes
+  useEffect(() => {
+    if (video?.thumbnailUrl) {
+      setThumbnailLoading(true);
+    }
+  }, [video?.thumbnailUrl]);
 
   const formatNumber = (num) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
@@ -88,36 +97,32 @@ const TodaysVideoPlayer = () => {
           {/* If not clicked yet → show thumbnail */}
           {!showVideo && video?.thumbnailUrl && (
             <div className="relative w-full h-[25vh] md:h-[30vh] lg:h-[70vh]">
-              <Image
-                src={
-                  video.thumbnailUrl.startsWith("http")
-                    ? video.thumbnailUrl
-                    : `https://${video.thumbnailUrl}`
-                }
+              <ImageWithLoader
+                src={getVideoAndThumbnail(video?.thumbnailUrl)}
                 alt={video.title}
-                width={1280}
-                height={720}
+                containerClassName="w-full h-[25vh] md:h-[30vh] lg:h-[70vh]"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
-                className="w-full h-full object-cover"
                 quality={85}
-                loading="lazy"
+                onLoadComplete={() => setThumbnailLoading(false)}
               />
 
-              {/* Play Button Overlay */}
-              <button
-                onClick={() => setShowVideo(true)}
-                className="absolute inset-0 flex items-center justify-center  hover:bg-opacity-40 transition"
-              >
-                <div className="w-12 h-12 bg-red  rounded-full flex items-center justify-center shadow-lg">
-                  <svg
-                    className="w-8 h-8 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M6 4l12 6-12 6V4z" />
-                  </svg>
-                </div>
-              </button>
+              {/* Play Button Overlay - Only show when thumbnail is loaded */}
+              {!thumbnailLoading && (
+                <button
+                  onClick={() => setShowVideo(true)}
+                  className="absolute inset-0 flex items-center justify-center  hover:bg-opacity-40 transition z-20"
+                >
+                  <div className="w-12 h-12 bg-red  rounded-full flex items-center justify-center shadow-lg">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M6 4l12 6-12 6V4z" />
+                    </svg>
+                  </div>
+                </button>
+              )}
             </div>
           )}
 
