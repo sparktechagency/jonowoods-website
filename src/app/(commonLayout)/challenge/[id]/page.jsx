@@ -147,7 +147,7 @@ const ChallengePage = ({ params }) => {
         <h2 className="text-2xl font-bold mb-4">No challenge videos found</h2>
         <button
           onClick={() => router.push("/challenge")}
-          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/80"
         >
           Back to Challenges
         </button>
@@ -297,10 +297,10 @@ const ChallengePage = ({ params }) => {
                   {/* Lock overlay for inaccessible videos - Only show when thumbnail is loaded */}
                   {!isAccessible && !isThumbnailLoading && (
                     <div className="absolute inset-0   flex items-center justify-center z-10">
-                      <div className="text-center bg-red-600 text-white px-5 py-3 opacity-80 rounded-lg">
+                      <div className="text-center bg-red-600 text-white px-4 py-2 opacity-80 rounded-lg">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-8 w-8 mx-auto mb-2"
+                          className="h-8 w-8 mx-auto mb-"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -314,7 +314,7 @@ const ChallengePage = ({ params }) => {
                         </svg>
                         {video.nextUnlockTime ? (
                           <div>
-                            <p className="text-sm mb-1">Unlocks in</p>
+                            <p className="text-sm ">Unlocks in</p>
                             <p className="text-xs font-bold text-yellow-300">
                               {videoCountdown || "Calculating..."}
                             </p>
@@ -345,9 +345,9 @@ const ChallengePage = ({ params }) => {
                   )}
 
                   {/* Video number */}
-                  <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
+                  {/* <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
                     Video {index + 1}
-                  </div>
+                  </div> */}
 
                   {/* Play button overlay - Only show when thumbnail is loaded */}
                   {isAccessible && !isThumbnailLoading && (
