@@ -9,8 +9,19 @@ const favoriteVideoApi = api.injectEndpoints({
           url: `/community/leaderboard`,
         };
       },
-      providesTags: ["Community"],
+      providesTags: ["Leaderboard"],
     }),
+
+    leaderboardGlobalStatus: builder.query({
+      query: () => {
+        return {
+          url: `/preference/get-is-leaderboard-shown`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Leaderboard"],
+    }),
+
     singleVideo: builder.query({
       query: (id) => {
         return {
@@ -18,7 +29,7 @@ const favoriteVideoApi = api.injectEndpoints({
           url: `/videos/${id}`,
         };
       },
-      
+      providesTags: ["Community"],
 
     }),
 
@@ -35,5 +46,5 @@ const favoriteVideoApi = api.injectEndpoints({
   }),
 });
 
-export const { useCommunityLeaderBoardQuery,useSingleVideoQuery,useGetFeaturedPostQuery } = favoriteVideoApi;
+export const { useCommunityLeaderBoardQuery,useSingleVideoQuery,useGetFeaturedPostQuery,useLeaderboardGlobalStatusQuery } = favoriteVideoApi;
 

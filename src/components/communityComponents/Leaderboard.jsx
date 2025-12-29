@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communityLeaderBoard";
-
-const STORAGE_KEY = "leaderboard_visible";
+import { useCommunityLeaderBoardQuery, useLeaderboardGlobalStatusQuery } from "@/redux/featured/community/communityLeaderBoard";
 
 const Leaderboard = () => {
   const router = useRouter();
@@ -12,21 +9,12 @@ const Leaderboard = () => {
   
   // Get active tab from URL, default to "time"
   const activeTab = searchParams.get("tab") || "time";
-  
-  // Initialize with null to handle hydration properly
-  const [isVisible, setIsVisible] = useState(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   const { data: leaderboard } = useCommunityLeaderBoardQuery();
+  const { data: leaderboardStatus } = useLeaderboardGlobalStatusQuery();
+  
   const leaderboardData = leaderboard?.data;
-
-  // Load saved preference after component mounts
-  useEffect(() => {
-    setIsMounted(true);
-    const saved = localStorage.getItem(STORAGE_KEY);
-    // Default to true if no saved preference
-    setIsVisible(saved !== null ? saved === "true" : true);
-  }, []);
+  const leaderboardIsShown = leaderboardStatus?.data?.leaderboardIsShown ?? false;
 
   // Defensive fallback to empty arrays
   const matTimeData = leaderboardData?.topByMatTime || [];
@@ -52,46 +40,13 @@ const Leaderboard = () => {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  // Handle visibility toggle with localStorage
-  const handleToggleVisibility = () => {
-    const newVisibility = !isVisible;
-    setIsVisible(newVisibility);
-    localStorage.setItem(STORAGE_KEY, String(newVisibility));
-  };
-
-  // Don't render until mounted to avoid hydration mismatch
-  if (!isMounted || isVisible === null) {
-    return (
-      <div className="w-full my-10 px-4 md:px-8 lg:px-12">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-primary">Leaderboard</h2>
-          <div className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300">
-            <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full my-10 px-4 md:px-8 lg:px-12">
-      <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-primary">Leaderboard</h2>
-        <button
-          onClick={handleToggleVisibility}
-          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          style={{ backgroundColor: isVisible ? '#ef4444' : '#9ca3af' }}
-          aria-label="Toggle leaderboard visibility"
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              isVisible ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
+      <div className="mb-4">
+        <h2 className="text-lg font-medium text-primary"> {leaderboardIsShown  && "Leaderboard"}</h2>
       </div>
 
-      {isVisible && (
+      {leaderboardIsShown && (
         <>
           {/* Tabs for Mobile & Tablet */}
           <div className="lg:hidden mb-6">
