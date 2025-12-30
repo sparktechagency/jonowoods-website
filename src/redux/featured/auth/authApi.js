@@ -88,7 +88,7 @@ const authSlice = api.injectEndpoints({
     }),
 
     updateProfile: builder.mutation({
-      query: ({data}) => {
+      query: ({ data }) => {
         return {
           method: "PATCH",
           url: "/users/profile",
@@ -127,6 +127,16 @@ const authSlice = api.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
+    // GET: Get all push notifications with filtering and pagination
+    getGreetingMessage: builder.query({
+      query: () => {
+        return {
+          url: `/preference/get-getting`,
+          method: "GET",
+        };
+      },
+      providesTags: ["GreetingMessage"],
+    }),
   }),
 });
 
@@ -143,5 +153,5 @@ export const {
   useMyProfileQuery,
   useLoginMutation,
   useUserDeleteAccountMutation,
-
+  useGetGreetingMessageQuery,
 } = authSlice;

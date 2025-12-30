@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -124,8 +124,8 @@ const VideoPlayerPage = ({ params }) => {
     }
   }, [nextVideoUnlockTime, refetch]);
 
-  // Handle video completion
-  const handleVideoComplete = async (videoId, shouldNavigate = false) => {
+  // Handle video completion - Navigate back to challenge list page
+  const handleVideoComplete = useCallback(async (videoId) => {
     // Prevent duplicate processing
     if (
       completionProcessedRef.current.has(videoId) ||
@@ -142,82 +142,50 @@ const VideoPlayerPage = ({ params }) => {
       console.log("Marking video as complete:", videoId);
       const response = await markWatchChallengeVideo(videoId).unwrap();
 
-      // Update local state immediately
-      setCompletedVideos((prev) => {
-        if (prev.includes(videoId)) return prev;
-        return [...prev, videoId];
-      });
+      // Check if there are more videos
+      const currentIndex = videos.findIndex((v) => v._id === videoId);
+      const hasMoreVideos = currentIndex < videos.length - 1;
 
-      // Handle time-locked next video
+      // Handle time-locked next video - Still navigate back but show message
       if (response?.data?.nextVideoInfo?.nextUnlockTime) {
-        setNextVideoUnlockTime(response.data.nextVideoInfo.nextUnlockTime);
         const countdownInfo = calculateCountdown(
           response.data.nextVideoInfo.nextUnlockTime
         );
 
         toast.success("Video completed!", {
           description: `Next video will unlock in ${countdownInfo.formatted}`,
-          duration: 5000,
+          duration: 3000,
         });
 
-        isProcessingCompletionRef.current = false;
-        return; // Don't navigate if next video is time-locked
+        // Small delay for toast to show
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Navigate back to challenge list page
+        setIsNavigating(true);
+        router.push(`/challenge/${challengeId}`);
+        return;
       }
 
-      // If we should navigate to next video
-      if (shouldNavigate) {
-        const currentIndex = videos.findIndex((v) => v._id === videoId);
-
-        if (currentIndex < videos.length - 1) {
-          const nextVideo = videos[currentIndex + 1];
-
-          if (nextVideo) {
-            setIsNavigating(true);
-
-            toast.success("Video completed!", {
-              description: `Loading next video: ${nextVideo.title}`,
-              duration: 2000,
-            });
-
-            // Refetch to get latest state
-            const refetchedData = await refetch();
-
-            // Small delay to ensure state updates
-            await new Promise((resolve) => setTimeout(resolve, 500));
-
-            // Navigate to next video
-            console.log("Navigating to next video:", nextVideo._id);
-            router.push(`/challenge/${challengeId}/video/${nextVideo._id}`);
-          }
-        } else {
-          toast.success("Congratulations!", {
-            description: "You have completed all challenge videos!",
-            duration: 5000,
-          });
-          isProcessingCompletionRef.current = false;
-        }
+      // Show success message based on whether there are more videos
+      if (hasMoreVideos) {
+        toast.success("Video completed!", {
+          description: "Next video is now unlocked. You can watch it from the challenge list.",
+          duration: 3000,
+        });
       } else {
-        // Manual complete without auto-navigation
-        const currentIndex = videos.findIndex((v) => v._id === videoId);
-
-        if (currentIndex < videos.length - 1) {
-          const nextVideo = videos[currentIndex + 1];
-
-          toast.success("Video marked as complete!", {
-            description: nextVideo ? "You can now watch the next video." : "",
-            duration: 3000,
-          });
-        } else {
-          toast.success("Congratulations!", {
-            description: "You have completed all challenge videos!",
-            duration: 5000,
-          });
-        }
-
-        // Refetch to update UI
-        await refetch();
-        isProcessingCompletionRef.current = false;
+        toast.success("Congratulations!", {
+          description: "You have completed all challenge videos!",
+          duration: 3000,
+        });
       }
+
+      // Important: Wait for mutation to fully settle before navigation
+      // This ensures RTK Query mutation completes and doesn't get cancelled
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Navigate back to challenge list page
+      setIsNavigating(true);
+      router.push(`/challenge/${challengeId}`);
     } catch (error) {
       console.error("Error marking video as completed:", error);
       toast.error("Failed to mark video as completed", {
@@ -227,7 +195,7 @@ const VideoPlayerPage = ({ params }) => {
       completionProcessedRef.current.delete(videoId);
       isProcessingCompletionRef.current = false;
     }
-  };
+  }, [videos, markWatchChallengeVideo, challengeId, router]);
 
   // Manual complete button handler
   const handleManualComplete = async () => {
@@ -240,20 +208,52 @@ const VideoPlayerPage = ({ params }) => {
       return;
     }
 
-    // Manual complete with auto-navigation
-    await handleVideoComplete(currentVideo._id, true);
+    // Manual complete - will navigate back to challenge list
+    await handleVideoComplete(currentVideo._id);
   };
 
-  // Video ended handler - AUTO NAVIGATION
-  const handleVideoEnded = async () => {
-    console.log("Video ended, marking as complete and navigating to next");
-    if (!isCurrentVideoCompleted && !isProcessingCompletionRef.current) {
-      await handleVideoComplete(currentVideo._id, true); // Auto-navigate on video end
+  // Video ended handler - Automatically trigger the "Mark Complete & Go Back" button action
+  // IMPORTANT: Don't await here - fire and forget to prevent component unmount issues
+  const handleVideoEnded = useCallback(() => {
+    console.log("🎬 ===== VIDEO ENDED EVENT TRIGGERED =====");
+    console.log("Video ended - Automatically triggering Mark Complete & Go Back button action");
+    console.log("Current video:", currentVideo?._id);
+    console.log("Completed videos:", completedVideos);
+    console.log("Is marking complete:", isMarkingComplete);
+    console.log("Is processing:", isProcessingCompletionRef.current);
+    
+    if (!currentVideo?._id) {
+      console.log("❌ No current video ID, skipping");
+      return;
     }
-  };
 
-  // Reset navigation state when component unmounts or video changes
+    // Check if already completed - same check as button uses (isCurrentVideoCompleted)
+    if (completedVideos.includes(currentVideo._id)) {
+      console.log("⚠️ Video already completed, skipping");
+      return;
+    }
+
+    // Check if already processing - same check as button
+    if (isMarkingComplete || isProcessingCompletionRef.current) {
+      console.log("⚠️ Already processing completion, skipping");
+      return;
+    }
+
+    // Fire and forget - don't await to prevent unmount issues
+    // handleVideoComplete will handle the async operations
+    console.log("✅ Auto-executing: Mark Complete & Go Back");
+    console.log("Calling handleVideoComplete for video:", currentVideo._id);
+    handleVideoComplete(currentVideo._id).catch((error) => {
+      console.error("Error in handleVideoComplete:", error);
+    });
+  }, [currentVideo, completedVideos, isMarkingComplete, handleVideoComplete]);
+
+  // Reset state when video changes
   useEffect(() => {
+    // Reset processing state when video changes
+    isProcessingCompletionRef.current = false;
+    setIsNavigating(false);
+    
     return () => {
       setIsNavigating(false);
       isProcessingCompletionRef.current = false;
@@ -272,7 +272,7 @@ const VideoPlayerPage = ({ params }) => {
         <div className="text-center">
           <Spinner />
           {isNavigating && (
-            <p className="mt-4 text-gray-600">Loading next video...</p>
+            <p className="mt-4 text-gray-600">Completing video and redirecting...</p>
           )}
         </div>
       </div>
@@ -350,16 +350,41 @@ const VideoPlayerPage = ({ params }) => {
           </div> */}
 
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-            {!showVideo ? (
-              // Thumbnail block
+            {/* Player always mounted - never unmount */}
+            <UniversalVideoPlayer
+              video={currentVideo}
+              autoplay={showVideo} // Control autoplay, not mounting
+              aspectRatio="16:9"
+              watermark={{
+                text: `Yoga With Jen`,
+                position: "top-right",
+              }}
+              onSecurityViolation={(type) => {
+                fetch("/api/security-log", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    videoId: currentVideo._id,
+                    violationType: type,
+                  }),
+                });
+              }}
+              onPlay={() => {
+                console.log("Playing");
+                setShowVideo(true); // Hide thumbnail when playing starts
+              }}
+              onEnded={handleVideoEnded}
+            />
+
+            {/* Thumbnail overlay - shown when video not started */}
+            {!showVideo && (
               <div
-                className="relative cursor-pointer group"
+                className="absolute inset-0 cursor-pointer group z-30"
                 onClick={() => setShowVideo(true)}
               >
                 <ImageWithLoader
                   src={getVideoAndThumbnail(currentVideo?.thumbnailUrl)}
                   alt="Video thumbnail"
-                  containerClassName="rounded-2xl w-full h-[25vh] lg:h-[70vh]"
+                  containerClassName="rounded-2xl w-full h-full"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1280px"
                   quality={85}
                   onLoadComplete={() => setThumbnailLoading(false)}
@@ -367,37 +392,15 @@ const VideoPlayerPage = ({ params }) => {
 
                 {/* Play Button Overlay - Only show when thumbnail is loaded */}
                 {!thumbnailLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <div className="bg-red-500 rounded-full p-2  transition">
-                      <svg className="w-8 h-8 text-red" viewBox="0 0 24 24">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                    <div className="bg-red-500 rounded-full p-4 transition hover:scale-110">
+                      <svg className="w-12 h-12 text-white" viewBox="0 0 24 24">
                         <polygon points="5,3 19,12 5,21" fill="white" />
                       </svg>
                     </div>
                   </div>
                 )}
               </div>
-            ) : (
-              // Video player section
-              <UniversalVideoPlayer
-                video={currentVideo}
-                autoplay={true}
-                aspectRatio="16:9"
-                watermark={{
-                  text: `Yoga With Jen`,
-                  position: "top-right",
-                }}
-                onSecurityViolation={(type) => {
-                  fetch("/api/security-log", {
-                    method: "POST",
-                    body: JSON.stringify({
-                      videoId: currentVideo._id,
-                      violationType: type,
-                    }),
-                  });
-                }}
-                onPlay={() => console.log("Playing")}
-                onEnded={handleVideoEnded}
-              />
             )}
           </div>
 
@@ -487,11 +490,11 @@ const VideoPlayerPage = ({ params }) => {
               isNavigating ? (
                 <>
                   {isNavigating
-                    ? "Loading next video..."
+                    ? "Redirecting..."
                     : "Marking Complete..."}
                 </>
               ) : (
-                <>Next Video</>
+                <>Mark Complete & Go Back</>
               )}
             </button>
           </div>

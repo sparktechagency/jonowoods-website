@@ -23,7 +23,7 @@ export const TodaysVideo = () => {
   console.log(image)
   return (
     <div className="mb-4 px-4 md:px-8 lg:px-12 ">
-      <h2 className="text-xl font-bold mb-2">Today's Video</h2>
+      <h2 className="text-xl lg:text-2xl font-bold mb-2">Today's Video</h2>
       <VideoCard
         title={title}
         imageUrl={image}

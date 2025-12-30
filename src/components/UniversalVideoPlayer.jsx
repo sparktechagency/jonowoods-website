@@ -22,13 +22,20 @@ const UniversalVideoPlayer = ({
   const iframeRef = useRef(null);
   const playerRef = useRef(null);
   const containerRef = useRef(null);
-  const messageHandlerRef = useRef(null);
+  const callbacksRef = useRef({ onReady, onPlay, onPause, onEnded, onError });
+  const isInitializedRef = useRef(false);
+  const progressCheckIntervalRef = useRef(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [devToolsOpen, setDevToolsOpen] = useState(false);
   const [securityWarning, setSecurityWarning] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  // Update callbacks ref when they change
+  useEffect(() => {
+    callbacksRef.current = { onReady, onPlay, onPause, onEnded, onError };
+  }, [onReady, onPlay, onPause, onEnded, onError]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -47,40 +54,253 @@ const UniversalVideoPlayer = ({
     }
   };
 
-  // Listen for iframe messages to detect video end
+  // Load Bunny.net Player.js script dynamically (only once globally)
   useEffect(() => {
-    if (!isMounted) return;
+    if (typeof window === "undefined") return;
+    
+    // Check if script is already loaded or loading
+    const existingScript = document.querySelector(
+      'script[src="https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js"]'
+    );
+    
+    if (window.playerjs || existingScript) {
+      return; // Script already loaded or loading
+    }
 
-    const handleMessage = (event) => {
-      // Check if message is from iframe
-      if (event.origin !== "https://iframe.mediadelivery.net") return;
+    console.log("Loading Bunny.net Player.js script...");
+    const script = document.createElement("script");
+    script.src = "https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js";
+    script.async = true;
+    
+    script.onload = () => {
+      console.log("✅ Bunny.net Player.js script loaded successfully");
+    };
+    
+    script.onerror = () => {
+      console.error("❌ Failed to load Bunny.net Player.js script");
+    };
+    
+    document.body.appendChild(script);
+  }, []);
+
+  // Initialize Official Bunny.net Player.js
+  useEffect(() => {
+    if (!isMounted || !iframeRef.current || isInitializedRef.current) return;
+
+    // Reset initialization flag when video changes
+    if (video?.videoId && video?.libraryId) {
+      isInitializedRef.current = false;
+    }
+
+    const iframe = iframeRef.current;
+
+    let retryCount = 0;
+    const MAX_RETRIES = 50; // Max 10 seconds (50 * 200ms)
+
+    // Wait for iframe to load AND player.js to be available
+    const initPlayer = () => {
+      retryCount++;
+      
+      // Check if iframe is loaded
+      if (!iframe.contentWindow) {
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(initPlayer, 200);
+        } else {
+          console.error("❌ Timeout: Iframe failed to load");
+          setError("Failed to load video player");
+        }
+        return;
+      }
+
+      // Check if player.js is loaded
+      if (!window.playerjs) {
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(initPlayer, 200);
+        } else {
+          console.error("❌ Timeout: player.js failed to load");
+          setError("Failed to load video player library");
+        }
+        return;
+      }
+
+      // Prevent multiple initializations
+      if (isInitializedRef.current || playerRef.current) {
+        console.log("Player already initialized");
+        return;
+      }
 
       try {
-        const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
-        
-        // Handle different event types
-        if (data.event === "ended" || data.type === "ended") {
-          console.log("Video ended - triggering onEnded callback");
-          onEnded();
-        } else if (data.event === "play" || data.type === "play") {
-          onPlay();
-        } else if (data.event === "pause" || data.type === "pause") {
-          onPause();
-        } else if (data.event === "ready" || data.type === "ready") {
-          onReady();
-        }
-      } catch (e) {
-        // Ignore parsing errors
+        console.log("Initializing Bunny.net Player.js...");
+        // Create official Bunny.net Player instance
+        const player = new window.playerjs.Player(iframe);
+        playerRef.current = player;
+        isInitializedRef.current = true;
+
+        // Track video progress for fallback detection
+        let videoDuration = 0;
+        let endedTriggered = false;
+
+        // Official Bunny.net events - 100% reliable
+        // Use callbacks from ref to avoid dependency issues
+        player.on("ready", () => {
+          console.log("✅ Bunny Player: Ready");
+          setIsLoading(false);
+          
+          // Get video duration when ready
+          try {
+            player.getDuration((duration) => {
+              console.log("📹 Video duration:", duration, "seconds");
+              videoDuration = duration;
+            });
+          } catch (e) {
+            console.log("Could not get duration:", e);
+          }
+          
+          callbacksRef.current.onReady();
+        });
+
+        player.on("play", () => {
+          console.log("▶️ Bunny Player: Play");
+          endedTriggered = false; // Reset on play
+          
+          // Start progress checking as fallback
+          if (progressCheckIntervalRef.current) {
+            clearInterval(progressCheckIntervalRef.current);
+          }
+          
+          progressCheckIntervalRef.current = setInterval(() => {
+            if (endedTriggered || !playerRef.current) {
+              if (progressCheckIntervalRef.current) {
+                clearInterval(progressCheckIntervalRef.current);
+                progressCheckIntervalRef.current = null;
+              }
+              return;
+            }
+            
+            try {
+              player.getCurrentTime((currentTime) => {
+                if (videoDuration > 0 && currentTime >= videoDuration - 1) {
+                  console.log("🏁 Video reached end via progress check - Duration:", videoDuration, "Current:", currentTime);
+                  endedTriggered = true;
+                  if (progressCheckIntervalRef.current) {
+                    clearInterval(progressCheckIntervalRef.current);
+                    progressCheckIntervalRef.current = null;
+                  }
+                  callbacksRef.current.onEnded();
+                }
+              });
+            } catch (e) {
+              // Silently fail
+            }
+          }, 1000); // Check every second
+          
+          callbacksRef.current.onPlay();
+        });
+
+        player.on("pause", () => {
+          console.log("⏸️ Bunny Player: Pause");
+          if (progressCheckIntervalRef.current) {
+            clearInterval(progressCheckIntervalRef.current);
+            progressCheckIntervalRef.current = null;
+          }
+          callbacksRef.current.onPause();
+        });
+
+        // Listen for ended event - Primary method
+        player.on("ended", () => {
+          if (endedTriggered) {
+            console.log("⚠️ Ended event already triggered, ignoring duplicate");
+            return;
+          }
+          endedTriggered = true;
+          console.log("🏁 Bunny Player: Ended - Official event triggered");
+          console.log("Calling onEnded callback...");
+          
+          if (progressCheckIntervalRef.current) {
+            clearInterval(progressCheckIntervalRef.current);
+            progressCheckIntervalRef.current = null;
+          }
+          
+          callbacksRef.current.onEnded(); // ✅ 100% reliable completion tracking
+        });
+
+        // Also try alternative event names (some players use different names)
+        player.on("complete", () => {
+          if (endedTriggered) return;
+          console.log("🏁 Bunny Player: Complete event triggered");
+          endedTriggered = true;
+          if (progressCheckIntervalRef.current) {
+            clearInterval(progressCheckIntervalRef.current);
+            progressCheckIntervalRef.current = null;
+          }
+          callbacksRef.current.onEnded();
+        });
+
+        player.on("error", (err) => {
+          console.error("❌ Bunny Player: Error", err);
+          setIsLoading(false);
+          setError("Failed to load video");
+          callbacksRef.current.onError(err);
+        });
+
+        console.log("✅ Bunny Player initialized successfully with all event listeners");
+
+      } catch (err) {
+        console.error("❌ Failed to initialize Bunny Player:", err);
+        setIsLoading(false);
+        setError("Failed to initialize video player");
+        callbacksRef.current.onError(err);
       }
     };
 
-    messageHandlerRef.current = handleMessage;
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
+    // Wait for iframe to load before initializing
+    const handleIframeLoad = () => {
+      console.log("Iframe loaded, initializing player...");
+      setTimeout(initPlayer, 500); // Small delay to ensure iframe is ready
     };
-  }, [isMounted, onEnded, onPlay, onPause, onReady]);
+
+    if (iframe.complete || iframe.contentWindow) {
+      handleIframeLoad();
+    } else {
+      iframe.addEventListener("load", handleIframeLoad);
+    }
+
+    // Also try to initialize after a delay (fallback)
+    const fallbackInit = setTimeout(() => {
+      if (!isInitializedRef.current && !playerRef.current) {
+        console.log("Fallback: Attempting player initialization...");
+        initPlayer();
+      }
+    }, 2000);
+
+    // Cleanup: Destroy player instance when component unmounts or video changes
+    return () => {
+      clearTimeout(fallbackInit);
+      if (iframe) {
+        iframe.removeEventListener("load", handleIframeLoad);
+      }
+      
+      // Clear any intervals
+      if (progressCheckIntervalRef.current) {
+        clearInterval(progressCheckIntervalRef.current);
+        progressCheckIntervalRef.current = null;
+      }
+      
+      if (playerRef.current) {
+        try {
+          console.log("Cleaning up player instance...");
+          playerRef.current.off(); // Remove all event listeners
+          if (typeof playerRef.current.destroy === "function") {
+            playerRef.current.destroy(); // Destroy player instance
+          }
+        } catch (err) {
+          console.error("Error destroying player:", err);
+        }
+        playerRef.current = null;
+        isInitializedRef.current = false;
+      }
+    };
+  }, [isMounted, video?.videoId, video?.libraryId]);
 
   // DevTools Detection
   useEffect(() => {
@@ -173,7 +393,7 @@ const UniversalVideoPlayer = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isMounted, autoplay, onSecurityViolation]);
 
-  // Iframe load detection
+  // Iframe load detection (fallback for initial loading state)
   useEffect(() => {
     if (!isMounted || !iframeRef.current) return;
 
@@ -181,14 +401,12 @@ const UniversalVideoPlayer = ({
     let loadingTimeout;
 
     const handleLoad = () => {
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1500);
-    };
-
-    const handleError = () => {
-      setIsLoading(false);
-      setError("Failed to load video");
+      // Player.js ready event will handle loading state, this is just fallback
+      loadingTimeout = setTimeout(() => {
+        if (isLoading) {
+          setIsLoading(false);
+        }
+      }, 3000);
     };
 
     loadingTimeout = setTimeout(() => {
@@ -196,14 +414,12 @@ const UniversalVideoPlayer = ({
     }, 8000);
 
     iframe.addEventListener('load', handleLoad);
-    iframe.addEventListener('error', handleError);
 
     return () => {
       clearTimeout(loadingTimeout);
       iframe.removeEventListener('load', handleLoad);
-      iframe.removeEventListener('error', handleError);
     };
-  }, [isMounted, video?.videoId, video?.libraryId]);
+  }, [isMounted, video?.videoId, video?.libraryId, isLoading]);
 
   // SSR safeguard
   if (!isMounted) {
@@ -266,37 +482,6 @@ const UniversalVideoPlayer = ({
       }}
       className={className}
     >
-      {(devToolsOpen || securityWarning) && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/95 z-50 text-white text-center p-4 gap-4">
-          <div className="text-5xl">🔒</div>
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Security Alert</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              {devToolsOpen
-                ? "Developer tools detected. Please close DevTools to continue watching."
-                : "Suspicious activity detected. Video playback has been paused for security reasons."}
-            </p>
-          </div>
-
-          <button
-            onClick={() => {
-              setDevToolsOpen(false);
-              setSecurityWarning(false);
-              if (autoplay) {
-                try {
-                  playerRef.current?.play?.();
-                } catch (e) {
-                  // Silent fail
-                }
-              }
-            }}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-primary text-primary-foreground hover:bg-primary/90 h-10 py-2 px-4"
-          >
-            Continue
-          </button>
-        </div>
-      )}
-
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
           <Loader2 className="w-12 h-12 text-white animate-spin" />
@@ -332,10 +517,14 @@ const UniversalVideoPlayer = ({
         allowFullScreen
         sandbox="allow-scripts allow-same-origin allow-presentation"
         referrerPolicy="no-referrer"
-     
         className="absolute top-0 left-0 w-full h-full border-0"
         onLoad={() => {
-          setTimeout(() => setIsLoading(false), 1500);
+          // Player.js ready event handles this, but keep as fallback
+          setTimeout(() => {
+            if (isLoading) {
+              setIsLoading(false);
+            }
+          }, 1500);
         }}
         onError={() => {
           setIsLoading(false);

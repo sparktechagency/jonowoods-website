@@ -18,7 +18,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   if (isLoading) {
     return (
       <section className="mb-10 px-4 md:px-8 lg:px-12">
-        <h2 className="text-xl font-semibold mb-4">Browse By Categories</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold mb-4">Browse By Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
           {[...Array(6)].map((_, i) => (
             <div
@@ -37,7 +37,7 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   if (isError) {
     return (
       <section className="mb-10 px-4 md:px-8 lg:px-12">
-        <h2 className="text-xl font-semibold mb-4">Browse By Categories</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold mb-4">Browse By Categories</h2>
         <p className="text-center text-red-500">
           Failed to load categories. Please try again later.
         </p>
@@ -52,9 +52,9 @@ export default function BrowseByCategory({ onSeeMore, onClassClick }) {
   };
 
   return (
-    <section className="mb-10 px-4 md:px-8 lg:px-12">
+    <section className="mt-6 px-4 md:px-8 lg:px-12">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Browse By Categories</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold lg:font-bold">Browse By Categories</h2>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">

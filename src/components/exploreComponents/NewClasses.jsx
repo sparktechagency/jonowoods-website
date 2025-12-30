@@ -15,7 +15,7 @@ export default function NewClasses() {
   if (isLoading) {
     return (
       <section className="my-10 px-4 md:px-8 lg:px-12">
-        <h2 className="text-xl font-semibold mb-4">Join a Challenge</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold mb-4">Join a Challenge</h2>
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">
           {[...Array(6)].map((_, i) => (
             <div
@@ -31,7 +31,7 @@ export default function NewClasses() {
   if (isError) {
     return (
       <section className="my-10 px-4 md:px-8 lg:px-12">
-        <h2 className="text-xl font-semibold mb-4">Join a Challenge</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold lg:font-bold mb-4">Join a Challenge</h2>
         <p className="text-center text-red-500">
           Failed to load challenges. Please try again later.
         </p>
@@ -48,7 +48,7 @@ export default function NewClasses() {
   return (
     <section className="my-10 px-4 md:px-8 lg:px-12">
       <div className="flex mb-4">
-        <h2 className="text-xl font-semibold">Join a Challenge</h2>
+        <h2 className="text-xl lg:text-2xl font-semibold">Join a Challenge</h2>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-y-5 gap-x-2">

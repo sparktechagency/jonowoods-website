@@ -46,7 +46,7 @@ export const ComingSoon = () => {
     if (isLoading) {
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          <h2 className="hidden lg:block text-xl font-bold mb-2 animate-pulse">
+          <h2 className="hidden lg:block text-xl lg:text-2xl font-bold mb-2 animate-pulse">
             Coming Soon
           </h2>
           <div className="animate-pulse bg-gray-200 rounded-lg h-[25vh] md:h-[50vh] lg:h-[70vh]"></div>
@@ -58,7 +58,7 @@ export const ComingSoon = () => {
     if (isError || !videoData) {
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+          <h2 className="text-xl lg:text-2xl font-bold mb-2">Coming Soon</h2>
           <VideoCard
             title="Coming Soon"
             imageUrl={fallbackImage}
@@ -73,7 +73,7 @@ export const ComingSoon = () => {
     if (videoData.isReady === "comingSoon") {
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+          <h2 className="text-xl lg:text-2xl font-bold mb-2">Coming Soon</h2>
           <div className="relative">
             <VideoCard
               title={videoData.title || "Coming Soon"}
@@ -111,7 +111,7 @@ export const ComingSoon = () => {
 
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          <h2 className="text-xl font-bold mb-2">It's Here!</h2>
+          <h2 className="text-xl lg:text-2xl font-bold mb-2">It's Here!</h2>
           <div className="relative">
             <VideoCard
               title={videoData.title || "New Content"}
@@ -128,7 +128,7 @@ export const ComingSoon = () => {
     if (videoData.isReady === "checkThisOut") {
       return (
         <div className="mb-4 px-4 md:px-8 lg:px-12">
-          <h2 className="text-xl font-bold mb-2">Check This Out</h2>
+          <h2 className="text-xl lg:text-2xl font-bold mb-2">Check This Out</h2>
           <div className="relative">
             <VideoCard
               title={videoData.title || "External Content"}
@@ -145,7 +145,7 @@ export const ComingSoon = () => {
     // Default fallback - jodi kono condition match na kore
     return (
       <div className="mb-4 px-4 md:px-8 lg:px-12">
-        <h2 className="text-xl font-bold mb-2">Coming Soon</h2>
+        <h2 className="text-xl lg:text-2xl font-bold mb-2">Coming Soon</h2>
         <VideoCard
           title="Coming Soon"
           imageUrl={fallbackImage}

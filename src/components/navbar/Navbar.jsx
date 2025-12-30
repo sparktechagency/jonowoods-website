@@ -27,6 +27,7 @@ import {
   MdDescription,
 } from "react-icons/md";
 import {
+  useGetGreetingMessageQuery,
   useMyProfileQuery,
   useUserDeleteAccountMutation,
 } from "@/redux/featured/auth/authApi";
@@ -83,6 +84,8 @@ export default function Navbar() {
 
   // Redux queries and mutations
   const { data: userData } = useMyProfileQuery();
+  const { data: greetingMessageData } = useGetGreetingMessageQuery();
+  console.log( "greetingMessageData", greetingMessageData);
   // console.log("userData", userData);
   const {
     data: notificationData,
@@ -555,7 +558,8 @@ export default function Navbar() {
                     {/* User info - hidden on mobile */}
                     <div className="hidden lg:block text-left">
                       <p className="text-sm text-gray-900">{userData?.name}</p>
-                      <p className="text-xs text-gray-500">{userData?.email}</p>
+                      {/* <p className="text-xs text-gray-500">{userData?.email}</p> */}
+                      <p className="text-xs text-gray-500">{greetingMessageData?.data?.greeting.slice(0, 50) || "Welcome to Yoga With Jen"}</p>
                     </div>
 
                     <FaChevronDown
@@ -583,7 +587,7 @@ export default function Navbar() {
                               {userData?.name || "User"}
                             </h3>
                             <p className="text-sm text-white">
-                              {userData?.email || "user@example.com"}
+                              {greetingMessageData?.data?.greeting.slice(0, 100) || "Welcome to Yoga With Jen"}
                             </p>
                             {/* Connection status */}
                             <p

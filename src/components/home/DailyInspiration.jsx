@@ -16,7 +16,7 @@ export const DailyInspiration = () => {
 
   return (
     <section className="mb-8 px-4 md:px-8 lg:px-12">
-      <h2 className="text-xl font-bold mb-4">Daily Inspiration</h2>
+      <h2 className="text-xl lg:text-2xl font-bold mb-4">Daily Inspiration</h2>
       <VideoCard
         title={title}
         imageUrl={image}
