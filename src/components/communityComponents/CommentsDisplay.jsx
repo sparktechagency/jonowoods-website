@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { getVideoAndThumbnail } from "../share/imageUrl";
@@ -8,6 +9,7 @@ import Spinner from "@/app/(commonLayout)/Spinner";
 import { useGetVideoCommentsQuery } from "@/redux/featured/community/videoCommentApi";
 
 export default function CommentsDisplay() {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [comments, setComments] = useState([]);
 
@@ -49,6 +51,13 @@ export default function CommentsDisplay() {
     }
   };
 
+  // Handle comment click - navigate to video page
+  const handleCommentClick = (videoId) => {
+    if (videoId) {
+      router.push(`/categories/class/${videoId}`);
+    }
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
@@ -74,7 +83,8 @@ export default function CommentsDisplay() {
             {comments.map((comment) => (
               <div
                 key={comment._id}
-                className="flex gap-4 p-4 bg-gray-100 rounded-2xl  shadow-md"
+                onClick={() => handleCommentClick(comment.videoId?._id)}
+                className="flex gap-4 p-4 bg-gray-100 rounded-2xl shadow-md cursor-pointer hover:bg-gray-200 transition-colors duration-200"
               >
                 {/* Video Thumbnail on Left */}
                 <div className="flex-shrink-0">
