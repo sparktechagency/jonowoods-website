@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { getVideoAndThumbnail } from "../share/imageUrl";
+import ImageWithLoader from "../share/ImageWithLoader";
 import Pagination from "./PaginationComponent";
 import Spinner from "@/app/(commonLayout)/Spinner";
 import { useGetVideoCommentsQuery } from "@/redux/featured/community/videoCommentApi";
@@ -88,21 +88,19 @@ export default function CommentsDisplay() {
               >
                 {/* Video Thumbnail on Left */}
                 <div className="flex-shrink-0">
-                  <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-700">
-                    {comment.videoId?.thumbnailUrl ? (
-                      <Image
-                        src={getVideoAndThumbnail(
-                          comment.videoId.thumbnailUrl
-                        )}
-                        alt={comment.videoId.title || "Video thumbnail"}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-600" />
-                    )}
-                  </div>
+                  {comment.videoId?.thumbnailUrl ? (
+                    <ImageWithLoader
+                      src={getVideoAndThumbnail(
+                        comment.videoId.thumbnailUrl
+                      )}
+                      alt={comment.videoId.title || "Video thumbnail"}
+                      containerClassName="w-20 h-20 rounded-lg bg-gray-700"
+                      className="rounded-lg"
+                      sizes="80px"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-gray-600" />
+                  )}
                 </div>
 
                 {/* Comment Text on Right */}
