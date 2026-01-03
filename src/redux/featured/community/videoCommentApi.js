@@ -12,7 +12,7 @@ const videoCommentApi = api.injectEndpoints({
         }
         return {
           method: "GET",
-          url: `/comments/${postId}`,
+          url: `/videos/comments/all-comments`,
           params: params,
         };
       },

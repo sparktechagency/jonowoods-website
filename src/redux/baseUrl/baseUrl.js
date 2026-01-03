@@ -30,6 +30,7 @@ export const api = createApi({
     "Videos",
     "Leaderboard",
     "GreetingMessage",
+    "VideoComments",
   ],
 
   endpoints: () => ({}),

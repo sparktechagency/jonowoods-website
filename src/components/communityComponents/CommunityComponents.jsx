@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import PostCreate from "./PostCreate";
 import PostDisplay from "./PostDisplay";
 import Leaderboard from "./Leaderboard";
+import CommentsDisplay from "./CommentsDisplay";
 import {
   useCreatePostMutation,
   useGetAllPostQuery,
@@ -12,8 +14,12 @@ import { useCommunityLeaderBoardQuery } from "@/redux/featured/community/communi
 import Spinner from "@/app/(commonLayout)/Spinner";
 import Pagination from "./PaginationComponent";
 import { FeaturedPostSection } from "./FeaturedPost";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function CommunityComponents() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || "feed";
   const [currentPage, setCurrentPage] = useState(1);
   const [posts, setPosts] = useState([]);
   const [editingPost, setEditingPost] = useState(null);
@@ -97,12 +103,19 @@ export default function CommunityComponents() {
     setEditingPost(null); // Cancel any editing when changing pages
   };
 
-  if (isLoading) {
+  // Handle tab change with URL update
+  const handleTabChange = (tab) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tab);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  if (isLoading && activeTab === "feed") {
     return <Spinner />;
   }
 
-  // Error state
-  if (isError) {
+  // Error state (only for feed tab)
+  if (isError && activeTab === "feed") {
     return (
       <div className="flex min-h-screen justify-center items-center">
         <div className="text-center bg-red-50 p-6 rounded-lg">
@@ -117,28 +130,41 @@ export default function CommunityComponents() {
   return (
     <main className="flex min-h-screen flex-col items-center mt-6 px-4 md:px-8 lg:px-12">
       <div className="w-full">
-        <PostCreate
-          editPost={editingPost}
-          onEditCancel={handleEditCancel}
-          onPostSuccess={handlePostSuccess}
-        />
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="feed">Feed</TabsTrigger>
+            <TabsTrigger value="comments">Comments</TabsTrigger>
+          </TabsList>
 
-        <FeaturedPostSection />
-        <PostDisplay
-          posts={posts}
-          currentUserId={currentUserId}
-          onPostsUpdate={handlePostsUpdate}
-          onPostEdit={handlePostEdit}
-          onPostDelete={handlePostDelete}
-        />
+          <TabsContent value="feed" className="mt-0">
+            <PostCreate
+              editPost={editingPost}
+              onEditCancel={handleEditCancel}
+              onPostSuccess={handlePostSuccess}
+            />
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={pagination.totalPage}
-          onPageChange={handlePageChange} 
-        />
+            <FeaturedPostSection />
+            <PostDisplay
+              posts={posts}
+              currentUserId={currentUserId}
+              onPostsUpdate={handlePostsUpdate}
+              onPostEdit={handlePostEdit}
+              onPostDelete={handlePostDelete}
+            />
 
-        <Leaderboard leaderboardData={leaderboardData} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={pagination.totalPage}
+              onPageChange={handlePageChange} 
+            />
+
+            <Leaderboard leaderboardData={leaderboardData} />
+          </TabsContent>
+
+          <TabsContent value="comments" className="mt-0">
+            <CommentsDisplay />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );
