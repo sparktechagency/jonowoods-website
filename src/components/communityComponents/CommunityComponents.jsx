@@ -130,8 +130,8 @@ export default function CommunityComponents() {
   return (
     <main className="flex min-h-screen flex-col items-center mt-6 px-4 md:px-8 lg:px-12">
       <div className="w-full">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="mb-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full ">
+          <TabsList className="mb-6 gap-4">
             <TabsTrigger value="feed">Feed</TabsTrigger>
             <TabsTrigger value="comments">Comments</TabsTrigger>
           </TabsList>
