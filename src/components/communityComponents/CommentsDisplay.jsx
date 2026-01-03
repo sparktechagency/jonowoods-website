@@ -63,7 +63,7 @@ export default function CommentsDisplay() {
             {comments.map((comment) => (
               <div
                 key={comment._id}
-                className="flex gap-4 p-4 bg-gray-800 rounded-lg"
+                className="flex gap-4 p-4 bg-gray-100 rounded-2xl  shadow-md"
               >
                 {/* Video Thumbnail on Left */}
                 <div className="flex-shrink-0">
@@ -86,7 +86,7 @@ export default function CommentsDisplay() {
 
                 {/* Comment Text on Right */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm leading-relaxed">
+                  <p className="text-black  leading-relaxed">
                     <span className="font-semibold">
                       {comment.commentCreatorId?.name || "Unknown User"}
                     </span>{" "}
