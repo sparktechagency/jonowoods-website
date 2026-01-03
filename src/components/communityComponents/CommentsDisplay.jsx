@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { formatDistanceToNow } from "date-fns";
 import { getVideoAndThumbnail } from "../share/imageUrl";
 import Pagination from "./PaginationComponent";
 import Spinner from "@/app/(commonLayout)/Spinner";
@@ -36,6 +37,16 @@ export default function CommentsDisplay() {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Format the timestamp to a relative time (e.g., "2 hours ago")
+  const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return "";
+    try {
+      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+    } catch (error) {
+      return "";
+    }
   };
 
   if (isLoading) {
@@ -85,8 +96,8 @@ export default function CommentsDisplay() {
                 </div>
 
                 {/* Comment Text on Right */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-black  leading-relaxed">
+                <div className="flex-1 min-w-0 flex flex-col lg:flex-row lg:justify-between lg:items-start gap-1 lg:gap-4">
+                  <p className="text-black leading-relaxed flex-1">
                     <span className="font-semibold">
                       {comment.commentCreatorId?.name || "Unknown User"}
                     </span>{" "}
@@ -96,6 +107,12 @@ export default function CommentsDisplay() {
                     </span>
                     : {comment.content}
                   </p>
+                  {/* Timestamp - only visible on large screens */}
+                  {comment.createdAt && (
+                    <p className="text-gray-500 text-xs hidden lg:block flex-shrink-0">
+                      {formatTimeAgo(comment.createdAt)}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
