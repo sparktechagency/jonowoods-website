@@ -43,7 +43,7 @@ const TransactionHistory = () => {
 
   if (isLoading) {
     return (
-      <Card className="w-full">
+      <Card className="w-full mt-10">
         <CardHeader>
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
@@ -56,7 +56,7 @@ const TransactionHistory = () => {
 
   if (error) {
     return (
-      <Card className="w-full">
+      <Card className="w-full mt-10">
         <CardHeader>
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
@@ -69,7 +69,7 @@ const TransactionHistory = () => {
 
   if (!transactionHistory?.data?.transactions?.length) {
     return (
-      <Card className="w-full">
+      <Card className="w-full mt-10">
         <CardHeader>
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
@@ -81,7 +81,7 @@ const TransactionHistory = () => {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 mt-10">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
