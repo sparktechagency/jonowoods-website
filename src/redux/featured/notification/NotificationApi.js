@@ -46,6 +46,18 @@ const notificationSlice = api.injectEndpoints({
       ]
 
     }),
+
+
+    deviceToken: builder.mutation({
+      query: (data) => {
+        return {
+          url: `/fcmToken/save-device-token`,
+          method: "POST",
+          body: data,
+        };
+      },
+    }),
+
   }),
 });
 
@@ -53,4 +65,5 @@ export const {
   useGetNotificationQuery,
   useReadOneNotificationMutation,
   useReadAllNotificationMutation,
+  useDeviceTokenMutation,
 } = notificationSlice;

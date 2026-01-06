@@ -35,6 +35,7 @@ import {
   useGetNotificationQuery,
   useReadOneNotificationMutation,
   useReadAllNotificationMutation,
+  useDeviceTokenMutation,
 } from "@/redux/featured/notification/NotificationApi";
 import { deleteAccountSuccess, logout } from "@/redux/featured/auth/authSlice";
 import { getImageUrl } from "../share/imageUrl";
@@ -54,6 +55,8 @@ import NotificationPagination from "./PaginationInNotification";
 import Spinner from "@/app/(commonLayout)/Spinner";
 import { toast } from "react-hot-toast";
 import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
+import { app } from "@/lib/firebase";
+import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -73,6 +76,7 @@ export default function Navbar() {
   const socketRef = useRef(null);
   const profileRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const [hasRequestedFcm, setHasRequestedFcm] = useState(false);
   const { data: accessData } = useGetMyAccessQuery();
   const access = accessData?.data;
   // console.log(access);
@@ -85,7 +89,7 @@ export default function Navbar() {
   // Redux queries and mutations
   const { data: userData } = useMyProfileQuery();
   const { data: greetingMessageData } = useGetGreetingMessageQuery();
-  console.log( "greetingMessageData", greetingMessageData);
+  // console.log( "greetingMessageData", greetingMessageData);
   // console.log("userData", userData);
   const {
     data: notificationData,
@@ -104,12 +108,154 @@ export default function Navbar() {
 
   const [readOneNotification] = useReadOneNotificationMutation();
   const [readAllNotification] = useReadAllNotificationMutation();
+  const [saveDeviceToken] = useDeviceTokenMutation();
   const [userDeleteAccount, { isLoading: isDeleteLoading }] =
     useUserDeleteAccountMutation();
 
   // Calculate unread count from API response
   const unreadCount = notificationData?.data?.unreadCount || 0;
   // console.log(unreadCount);
+
+  // Firebase Cloud Messaging: request permission, get token, and listen for foreground messages
+  useEffect(() => {
+    const setupFcm = async () => {
+      try {
+        if (
+          typeof window === "undefined" ||
+          !("Notification" in window) ||
+          !userData?._id
+        ) {
+          return;
+        }
+
+        // Avoid running multiple times unnecessarily
+        if (hasRequestedFcm) return;
+
+        const supported = await isSupported();
+        if (!supported) {
+          console.warn("FCM is not supported in this browser.");
+          return;
+        }
+
+        // Register service worker for background messages
+        if ("serviceWorker" in navigator) {
+          try {
+            const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+              scope: "/",
+            });
+            console.log("✅ Service Worker registered successfully:", registration.scope);
+            
+            // Wait for service worker to be ready
+            if (registration.installing) {
+              console.log("⏳ Service Worker installing...");
+              await new Promise((resolve) => {
+                registration.installing.addEventListener("statechange", function () {
+                  if (this.state === "activated") {
+                    console.log("✅ Service Worker activated");
+                    resolve();
+                  }
+                });
+              });
+            } else if (registration.waiting) {
+              console.log("⏳ Service Worker waiting...");
+            } else if (registration.active) {
+              console.log("✅ Service Worker already active");
+            }
+          } catch (swError) {
+            console.error("❌ Service worker registration failed:", swError);
+          }
+        } else {
+          console.warn("⚠️ Service Worker not supported in this browser");
+        }
+
+        const permission = await Notification.requestPermission();
+        console.log("🔔 Notification permission:", permission);
+        if (permission !== "granted") {
+          console.warn("⚠️ Notification permission not granted");
+          setHasRequestedFcm(true);
+          return;
+        }
+
+        const messaging = getMessaging(app);
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+        
+        if (!vapidKey) {
+          console.error("❌ VAPID key is missing! Please set NEXT_PUBLIC_FIREBASE_VAPID_KEY in .env.local");
+          setHasRequestedFcm(true);
+          return;
+        }
+        
+        console.log("🔑 VAPID Key configured:", vapidKey.substring(0, 20) + "...");
+
+        const currentToken = await getToken(messaging, {
+          vapidKey,
+          serviceWorkerRegistration: await navigator.serviceWorker.ready,
+        });
+
+        if (currentToken) {
+          console.log("✅ Firebase FCM token:", currentToken);
+          const storedToken = localStorage.getItem("fcmToken");
+
+          // Only send to backend if token is new or changed
+          if (storedToken !== currentToken) {
+            try {
+              console.log("📤 Sending token to backend...");
+              await saveDeviceToken({ token: currentToken }).unwrap();
+              localStorage.setItem("fcmToken", currentToken);
+              console.log("✅ Token saved to backend and localStorage");
+            } catch (e) {
+              console.error("❌ Failed to save device token:", e);
+            }
+          } else {
+            console.log("ℹ️ Token unchanged, skipping backend update");
+          }
+        } else {
+          console.warn("⚠️ No registration token available. Request permission again.");
+        }
+
+        // Foreground message handler
+        onMessage(messaging, (payload) => {
+          console.log("📨 Foreground message received:", payload);
+          console.log("📨 Message details:", {
+            messageId: payload.messageId,
+            from: payload.from,
+            collapseKey: payload.collapseKey,
+            notification: payload.notification,
+            data: payload.data,
+          });
+          
+          const title =
+            payload.notification?.title || payload.data?.title || "New notification received";
+          const body = payload.notification?.body || payload.data?.body || "";
+
+          if (title || body) {
+            // Show toast notification with title and body
+            const message = body ? `${title}\n${body}` : title;
+            toast.success(message, {
+              duration: 5000,
+              position: "top-right",
+              style: {
+                maxWidth: "400px",
+                whiteSpace: "pre-line",
+              },
+            });
+          }
+
+          // Refresh notifications list when a push comes in foreground
+          refetch();
+        });
+        
+        console.log("✅ FCM setup complete - listening for messages");
+
+        setHasRequestedFcm(true);
+      } catch (error) {
+        console.error("Error setting up Firebase Cloud Messaging:", error);
+        setHasRequestedFcm(true);
+      }
+    };
+
+    setupFcm();
+  }, [userData?._id, hasRequestedFcm, saveDeviceToken, refetch]);
 
   // Improved Socket.IO setup with better error handling and reconnection
   useEffect(() => {
