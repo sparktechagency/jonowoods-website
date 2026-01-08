@@ -106,7 +106,7 @@ export const communityApi = api.injectEndpoints({
     getFeaturedPost: builder.query({
       query: () => ({
         method: "GET",
-        url: `/post/letest`,
+        url: `/post/latest`,
       }),
       invalidatesTags: (result, error, id) => [{ type: "Posts", id }, "Posts"],
     }),

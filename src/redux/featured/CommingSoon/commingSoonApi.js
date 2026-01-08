@@ -3,13 +3,14 @@ import { api } from "@/redux/baseUrl/baseUrl";
 const commignSoonSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     quotation: builder.query({
-      query: () => {
+      query: (timezone) => {
         return {
           method: "GET",
-          url: "/quotation",
+          url: `/quotation?timezone=${encodeURIComponent(timezone)}`,
         };
       },
     }),
+
 
     comingSoonLatestVideo: builder.query({
       query: () => {
@@ -24,7 +25,7 @@ const commignSoonSlice = api.injectEndpoints({
       query: () => {
         return {
           method: "GET",
-          url: "/dailyInspiration/letest",
+          url: "/dailyInspiration/latest",
         };
       },
     }),
@@ -85,7 +86,7 @@ const commignSoonSlice = api.injectEndpoints({
       },
       invalidatesTags: ["ChallengeVideo"],
     }),
-    
+
   }),
 });
 

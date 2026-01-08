@@ -37,7 +37,7 @@ const favoriteVideoApi = api.injectEndpoints({
       query: () => {
         return {
           method: "GET",
-          url: `/post/letest`,
+          url: `/post/latest`,
         };
       },
       providesTags: ["Community"],

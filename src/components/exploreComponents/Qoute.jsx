@@ -4,7 +4,9 @@ import Spinner from "@/app/(commonLayout)/Spinner";
 import { useQuotationQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 
 export default function YogaQuotePage() {
-  const { data, isLoading, isError } = useQuotationQuery();
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const { data, isLoading, isError } = useQuotationQuery(timezone);
+
 
   // Default fallback quote
   const defaultQuote =

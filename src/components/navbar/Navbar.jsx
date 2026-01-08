@@ -57,6 +57,7 @@ import { toast } from "react-hot-toast";
 import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
 import { app } from "@/lib/firebase";
 import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
+import moment from "moment";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -510,16 +511,16 @@ export default function Navbar() {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+  // const formatDate = (dateString) => {
+  //   const date = new Date(dateString);
+  //   const now = new Date();
+  //   const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) return "Just now";
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
-  };
+  //   if (diffInHours < 1) return "Just now";
+  //   if (diffInHours < 24) return `${diffInHours}h ago`;
+  //   const diffInDays = Math.floor(diffInHours / 24);
+  //   return `${diffInDays}d ago`;
+  // };
 
   const handleLogout = () => {
     // Disconnect socket before logout
@@ -924,11 +925,14 @@ export default function Navbar() {
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
+                          <h2 className="text-sm font-semibold mb-1">
+                            {notification.title}
+                          </h2>
                           <p className="text-sm text-gray-800 mb-1">
                             {notification.message}
                           </p>
                           <p className="text-xs text-gray-500">
-                            {formatDate(notification.createdAt)}
+                            {moment(notification.createdAt).fromNow()}
                           </p>
                         </div>
                         {!notification.read && (

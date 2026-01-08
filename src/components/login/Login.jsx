@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useGetMyAccessQuery } from "@/redux/featured/Package/packageApi";
 import ButtonSpinner from "@/app/(commonLayout)/ButtonSpinner";
+import { requestForToken } from "@/lib/firebase"; // Import FCM token requester
 
 export default function LoginUser() {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,7 +25,7 @@ export default function LoginUser() {
   const router = useRouter();
 
   const handleTogglePassword = () => setShowPassword((prev) => !prev);
-  
+
   // Don't call this hook here since user hasn't logged in yet
   // const {data:accessData}=useGetMyAccessQuery()
   // const access=accessData?.data?.hasAccess
@@ -37,35 +38,61 @@ export default function LoginUser() {
       console.warn("Could not detect timezone, using UTC as fallback");
       return "UTC";
     }
+  }
+
+
+  // Helper to get or create a persistent device ID
+  const getDeviceId = () => {
+    let deviceId = localStorage.getItem("deviceId");
+    if (!deviceId) {
+      // Generate a simple unique ID if crypto.randomUUID is not available
+      deviceId = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : "web-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("deviceId", deviceId);
+    }
+    return deviceId;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       // Get user's timezone
       const timezone = getUserTimezone();
-      
-      const res = await login({ 
-        email, 
+
+      // Get FCM Token
+      let fcmToken = "";
+      try {
+        fcmToken = await requestForToken();
+        console.log("FCM Token retrieved:", fcmToken ? "Yes" : "No");
+      } catch (err) {
+        console.error("Error fetching FCM token:", err);
+      }
+
+      const res = await login({
+        email,
         password,
-        timezone // Add timezone to login request
+        timezone, // Add timezone to login request
+        fcmToken: fcmToken || "",
+        deviceId: getDeviceId(),
+        deviceType: "web"
       }).unwrap();
       console.log(res);
-      
+
       const { accessToken, refreshToken } = res.data;
-      
+
       // Save tokens and dispatch success - ensure localStorage is set first
       localStorage.setItem("token", accessToken);
       dispatch(loginSuccess({ accessToken }));
-      
+
       toast.success("Login successful! Welcome back.");
-      
+
       // Wait for Redux state and localStorage to sync before navigating
       // This ensures the token is available when PrivateRoute checks it
       // Increased timeout to ensure everything is properly synced
       await new Promise(resolve => setTimeout(resolve, 200));
-      
+
       // Verify token is actually set before navigating
       const verifyToken = localStorage.getItem("token");
       if (!verifyToken || verifyToken === "undefined" || verifyToken === "null") {
@@ -73,7 +100,7 @@ export default function LoginUser() {
         localStorage.setItem("token", accessToken);
         await new Promise(resolve => setTimeout(resolve, 100));
       }
-      
+
       // Check if there's a redirect path saved
       const redirectPath = localStorage.getItem("redirectPath");
       if (redirectPath) {
@@ -90,9 +117,9 @@ export default function LoginUser() {
       }
     } catch (error) {
       console.error("Login failed:", error);
-  
+
       // Show error toast message
-      toast.error(error?.data?.message || "Login failed. Please try again."); 
+      toast.error(error?.data?.message || "Login failed. Please try again.");
     }
   };
 
