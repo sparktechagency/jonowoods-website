@@ -5,7 +5,7 @@
 importScripts("https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging-compat.js");
 
-console.log("🔥 Firebase Service Worker: Starting initialization...");
+// console.log("🔥 Firebase Service Worker: Starting initialization...");
 
 // IMPORTANT:
 // These values should match the ones in your .env.local (they are public keys).
@@ -21,15 +21,15 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-console.log("✅ Firebase Service Worker: Firebase initialized");
+// console.log("✅ Firebase Service Worker: Firebase initialized");
 
 // Get messaging instance
 const messaging = firebase.messaging();
-console.log("✅ Firebase Service Worker: Messaging instance created");
+// console.log("✅ Firebase Service Worker: Messaging instance created");
 
 // Handle background messages
 messaging.onBackgroundMessage(function (payload) {
-  console.log("📨 Firebase Service Worker: Background message received", payload);
+  // console.log("📨 Firebase Service Worker: Background message received", payload);
   console.log("📨 Message details:", {
     messageId: payload.messageId,
     from: payload.from,
@@ -77,8 +77,8 @@ messaging.onBackgroundMessage(function (payload) {
 
 // Handle notification clicks
 self.addEventListener("notificationclick", function (event) {
-  console.log("👆 Firebase Service Worker: Notification clicked", event);
-  console.log("👆 Notification data:", event.notification.data);
+  // console.log("👆 Firebase Service Worker: Notification clicked", event);
+  // console.log("👆 Notification data:", event.notification.data);
   
   event.notification.close();
 

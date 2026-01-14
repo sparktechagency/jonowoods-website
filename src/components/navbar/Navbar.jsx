@@ -144,7 +144,7 @@ export default function Navbar() {
             const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
               scope: "/",
             });
-            console.log("✅ Service Worker registered successfully:", registration.scope);
+            // console.log("✅ Service Worker registered successfully:", registration.scope);
             
             // Wait for service worker to be ready
             if (registration.installing) {
@@ -160,7 +160,7 @@ export default function Navbar() {
             } else if (registration.waiting) {
               console.log("⏳ Service Worker waiting...");
             } else if (registration.active) {
-              console.log("✅ Service Worker already active");
+              // console.log("✅ Service Worker already active");
             }
           } catch (swError) {
             console.error("❌ Service worker registration failed:", swError);
@@ -170,7 +170,7 @@ export default function Navbar() {
         }
 
         const permission = await Notification.requestPermission();
-        console.log("🔔 Notification permission:", permission);
+        // console.log("🔔 Notification permission:", permission);
         if (permission !== "granted") {
           console.warn("⚠️ Notification permission not granted");
           setHasRequestedFcm(true);
@@ -186,7 +186,7 @@ export default function Navbar() {
           return;
         }
         
-        console.log("🔑 VAPID Key configured:", vapidKey.substring(0, 20) + "...");
+        // console.log("🔑 VAPID Key configured:", vapidKey.substring(0, 20) + "...");
 
         const currentToken = await getToken(messaging, {
           vapidKey,
@@ -194,16 +194,16 @@ export default function Navbar() {
         });
 
         if (currentToken) {
-          console.log("✅ Firebase FCM token:", currentToken);
+          // console.log("✅ Firebase FCM token:", currentToken);
           const storedToken = localStorage.getItem("fcmToken");
 
           // Only send to backend if token is new or changed
           if (storedToken !== currentToken) {
             try {
-              console.log("📤 Sending token to backend...");
+              // console.log("📤 Sending token to backend...");
               await saveDeviceToken({ token: currentToken }).unwrap();
               localStorage.setItem("fcmToken", currentToken);
-              console.log("✅ Token saved to backend and localStorage");
+              // console.log("✅ Token saved to backend and localStorage");
             } catch (e) {
               console.error("❌ Failed to save device token:", e);
             }
@@ -246,7 +246,7 @@ export default function Navbar() {
           refetch();
         });
         
-        console.log("✅ FCM setup complete - listening for messages");
+        // console.log("✅ FCM setup complete - listening for messages");
 
         setHasRequestedFcm(true);
       } catch (error) {

@@ -89,7 +89,7 @@ export default function UserCreate() {
                 id="name"
                 placeholder="Enter your full name"
                 {...register("name", { required: " Name is required" })}
-                className="w-full py-6 text-black bg-white border border-[#2E2E2EF5] rounded-lg"
+                className="w-full py-5 md:py-6 text-black bg-white border border-primary rounded-lg"
               />
               {errors.name && (
                 <p className="text-red-500 text-xs mt-1">
@@ -114,7 +114,7 @@ export default function UserCreate() {
                     message: "Please enter a valid email address",
                   },
                 })}
-                className="w-full py-6 text-black bg-white border border-[#2E2E2EF5] rounded-lg"
+                className="w-full py-5 md:py-6 text-black bg-white border border-primary rounded-lg"
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">
@@ -143,7 +143,7 @@ export default function UserCreate() {
                       message: "Password must have at least 8 characters",
                     },
                   })}
-                  className="w-full py-6 text-black bg-white border border-[#2E2E2EF5] rounded-lg"
+                  className="w-full py-5 md:py-6 text-black bg-white border border-primary rounded-lg"
                 />
                 <button
                   type="button"
@@ -213,7 +213,7 @@ export default function UserCreate() {
                     validate: (value) => 
                       value === getValues("password") || "Passwords do not match"
                   })}
-                  className="w-full py-6 text-black bg-white border border-[#2E2E2EF5] rounded-lg"
+                  className="w-full py-5 md:py-6 text-black bg-white border border-primary rounded-lg"
                 />
                 <button
                   type="button"

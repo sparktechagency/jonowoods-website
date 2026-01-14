@@ -28,16 +28,13 @@ const page = ({ params }) => {
 
 
   const { data: category, isLoading: categoryLoading } = useCategoryWithSubcategoryQuery(id, { skip: !id });
-  console.log( "category",category)
-  console.log(category?.data?.result)
+ 
 
 
   const { data: classVideo, isLoading: classVideoLoading } = useCategoryVideoQuery({
     id,
     params: queryParams,
   });
-  console.log(classVideo?.data?.result)
-  console.log("classVideo",classVideo)
 
   if (categoryLoading || classVideoLoading) return <Spinner />
 

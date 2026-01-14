@@ -37,6 +37,7 @@ const VideoPlayerPage = ({ params }) => {
   const hasCheckedAccessRef = useRef(false);
   const [showVideo, setShowVideo] = useState(false);
   const [thumbnailLoading, setThumbnailLoading] = useState(true);
+  const videoPlayerRef = useRef(null); // Ref to control video player
 
   // Function to calculate countdown
   const calculateCountdown = (unlockTime) => {
@@ -125,126 +126,173 @@ const VideoPlayerPage = ({ params }) => {
   }, [nextVideoUnlockTime, refetch]);
 
   // Handle video completion - Navigate back to challenge list page
-  const handleVideoComplete = useCallback(async (videoId) => {
-    // Prevent duplicate processing
-    if (
-      completionProcessedRef.current.has(videoId) ||
-      isProcessingCompletionRef.current
-    ) {
-      console.log("Already processing or completed:", videoId);
-      return;
-    }
+  const handleVideoComplete = useCallback(
+    async (videoId) => {
+      // console.log("📋 ===== HANDLE VIDEO COMPLETE CALLED =====");
+      // console.log(`🆔 Video ID: ${videoId}`);
+      console.log(
+        `📊 Already processed: ${completionProcessedRef.current.has(videoId)}`
+      );
+      console.log(`⏳ Is processing: ${isProcessingCompletionRef.current}`);
 
-    isProcessingCompletionRef.current = true;
-    completionProcessedRef.current.add(videoId);
-
-    try {
-      console.log("Marking video as complete:", videoId);
-      const response = await markWatchChallengeVideo(videoId).unwrap();
-
-      // Check if there are more videos
-      const currentIndex = videos.findIndex((v) => v._id === videoId);
-      const hasMoreVideos = currentIndex < videos.length - 1;
-
-      // Handle time-locked next video - Still navigate back but show message
-      if (response?.data?.nextVideoInfo?.nextUnlockTime) {
-        const countdownInfo = calculateCountdown(
-          response.data.nextVideoInfo.nextUnlockTime
-        );
-
-        toast.success("Video completed!", {
-          description: `Next video will unlock in ${countdownInfo.formatted}`,
-          duration: 3000,
-        });
-
-        // Small delay for toast to show
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Navigate back to challenge list page
-        setIsNavigating(true);
-        router.push(`/challenge/${challengeId}`);
+      // Prevent duplicate processing
+      if (
+        completionProcessedRef.current.has(videoId) ||
+        isProcessingCompletionRef.current
+      ) {
+        console.log("⚠️ Already processing or completed, skipping...");
         return;
       }
 
-      // Show success message based on whether there are more videos
-      if (hasMoreVideos) {
-        toast.success("Video completed!", {
-          description: "Next video is now unlocked. You can watch it from the challenge list.",
-          duration: 3000,
+      isProcessingCompletionRef.current = true;
+      completionProcessedRef.current.add(videoId);
+      console.log("✅ Starting completion process...");
+
+      try {
+        console.log("📡 ===== API CALL STARTING =====");
+        console.log(
+          `🆔 Calling markWatchChallengeVideo API for video: ${videoId}`
+        );
+
+        const response = await markWatchChallengeVideo(videoId).unwrap();
+
+        
+
+        // Check if there are more videos
+        const currentIndex = videos.findIndex((v) => v._id === videoId);
+        const hasMoreVideos = currentIndex < videos.length - 1;
+        console.log(
+          `📊 Current Index: ${currentIndex}, Total Videos: ${videos.length}, Has More: ${hasMoreVideos}`
+        );
+
+        // Handle time-locked next video - Still navigate back but show message
+        if (response?.data?.nextVideoInfo?.nextUnlockTime) {
+          console.log(
+            `🔒 Next Unlock Time: ${response.data.nextVideoInfo.nextUnlockTime}`
+          );
+
+          const countdownInfo = calculateCountdown(
+            response.data.nextVideoInfo.nextUnlockTime
+          );
+          console.log(`⏳ Countdown: ${countdownInfo.formatted}`);
+
+          toast.success("Video completed!", {
+            description: `Next video will unlock in ${countdownInfo.formatted}`,
+            duration: 3000,
+          });
+
+          // Small delay for toast to show
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // Navigate back to challenge list page
+          console.log("🔙 Navigating back to challenge list page...");
+          setIsNavigating(true);
+          router.push(`/challenge/${challengeId}`);
+          console.log("✅ Navigation initiated");
+          return;
+        }
+
+        // Show success message based on whether there are more videos
+        if (hasMoreVideos) {
+          console.log("🎉 ===== NEXT VIDEO UNLOCKED =====");
+          console.log("✅ Next video is now available!");
+          toast.success("Video completed!", {
+            description:
+              "Next video is now unlocked. You can watch it from the challenge list.",
+            duration: 3000,
+          });
+        } else {
+          toast.success("Congratulations!", {
+            description: "You have completed all challenge videos!",
+            duration: 3000,
+          });
+        }
+
+        // Important: Wait for mutation to fully settle before navigation
+        // This ensures RTK Query mutation completes and doesn't get cancelled
+        console.log("⏳ Waiting 300ms for mutation to settle...");
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // Navigate back to challenge list page
+        // console.log("🔙 Navigating back to challenge list page...");
+        setIsNavigating(true);
+        router.push(`/challenge/${challengeId}`);
+        // console.log("✅ Navigation initiated");
+        // console.log("🎬 ===== COMPLETION PROCESS FINISHED =====");
+      } catch (error) {
+        // console.error("❌ ===== API CALL FAILED =====");
+        // console.error("🚨 Error marking video as completed:", error);
+        // console.error("📦 Error Response:", error?.data);
+        // console.error("📝 Error Message:", error?.data?.message);
+        toast.error("Failed to mark video as completed", {
+          description: error?.data?.message || "Please try again later.",
         });
-      } else {
-        toast.success("Congratulations!", {
-          description: "You have completed all challenge videos!",
-          duration: 3000,
-        });
+        // Remove from processed set if failed
+        completionProcessedRef.current.delete(videoId);
+        isProcessingCompletionRef.current = false;
+        console.log("🔄 Reset processing state due to error");
       }
-
-      // Important: Wait for mutation to fully settle before navigation
-      // This ensures RTK Query mutation completes and doesn't get cancelled
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Navigate back to challenge list page
-      setIsNavigating(true);
-      router.push(`/challenge/${challengeId}`);
-    } catch (error) {
-      console.error("Error marking video as completed:", error);
-      toast.error("Failed to mark video as completed", {
-        description: error?.data?.message || "Please try again later.",
-      });
-      // Remove from processed set if failed
-      completionProcessedRef.current.delete(videoId);
-      isProcessingCompletionRef.current = false;
-    }
-  }, [videos, markWatchChallengeVideo, challengeId, router]);
+    },
+    [videos, markWatchChallengeVideo, challengeId, router]
+  );
 
   // Manual complete button handler
   const handleManualComplete = async () => {
+    console.log("🔄 Manual complete button clicked");
+
+    // If we're already navigating or processing/completing, do nothing
+    if (isNavigating || isMarkingComplete || isProcessingCompletionRef.current) {
+      return;
+    }
+
+    // If video is already completed, just navigate back without re-calling API
     if (isCurrentVideoCompleted) {
-      toast.info("Video already completed");
+      toast.info("Video already completed. Redirecting to challenge list...");
+      setIsNavigating(true);
+      router.push(`/challenge/${challengeId}`);
       return;
     }
 
-    if (isMarkingComplete || isProcessingCompletionRef.current) {
-      return;
+    // If not completed yet, call completion handler (will also navigate back)
+    if (currentVideo?._id) {
+      await handleVideoComplete(currentVideo._id);
     }
-
-    // Manual complete - will navigate back to challenge list
-    await handleVideoComplete(currentVideo._id);
   };
 
   // Video ended handler - Automatically trigger the "Mark Complete & Go Back" button action
   // IMPORTANT: Don't await here - fire and forget to prevent component unmount issues
   const handleVideoEnded = useCallback(() => {
-    console.log("🎬 ===== VIDEO ENDED EVENT TRIGGERED =====");
-    console.log("Video ended - Automatically triggering Mark Complete & Go Back button action");
-    console.log("Current video:", currentVideo?._id);
-    console.log("Completed videos:", completedVideos);
-    console.log("Is marking complete:", isMarkingComplete);
-    console.log("Is processing:", isProcessingCompletionRef.current);
-    
+    console.log("🎬 ===== VIDEO ENDED EVENT TRIGGERED IN PAGE =====");
+    console.log("📹 Current video ID:", currentVideo?._id);
+    console.log("✅ Completed videos list:", completedVideos);
+    console.log("⏳ Is marking complete (RTK):", isMarkingComplete);
+    console.log("⏳ Is processing (ref):", isProcessingCompletionRef.current);
+
     if (!currentVideo?._id) {
-      console.log("❌ No current video ID, skipping");
+      console.log("❌ No current video ID found, skipping completion");
       return;
     }
 
     // Check if already completed - same check as button uses (isCurrentVideoCompleted)
     if (completedVideos.includes(currentVideo._id)) {
-      console.log("⚠️ Video already completed, skipping");
+      console.log(
+        "⚠️ Video already in completed list, skipping duplicate completion"
+      );
       return;
     }
 
     // Check if already processing - same check as button
     if (isMarkingComplete || isProcessingCompletionRef.current) {
-      console.log("⚠️ Already processing completion, skipping");
+      console.log("⚠️ Completion already in progress, skipping duplicate call");
       return;
     }
 
     // Fire and forget - don't await to prevent unmount issues
     // handleVideoComplete will handle the async operations
-    console.log("✅ Auto-executing: Mark Complete & Go Back");
-    console.log("Calling handleVideoComplete for video:", currentVideo._id);
+    console.log("✅ All checks passed - Starting completion process");
+    console.log("🚀 Calling handleVideoComplete for video:", currentVideo._id);
     handleVideoComplete(currentVideo._id).catch((error) => {
-      console.error("Error in handleVideoComplete:", error);
+      console.error("❌ Error in handleVideoComplete callback:", error);
     });
   }, [currentVideo, completedVideos, isMarkingComplete, handleVideoComplete]);
 
@@ -253,7 +301,7 @@ const VideoPlayerPage = ({ params }) => {
     // Reset processing state when video changes
     isProcessingCompletionRef.current = false;
     setIsNavigating(false);
-    
+
     return () => {
       setIsNavigating(false);
       isProcessingCompletionRef.current = false;
@@ -272,7 +320,9 @@ const VideoPlayerPage = ({ params }) => {
         <div className="text-center">
           <Spinner />
           {isNavigating && (
-            <p className="mt-4 text-gray-600">Completing video and redirecting...</p>
+            <p className="mt-4 text-gray-600">
+              Completing video and redirecting...
+            </p>
           )}
         </div>
       </div>
@@ -326,34 +376,51 @@ const VideoPlayerPage = ({ params }) => {
       {/* Video Player Section */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="relative">
-          {/* <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            {console.log(currentVideo)}
             <UniversalVideoPlayer
-              video={currentVideo}
+              video={{
+                videoId: currentVideo.videoId,
+                libraryId: currentVideo.libraryId,
+                title: currentVideo.title,
+              }}
               autoplay={false}
-              aspectRatio="16:9"
-              watermark={{
-                text: ` Yoga With Jen`,
-                position: "top-right",
+              muted={false}
+              nearCompletionOffset={1}
+              onReady={() => console.log("Video ready")}
+              onPlay={() => console.log("Video playing")}
+              onPause={() => console.log("Video paused")}
+              onNearCompletion={() => {
+                console.log(
+                  "🎯 Triggering handleManualComplete() from onNearCompletion"
+                );
+                handleManualComplete();
               }}
-              onSecurityViolation={(type) => {
-                fetch("/api/security-log", {
-                  method: "POST",
-                  body: JSON.stringify({
-                    videoId: currentVideo._id,
-                    violationType: type,
-                  }),
-                });
+              onEnded={() => console.log("Video Completed`")}
+              onProgress={({
+                currentTime,
+                duration,
+                percentage,
+                remainingTime,
+              }) => {
+                if (Math.floor(currentTime) % 5 === 0 && currentTime > 0) {
+                  console.log(
+                    `Progress ${percentage.toFixed(
+                      1
+                    )}% | Remaining ${remainingTime?.toFixed(1)}s`
+                  );
+                }
               }}
-              onPlay={() => console.log("Playing")}
-              onEnded={handleVideoEnded}
+              onError={(err) => console.log(`Error ${err}`)}
             />
-          </div> */}
+          </div>
 
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             {/* Player always mounted - never unmount */}
-            <UniversalVideoPlayer
+            {/* <UniversalVideoPlayer
+              ref={videoPlayerRef}
               video={currentVideo}
-              autoplay={showVideo} // Control autoplay, not mounting
+              autoplay={false} // Don't autoplay, we'll control via ref
               aspectRatio="16:9"
               watermark={{
                 text: `Yoga With Jen`,
@@ -369,17 +436,53 @@ const VideoPlayerPage = ({ params }) => {
                 });
               }}
               onPlay={() => {
-                console.log("Playing");
+                console.log("▶️ Video started playing");
                 setShowVideo(true); // Hide thumbnail when playing starts
               }}
+              onProgress={(progress) => {
+                // Log progress every 10% to avoid spam
+                const percent = Math.floor(progress.percentage);
+                if (percent % 10 === 0 && percent > 0) {
+                  console.log(
+                    `📊 Video Progress: ${percent}% (${progress.currentTime.toFixed(
+                      1
+                    )}s / ${progress.duration.toFixed(1)}s)`
+                  );
+                }
+              }}
               onEnded={handleVideoEnded}
-            />
+            /> */}
 
             {/* Thumbnail overlay - shown when video not started */}
             {!showVideo && (
               <div
                 className="absolute inset-0 cursor-pointer group z-30"
-                onClick={() => setShowVideo(true)}
+                onClick={() => {
+                  console.log(
+                    "🖱️ Thumbnail clicked - Starting video playback..."
+                  );
+                  setShowVideo(true);
+
+                  // Trigger video play via ref with retry mechanism
+                  const tryPlay = (retries = 0) => {
+                    if (videoPlayerRef.current?.isReady()) {
+                      console.log("✅ Player ready, calling play()");
+                      videoPlayerRef.current.play();
+                    } else if (retries < 10) {
+                      console.log(
+                        `⏳ Player not ready yet, retry ${retries + 1}/10...`
+                      );
+                      setTimeout(() => tryPlay(retries + 1), 200);
+                    } else {
+                      console.error("❌ Failed to play video after 10 retries");
+                      toast.error(
+                        "Failed to start video. Please refresh the page."
+                      );
+                    }
+                  };
+
+                  tryPlay();
+                }}
               >
                 <ImageWithLoader
                   src={getVideoAndThumbnail(currentVideo?.thumbnailUrl)}
@@ -472,33 +575,27 @@ const VideoPlayerPage = ({ params }) => {
       </div>
 
       <div className="flex justify-end mt-4">
-        {" "}
-        {/* Manual Complete Button - Only show if not completed */}
-        {!isCurrentVideoCompleted && (
-          <div className="">
-            <button
-              onClick={handleManualComplete}
-              disabled={
-                isMarkingComplete ||
-                isProcessingCompletionRef.current ||
-                isNavigating
-              }
-              className="flex items-center px-2 py-1 lg:px-6 lg:py-3 bg-primary cursor-pointer text-white rounded-sm hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isMarkingComplete ||
+        <div>
+          <button
+            onClick={handleManualComplete}
+            disabled={
+              isMarkingComplete ||
               isProcessingCompletionRef.current ||
-              isNavigating ? (
-                <>
-                  {isNavigating
-                    ? "Redirecting..."
-                    : "Marking Complete..."}
-                </>
-              ) : (
-                <>Mark Complete & Go Back</>
-              )}
-            </button>
-          </div>
-        )}
+              isNavigating
+            }
+            className="flex items-center px-2 py-1 lg:px-6 lg:py-3 bg-primary cursor-pointer text-white rounded-sm hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isNavigating ? (
+              <>Redirecting...</>
+            ) : isMarkingComplete || isProcessingCompletionRef.current ? (
+              <>Marking Complete...</>
+            ) : isCurrentVideoCompleted ? (
+              <>Go Back to Challenge</>
+            ) : (
+              <>Mark Complete & Go Back</>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

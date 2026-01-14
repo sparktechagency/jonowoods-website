@@ -2,6 +2,7 @@
 import { useComingSoonLatestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 import { VideoCard } from "./VideoCard";
 import { Lock } from "lucide-react";
+import { getVideoAndThumbnail } from "@/components/share/imageUrl";
 
 export const ComingSoon = () => {
   const { data, isLoading, isError } = useComingSoonLatestVideoQuery();
@@ -14,7 +15,7 @@ export const ComingSoon = () => {
  if (isLoading || isError || !data?.data) return null;
 
   const image = videoData?.thumbnailUrl
-    ? `https://${videoData.thumbnailUrl}`
+    ? getVideoAndThumbnail(videoData.thumbnailUrl)
     : null; // no default image
   console.log(image);
 

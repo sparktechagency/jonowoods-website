@@ -2,7 +2,7 @@
 import React from "react";
 
 const AuthLayout = ({ children }) => {
-  const bgImage = "https://i.ibb.co.com/C5dPm7xb/Frame-2147226698.png"; // You can define the bgImage variable here or pass it as a prop
+  const bgImage = "/assests/bgImage.png";
 
   return (
     <div

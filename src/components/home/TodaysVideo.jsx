@@ -2,17 +2,17 @@
 // TodaysVideo.jsx
 import { useTodayLetestVideoQuery } from "@/redux/featured/CommingSoon/commingSoonApi";
 import { VideoCard } from "./VideoCard";
+import { getVideoAndThumbnail } from "@/components/share/imageUrl";
 
 export const TodaysVideo = () => {
-  const { data } = useTodayLetestVideoQuery();
+   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const { data } = useTodayLetestVideoQuery(timezone);
   console.log("today video data ",data)
 
  if (!data?.data) return null;
 
-  // const image = `https://${data?.data?.thumbnailUrl}`;
-
    const image = data?.data?.thumbnailUrl
-    ? `https://${data?.data?.thumbnailUrl}`
+    ? getVideoAndThumbnail(data?.data?.thumbnailUrl)
     : null;
   console.log("today video image ",image)
 

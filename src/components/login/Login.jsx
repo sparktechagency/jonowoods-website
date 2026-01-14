@@ -173,7 +173,7 @@ export default function LoginUser() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full py-2 md:py-6 text-black bg-white border border-red-700"
+                className="w-full py-5 md:py-6 text-black bg-white border border-red-700"
                 required
               />
             </div>
@@ -193,7 +193,7 @@ export default function LoginUser() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full py-2 md:py-6 text-black bg-white border border-red-700"
+                  className="w-full py-5 md:py-6 text-black bg-white border border-red-700"
                   required
                 />
                 <button

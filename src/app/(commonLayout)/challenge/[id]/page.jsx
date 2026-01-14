@@ -24,10 +24,15 @@ const ChallengePage = ({ params }) => {
       value: perPage,
     },
   ];
-  const { data, isLoading } = useSingleChallengeVideoQuery({
+  const { data, isLoading, refetch } = useSingleChallengeVideoQuery({
     id,
     params: queryParams,
   });
+
+  // Refetch data when component mounts or page becomes visible
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   const challengeInfo = data?.data?.categoryInfo;
   console.log(challengeInfo);
   console.log(data);
@@ -344,10 +349,6 @@ const ChallengePage = ({ params }) => {
                     </div>
                   )}
 
-                  {/* Video number */}
-                  {/* <div className="absolute top-2 left-2 bg-white text-gray-800 text-xs font-medium px-2 py-1 rounded">
-                    Video {index + 1}
-                  </div> */}
 
                   {/* Play button overlay - Only show when thumbnail is loaded */}
                   {isAccessible && !isThumbnailLoading && (

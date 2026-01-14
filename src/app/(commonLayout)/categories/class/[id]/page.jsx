@@ -133,7 +133,7 @@ export default function FitnessVideoPage({ params }) {
   };
 
   const handleDeleteComment = async (commentId) => {
-    console.log(commentId);
+    // console.log(commentId);
 
     try {
       const res = await videoDeleteComment(commentId).unwrap();

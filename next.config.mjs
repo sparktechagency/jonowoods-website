@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    // Keep domains for backward compatibility
     domains: [
       "cdn.pixabay.com",
       "images.unsplash.com",
@@ -12,7 +13,27 @@ const nextConfig = {
       "69.62.67.86",
       "api.yogawithjen.life",
       "web.yogawithjen.life",
-      "yoga-with-jen-app.b-cdn.net"
+      "yoga-with-jen-app.b-cdn.net",
+      "yoga-with-jen-storage-pull-zone.b-cdn.net"
+    ],
+    // Modern approach with remotePatterns (more secure)
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'yoga-with-jen-storage-pull-zone.b-cdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'yoga-with-jen-app.b-cdn.net',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.yogawithjen.life',
+      },
+      {
+        protocol: 'http',
+        hostname: '10.10.7.48',
+      },
     ],
     // Image optimization settings
     formats: ['image/avif', 'image/webp'],

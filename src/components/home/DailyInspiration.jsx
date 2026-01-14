@@ -1,15 +1,17 @@
 "use client";
 import { useInspirationLatestVideoQuery } from "../../redux/featured/CommingSoon/commingSoonApi";
 import { VideoCard } from "./VideoCard";
+import { getVideoAndThumbnail } from "@/components/share/imageUrl";
 
 export const DailyInspiration = () => {
-  const { data } = useInspirationLatestVideoQuery();
+   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const { data } = useInspirationLatestVideoQuery(timezone);
 
   // If no data, render nothing
   if (!data?.data) return null;
 
   const image = data?.data?.thumbnailUrl
-    ? `https://${data?.data?.thumbnailUrl}`
+    ? getVideoAndThumbnail(data?.data?.thumbnailUrl)
     : null; // no default image
 
   const title = data?.data?.title;

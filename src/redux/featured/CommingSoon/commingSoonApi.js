@@ -22,19 +22,19 @@ const commignSoonSlice = api.injectEndpoints({
     }),
 
     inspirationLatestVideo: builder.query({
-      query: () => {
+      query: (timezone) => {
         return {
           method: "GET",
-          url: "/dailyInspiration/latest",
+          url: `/dailyInspiration/latest?timezone=${encodeURIComponent(timezone)}`,
         };
       },
     }),
 
     todayLetestVideo: builder.query({
-      query: () => {
+      query: (timezone) => {
         return {
           method: "GET",
-          url: "/today",
+          url: `/today?timezone=${encodeURIComponent(timezone)}`,
         };
       },
     }),

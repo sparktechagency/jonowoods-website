@@ -16,11 +16,18 @@ export const getImageUrl = (path) => {
 export function getVideoAndThumbnail(url) {
   if (!url) return ''; // handle undefined/null cases
   
-  // If already has http/https, return as-is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
+  // Convert to string and trim whitespace
+  let cleanUrl = String(url).trim();
   
-  // Otherwise, add https://
-  return `https://${url}`;
+  if (!cleanUrl) return '';
+  
+  // Remove ALL protocol prefixes first (handles any number of duplicates)
+  // This regex matches one or more occurrences of http:// or https:// at the start
+  cleanUrl = cleanUrl.replace(/^(https?:\/\/)+/i, '');
+  
+  // Now add a single https:// prefix
+  // This makes the function idempotent - calling it multiple times gives same result
+  cleanUrl = `https://${cleanUrl}`;
+  
+  return cleanUrl;
 }
