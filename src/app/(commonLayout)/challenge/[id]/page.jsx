@@ -202,9 +202,7 @@ const ChallengePage = ({ params }) => {
             <div className="md:w-1/3 lg:w-1/4">
               <ImageWithLoader
                 src={getImageUrl(challengeInfo?.image)}
-                alt={
-                  challengeData?.name || challengeData?.title || "Challenge"
-                }
+                alt={challengeData?.name || challengeData?.title || "Challenge"}
                 containerClassName="h-72 md:h-72"
               />
             </div>
@@ -245,10 +243,24 @@ const ChallengePage = ({ params }) => {
 
       {/* Videos Grid */}
       <div className="mb-8">
-        <h2 className="text-xl md:text-2xl font-bold mb-6">Challenge Videos</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl md:text-2xl font-bold mb-6">
+            Challenge Video
+          </h2>
+          <div className=" hidden lg:block p-4   ">
+            <div className="flex justify-end">
+              <Button
+                onClick={handleNextFlow}
+                className="py-6 text-white font-semibold px-6 rounded-md transform transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+              >
+                Next Flow
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Next Flow Button - Fixed at bottom on mobile only */}
-        <div className="block md:hidden fixed bottom-0 left-0 right-0 p-4   z-50">
+        <div className="block lg:hidden fixed bottom-0 left-0 right-0 p-4   z-50">
           <div className="flex justify-end">
             <Button
               onClick={handleNextFlow}
@@ -267,7 +279,8 @@ const ChallengePage = ({ params }) => {
             const isAccessible = isVideoAccessible(index);
             const isCompleted = completedVideos.includes(video._id);
             const videoCountdown = getVideoCountdown(video);
-            const isThumbnailLoading = thumbnailLoadingStates[video._id] !== false;
+            const isThumbnailLoading =
+              thumbnailLoadingStates[video._id] !== false;
 
             return (
               <div
@@ -348,7 +361,6 @@ const ChallengePage = ({ params }) => {
                       </svg>
                     </div>
                   )}
-
 
                   {/* Play button overlay - Only show when thumbnail is loaded */}
                   {isAccessible && !isThumbnailLoading && (

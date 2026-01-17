@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "@/components/share/provider";
 import { Toaster } from "sonner";
 import LayoutWrapper from "@/components/LayoutWrapper";
+import DisableRightClick from "@/components/share/DisableRightClick";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
         className={`${poppins.variable} ${geistMono.variable} antialiased `}
       >
         <Providers>
+          {/* <DisableRightClick /> */}
          {/* <LayoutWrapper> */}
          <div>
             <div className="">
