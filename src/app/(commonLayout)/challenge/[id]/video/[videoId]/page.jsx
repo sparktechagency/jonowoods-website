@@ -26,6 +26,7 @@ import {
   useReplyCommentMutation,
   useVideoDeleteCommentMutation,
 } from "@/redux/featured/commentApi/commentApi";
+import ConfirmModal from "@/components/share/ConfirmModal";
 
 const VideoPlayerPage = ({ params }) => {
   const { id: challengeId, videoId } = params;
@@ -79,6 +80,10 @@ const VideoPlayerPage = ({ params }) => {
   const [editingComment, setEditingComment] = useState(null);
   const commentInputRef = useRef(null);
   const replyInputRefs = useRef({});
+
+  const [commentToDelete, setCommentToDelete] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeletingComment, setIsDeletingComment] = useState(false);
 
   // Initialize comments from API data
   useEffect(() => {
@@ -405,9 +410,16 @@ const VideoPlayerPage = ({ params }) => {
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
+  const handleDeleteComment = (commentId) => {
+    setCommentToDelete(commentId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
     try {
-      const res = await videoDeleteComment(commentId).unwrap();
+      setIsDeletingComment(true);
+      const res = await videoDeleteComment(commentToDelete).unwrap();
 
       refetchComments();
       if (res?.success) {
@@ -416,6 +428,10 @@ const VideoPlayerPage = ({ params }) => {
     } catch (error) {
       console.error("Error deleting comment:", error);
       toast.error("Failed to delete comment");
+    } finally {
+      setIsDeletingComment(false);
+      setShowDeleteConfirm(false);
+      setCommentToDelete(null);
     }
   };
 
@@ -969,6 +985,21 @@ const VideoPlayerPage = ({ params }) => {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete comment?"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText={isDeletingComment ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+        onConfirm={confirmDeleteComment}
+        onCancel={() => {
+          if (isDeletingComment) return;
+          setShowDeleteConfirm(false);
+          setCommentToDelete(null);
+        }}
+        isLoading={isDeletingComment}
+      />
     </div>
   );
 };

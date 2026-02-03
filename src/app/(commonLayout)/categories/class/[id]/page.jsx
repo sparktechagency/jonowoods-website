@@ -21,6 +21,7 @@ import { getImageUrl, getVideoAndThumbnail } from "@/components/share/imageUrl";
 import { toast } from "sonner";
 import UniversalVideoPlayer from "@/components/UniversalVideoPlayer";
 import ImageWithLoader from "@/components/share/ImageWithLoader";
+import ConfirmModal from "@/components/share/ConfirmModal";
 
 export default function FitnessVideoPage({ params }) {
   const { id } = React.use(params);
@@ -33,6 +34,10 @@ export default function FitnessVideoPage({ params }) {
   const currentUserId = decoded.id;
   const [play, setPlay] = useState(false);
   const [thumbnailLoading, setThumbnailLoading] = useState(true);
+
+  const [commentToDelete, setCommentToDelete] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeletingComment, setIsDeletingComment] = useState(false);
 
   // API hooks
   const { data, isLoading, refetch } = useSingleVidoeQuery(id, { skip: !id });
@@ -132,11 +137,17 @@ export default function FitnessVideoPage({ params }) {
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    // console.log(commentId);
+  const handleDeleteComment = (commentId) => {
+    setCommentToDelete(commentId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
 
     try {
-      const res = await videoDeleteComment(commentId).unwrap();
+      setIsDeletingComment(true);
+      const res = await videoDeleteComment(commentToDelete).unwrap();
 
       refetchComments();
       if (res?.success) {
@@ -144,6 +155,10 @@ export default function FitnessVideoPage({ params }) {
       }
     } catch (error) {
       console.error("Error deleting comment:", error);
+    } finally {
+      setIsDeletingComment(false);
+      setShowDeleteConfirm(false);
+      setCommentToDelete(null);
     }
   };
 
@@ -520,6 +535,21 @@ export default function FitnessVideoPage({ params }) {
             comments.map((comment) => renderComment(comment))
           )}
         </div>
+
+        <ConfirmModal
+          isOpen={showDeleteConfirm}
+          title="Delete comment?"
+          message="Are you sure you want to delete this comment? This action cannot be undone."
+          confirmText={isDeletingComment ? "Deleting..." : "Delete"}
+          cancelText="Cancel"
+          onConfirm={confirmDeleteComment}
+          onCancel={() => {
+            if (isDeletingComment) return;
+            setShowDeleteConfirm(false);
+            setCommentToDelete(null);
+          }}
+          isLoading={isDeletingComment}
+        />
       </div>
     </div>
   );

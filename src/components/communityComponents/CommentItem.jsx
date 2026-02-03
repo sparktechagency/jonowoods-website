@@ -15,6 +15,7 @@ import ProfileIcon from "../profileIcon/ProfileIcon";
 import { Heart, MessageSquare, Edit, Trash, MoreVertical } from "lucide-react";
 import ButtonSpinner from "@/app/(commonLayout)/ButtonSpinner";
 import ReplyItem from "./ReplyItem";
+import ConfirmModal from "../share/ConfirmModal";
 
 const CommentItem = ({
   comment,
@@ -38,6 +39,10 @@ const CommentItem = ({
     editing: {},
     deleting: {},
   });
+
+  const [commentToDelete, setCommentToDelete] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeletingComment, setIsDeletingComment] = useState(false);
 
   const setLoadingState = (type, id, value) => {
     setLoadingStates((prev) => ({
@@ -89,12 +94,22 @@ const CommentItem = ({
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
-    setLoadingState("deleting", commentId, true);
+  const handleDeleteCommentClick = (commentId) => {
+    setCommentToDelete(commentId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!commentToDelete) return;
+    setLoadingState("deleting", commentToDelete, true);
+    setIsDeletingComment(true);
     try {
-      await onDeleteComment(commentId);
+      await onDeleteComment(commentToDelete);
     } finally {
-      setLoadingState("deleting", commentId, false);
+      setLoadingState("deleting", commentToDelete, false);
+      setIsDeletingComment(false);
+      setShowDeleteConfirm(false);
+      setCommentToDelete(null);
     }
   };
 
@@ -123,7 +138,8 @@ const CommentItem = ({
   
 
   return (
-    <div className="border-t pt-3">
+    <>
+      <div className="border-t pt-3">
       <div className="flex items-start gap-5 mb-2">
         <Avatar className="h-12 w-12">
           <ProfileIcon 
@@ -165,7 +181,7 @@ const CommentItem = ({
                     Edit
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => handleDeleteComment(comment._id)}
+                    onClick={() => handleDeleteCommentClick(comment._id)}
                     disabled={loadingStates.deleting[comment._id]}
                     className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700"
                   >
@@ -307,7 +323,23 @@ const CommentItem = ({
           ))}
         </div>
       )}
-    </div>
+      </div>
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        title="Delete comment?"
+        message="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmText={isDeletingComment ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+        onConfirm={confirmDeleteComment}
+        onCancel={() => {
+          if (isDeletingComment) return;
+          setShowDeleteConfirm(false);
+          setCommentToDelete(null);
+        }}
+        isLoading={isDeletingComment}
+      />
+    </>
   );
 };
 
