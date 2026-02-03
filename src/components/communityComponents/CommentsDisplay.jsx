@@ -51,10 +51,27 @@ export default function CommentsDisplay() {
     }
   };
 
-  // Handle comment click - navigate to video page
-  const handleCommentClick = (videoId) => {
-    if (videoId) {
-      router.push(`/categories/class/${videoId}`);
+  // Handle comment click - navigate based on comment type
+  const handleCommentClick = (comment) => {
+    if (!comment) return;
+
+    const type = comment.type;
+
+    // Normal video comment -> go to categories/class/:videoId
+    if (!type || type === "Videos" || type === "Video") {
+      const videoId = comment.videoId?._id;
+      if (videoId) {
+        router.push(`/categories/class/${videoId}`);
+      }
+      return;
+    }
+
+    // Challenge video comment -> go to challenge/:challengeId
+    if (type === "ChallengeVideo" || type === "Challenge") {
+      const challengeId = comment.challengeId;
+      if (challengeId) {
+        router.push(`/challenge/${challengeId}`);
+      }
     }
   };
 
@@ -83,7 +100,7 @@ export default function CommentsDisplay() {
             {comments.map((comment) => (
               <div
                 key={comment._id}
-                onClick={() => handleCommentClick(comment.videoId?._id)}
+                onClick={() => handleCommentClick(comment)}
                 className="flex gap-4 p-4 bg-gray-100 rounded-2xl shadow-md cursor-pointer hover:bg-gray-200 transition-colors duration-200"
               >
                 {/* Video Thumbnail on Left */}

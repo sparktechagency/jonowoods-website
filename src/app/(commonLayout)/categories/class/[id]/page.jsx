@@ -480,7 +480,7 @@ export default function FitnessVideoPage({ params }) {
               placeholder={
                 editingComment
                   ? "Edit your comment..."
-                  : "Write your comment here"
+                  : "Write your comment here "
               }
               className="w-full px-4 py-3 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent pr-12"
               disabled={commentLoading || editLoading}
