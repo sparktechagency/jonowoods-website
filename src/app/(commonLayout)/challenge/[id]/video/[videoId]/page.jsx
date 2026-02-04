@@ -77,6 +77,7 @@ const VideoPlayerPage = ({ params }) => {
   // Comment state management
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [expandedComments, setExpandedComments] = useState({});
   const [editingComment, setEditingComment] = useState(null);
   const commentInputRef = useRef(null);
   const replyInputRefs = useRef({});
@@ -476,6 +477,13 @@ const VideoPlayerPage = ({ params }) => {
     setReplyText("");
   };
 
+  const toggleReplies = (commentId) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
+  };
+
   const formatTimeAgo = (timestamp) => {
     const now = new Date();
     const commentTime = new Date(timestamp);
@@ -490,7 +498,14 @@ const VideoPlayerPage = ({ params }) => {
 
   const renderComment = (comment, depth = 0) => {
     const isCurrentUser = comment.commentCreatorId?._id === currentUserId;
-    
+    const hasReplies = comment.replies && comment.replies.length > 0;
+    const isExpanded = Object.prototype.hasOwnProperty.call(
+      expandedComments,
+      comment._id
+    )
+      ? expandedComments[comment._id]
+      : depth === 0;
+
     return (
       <div key={comment._id} className="mb-4">
         <div
@@ -571,6 +586,21 @@ const VideoPlayerPage = ({ params }) => {
                   </button>
                 </>
               )}
+
+              {/* Inline toggle when replies are visible */}
+              {hasReplies && isExpanded && (
+                <button
+                  type="button"
+                  onClick={() => toggleReplies(comment._id)}
+                  className="text-primary font-bold hover:underline cursor-pointer transition-colors"
+                >
+                  {isExpanded
+                    ? "Hide replies"
+                    : `${comment.replies.length} ${
+                        comment.replies.length === 1 ? "reply" : "replies"
+                      }`}
+                </button>
+              )}
             </div>
           </div>
 
@@ -622,8 +652,23 @@ const VideoPlayerPage = ({ params }) => {
           </form>
         )}
 
-        {/* Render replies */}
-        {comment.replies && comment.replies.length > 0 && (
+        {/* When replies are hidden, show toggle under like/action row */}
+        {hasReplies && !isExpanded && (
+          <div className="mt-1 ml-11">
+            <button
+              type="button"
+              onClick={() => toggleReplies(comment._id)}
+              className="text-primary font-bold hover:underline cursor-pointer transition-colors text-xs"
+            >
+              {`${comment.replies.length} ${
+                comment.replies.length === 1 ? "reply" : "replies"
+              }`}
+            </button>
+          </div>
+        )}
+
+        {/* Render replies (initially hidden, toggle on click) */}
+        {hasReplies && isExpanded && (
           <div className="mt-3">
             {comment.replies.map((reply) => renderComment(reply, depth + 1))}
           </div>
