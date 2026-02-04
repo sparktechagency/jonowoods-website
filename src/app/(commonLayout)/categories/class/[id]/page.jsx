@@ -58,6 +58,7 @@ export default function FitnessVideoPage({ params }) {
   // State management
   const [comments, setComments] = useState([]);
   const [replyingTo, setReplyingTo] = useState(null);
+  const [expandedComments, setExpandedComments] = useState({});
   const [editingComment, setEditingComment] = useState(null);
   const commentInputRef = useRef(null);
   const replyInputRefs = useRef({});
@@ -171,9 +172,19 @@ export default function FitnessVideoPage({ params }) {
     }
   };
 
-  const handleReply = (commentId) => {
+  const handleReply = (comment) => {
+    if (!comment) return;
+
+    const commentId = comment._id;
     setReplyingTo(commentId);
     setEditingComment(null);
+
+    const mentionName =
+      comment.commentCreatorId?.name?.trim() ||
+      comment.userName?.trim() ||
+      "User";
+    setReplyText(`@${mentionName} `);
+
     setTimeout(() => {
       replyInputRefs.current[commentId]?.focus();
     }, 100);
@@ -191,6 +202,13 @@ export default function FitnessVideoPage({ params }) {
     setReplyingTo(null);
     setComment("");
     setReplyText("");
+  };
+
+  const toggleReplies = (commentId) => {
+    setExpandedComments((prev) => ({
+      ...prev,
+      [commentId]: !prev[commentId],
+    }));
   };
 
   const formatTimeAgo = (timestamp) => {
@@ -211,6 +229,14 @@ export default function FitnessVideoPage({ params }) {
     // In production, you should check if the comment belongs to the current user
     const isCurrentUser = true; // Change this to proper user check: comment.userId === currentUser?.id
     // const isCurrentUser = comment.userId === currentUserId;
+    const hasReplies = comment.replies && comment.replies.length > 0;
+    const isExpanded = Object.prototype.hasOwnProperty.call(
+      expandedComments,
+      comment._id
+    )
+      ? expandedComments[comment._id]
+      : depth === 0;
+
     console.log("comment", comment);
     return (
       <div key={comment._id} className="mb-4">
@@ -268,7 +294,7 @@ export default function FitnessVideoPage({ params }) {
               </button>
 
               <button
-                onClick={() => handleReply(comment._id)}
+                onClick={() => handleReply(comment)}
                 className="text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
               >
                 Reply
@@ -292,6 +318,21 @@ export default function FitnessVideoPage({ params }) {
                     {deleteLoading ? "Deleting..." : "Delete"}
                   </button>
                 </>
+              )}
+
+              {/* When replies are visible, keep toggle inline with actions */}
+              {hasReplies && isExpanded && (
+                <button
+                  type="button"
+                  onClick={() => toggleReplies(comment._id)}
+                  className="text-primary font-bold hover:underline cursor-pointer transition-colors"
+                >
+                  {isExpanded
+                    ? "Hide replies"
+                    : `${comment.replies.length} ${
+                        comment.replies.length === 1 ? "reply" : "replies"
+                      }`}
+                </button>
               )}
             </div>
           </div>
@@ -319,7 +360,9 @@ export default function FitnessVideoPage({ params }) {
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder={`@${
-                    comment.userName || "User"
+                    comment.commentCreatorId?.name ||
+                    comment.userName ||
+                    "User"
                   } write your comment`}
                   className="w-full px-3 py-2 border cursor-pointer border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
@@ -344,8 +387,23 @@ export default function FitnessVideoPage({ params }) {
           </form>
         )}
 
-        {/* Render replies */}
-        {comment.replies && comment.replies.length > 0 && (
+        {/* When replies are hidden, show toggle under like/action row */}
+        {hasReplies && !isExpanded && (
+          <div className="mt-1 ml-11">
+            <button
+              type="button"
+              onClick={() => toggleReplies(comment._id)}
+              className="text-primary font-bold hover:underline cursor-pointer transition-colors text-xs"
+            >
+              {`${comment.replies.length} ${
+                comment.replies.length === 1 ? "reply" : "replies"
+              }`}
+            </button>
+          </div>
+        )}
+
+        {/* Render replies (initially hidden, toggle on click) */}
+        {hasReplies && isExpanded && (
           <div className="mt-3">
             {comment.replies.map((reply) => renderComment(reply, depth + 1))}
           </div>

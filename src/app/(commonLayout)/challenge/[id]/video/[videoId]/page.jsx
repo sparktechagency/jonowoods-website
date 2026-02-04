@@ -444,9 +444,19 @@ const VideoPlayerPage = ({ params }) => {
     }
   };
 
-  const handleReply = (commentId) => {
+  const handleReply = (comment) => {
+    if (!comment) return;
+
+    const commentId = comment._id;
     setReplyingTo(commentId);
     setEditingComment(null);
+
+    const mentionName =
+      comment.commentCreatorId?.name?.trim() ||
+      comment.commentCreatorId?.username?.trim() ||
+      "User";
+    setReplyText(`@${mentionName} `);
+
     setTimeout(() => {
       replyInputRefs.current[commentId]?.focus();
     }, 100);
@@ -536,7 +546,7 @@ const VideoPlayerPage = ({ params }) => {
               </button>
 
               <button
-                onClick={() => handleReply(comment._id)}
+                onClick={() => handleReply(comment)}
                 className="text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
               >
                 Reply
