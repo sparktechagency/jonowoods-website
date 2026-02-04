@@ -785,9 +785,9 @@ const ChallengePage = ({ params }) => {
       </div>
 
       {/* Comment Section */}
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <div className="bg-white rounded-lg shadow-md p-6">
-          {/* Engagement Section */}
+    
           <div className="flex items-center space-x-4 pb-4 border-b border-gray-100">
             <div className="flex items-center space-x-2">
               <div className="w-6 h-6 flex items-center justify-center">
@@ -804,7 +804,7 @@ const ChallengePage = ({ params }) => {
             </div>
           </div>
 
-          {/* Main Comment Input */}
+   
           <form onSubmit={handleCommentSubmit} className="mt-6 mb-6">
             <div className="relative">
               <input
@@ -841,7 +841,6 @@ const ChallengePage = ({ params }) => {
             )}
           </form>
 
-          {/* Comments Section */}
           <div className="space-y-1">
             {commentDataLoading ? (
               <div className="text-center py-4">
@@ -856,7 +855,7 @@ const ChallengePage = ({ params }) => {
             )}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

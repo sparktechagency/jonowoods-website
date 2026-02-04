@@ -270,8 +270,8 @@ export default function Navbar() {
       }
 
       // Initialize socket connection with improved configuration
-      socketRef.current = io("http://10.10.7.48:7000", {
-      // socketRef.current = io("https://api.yogawithjen.life", {
+      // socketRef.current = io("http://10.10.7.48:7000", {
+      socketRef.current = io("https://api.yogawithjen.life", {
         transports: ["websocket", "polling"], // Fallback to polling if websocket fails
         upgrade: true,
         rememberUpgrade: true,
